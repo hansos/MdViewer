@@ -272,6 +272,7 @@
 
             <Panel Grid.Row="1">
               <TreeView Classes="sidebar"
+                        x:Name="OutlineTree"
                         ItemsSource="{Binding SelectedTab.Outline}"
                         SelectedItem="{Binding SelectedOutlineItem, Mode=TwoWay}">
                 <TreeView.Styles>

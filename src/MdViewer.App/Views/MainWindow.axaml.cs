@@ -49,7 +49,51 @@ public partial class MainWindow : Window
                 RoutingStrategies.Tunnel);
         }
 
+        var previewScroller = this.FindControl<ScrollViewer>("DocumentScroller");
+        if (previewScroller is not null)
+        {
+            previewScroller.ScrollChanged += (_, _) => FollowScrollInOutline();
+        }
+
+        var source = this.FindControl<SourceView>("Source");
+        if (source is not null)
+        {
+            source.Scrolled += FollowScrollInOutline;
+        }
+
         DataContextChanged += OnDataContextChanged;
+    }
+
+    /// <summary>
+    /// Keeps the outline pointing at the heading the reader is under. The
+    /// position is read in source offsets, so it works the same in both views.
+    /// </summary>
+    private void FollowScrollInOutline()
+    {
+        var model = Model;
+        if (model?.SelectedTab is null) return;
+
+        model.SyncOutlineSelectionToOffset(CaptureScrollOffset());
+        BringSelectedOutlineItemIntoView();
+    }
+
+    private void BringSelectedOutlineItemIntoView()
+    {
+        var tree = this.FindControl<TreeView>("OutlineTree");
+        var item = Model?.SelectedOutlineItem;
+        if (tree is null || item is null) return;
+
+        // Containers below a collapsed or virtualised branch only exist after
+        // the next layout pass, so the scroll has to wait for it.
+        Dispatcher.UIThread.Post(
+            () =>
+            {
+                if (tree.TreeContainerFromItem(item) is TreeViewItem container)
+                {
+                    container.BringIntoView();
+                }
+            },
+            DispatcherPriority.Background);
     }
 
     private MainWindowViewModel? Model => DataContext as MainWindowViewModel;

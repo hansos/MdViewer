@@ -25,11 +25,18 @@ public partial class SourceView : UserControl
         var scroller = this.FindControl<ScrollViewer>("Scroller");
         if (scroller is not null)
         {
-            scroller.ScrollChanged += (_, _) => SyncGutter(scroller.Offset.Y);
+            scroller.ScrollChanged += (_, _) =>
+            {
+                SyncGutter(scroller.Offset.Y);
+                Scrolled?.Invoke();
+            };
         }
 
         ApplyZoomResources();
     }
+
+    /// <summary>Raised whenever the reading position in the source changes.</summary>
+    public event Action? Scrolled;
 
     public double ZoomFactor
     {

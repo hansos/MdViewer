@@ -46,6 +46,13 @@ public partial class MainWindowViewModel : ViewModelBase
     /// </summary>
     private bool _isRestoring;
 
+    /// <summary>
+    /// True while the outline selection is being driven by the document's own
+    /// scroll position. Without it the selection would scroll the document
+    /// back to the heading it just followed, and the two would fight.
+    /// </summary>
+    private bool _isFollowingScroll;
+
     [ObservableProperty]
     private DocumentTabViewModel? _selectedTab;
 
@@ -851,7 +858,62 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnSelectedOutlineItemChanged(OutlineItemViewModel? value)
     {
         if (value is null) return;
+
+        foreach (var item in Flatten(SelectedTab?.Outline ?? Enumerable.Empty<OutlineItemViewModel>()))
+        {
+            item.IsCurrent = ReferenceEquals(item, value);
+        }
+
+        if (_isFollowingScroll) return;
+
         ScrollToOffsetRequested?.Invoke(value.SourceOffset);
+    }
+
+    /// <summary>
+    /// Moves the outline selection to the heading the reader is currently
+    /// under, so scrolling the document keeps the panel in step with it.
+    /// </summary>
+    public void SyncOutlineSelectionToOffset(int sourceOffset)
+    {
+        var tab = SelectedTab;
+        if (tab is null || tab.Outline.Count == 0) return;
+
+        OutlineItemViewModel? match = null;
+        foreach (var item in Flatten(tab.Outline))
+        {
+            if (item.SourceOffset > sourceOffset) break;
+            match = item;
+        }
+
+        // Above the first heading there is nothing to point at, and the first
+        // heading is the closest honest answer.
+        match ??= tab.Outline[0];
+
+        if (ReferenceEquals(match, SelectedOutlineItem)) return;
+
+        _isFollowingScroll = true;
+        try
+        {
+            SelectedOutlineItem = match;
+        }
+        finally
+        {
+            _isFollowingScroll = false;
+        }
+    }
+
+    /// <summary>The outline in document order, parents before their children.</summary>
+    private static IEnumerable<OutlineItemViewModel> Flatten(IEnumerable<OutlineItemViewModel> items)
+    {
+        foreach (var item in items)
+        {
+            yield return item;
+
+            foreach (var child in Flatten(item.Children))
+            {
+                yield return child;
+            }
+        }
     }
 
     partial void OnSelectedTabChanged(DocumentTabViewModel? value)
