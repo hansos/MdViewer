@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Media;
+using Markdig.Extensions.Footnotes;
 using Markdig.Extensions.TaskLists;
 using Markdig.Syntax.Inlines;
 using MarkdigInline = Markdig.Syntax.Inlines.Inline;
@@ -133,6 +134,20 @@ public sealed class InlineRenderer
 
                 sink.Add(span);
                 target.AddLinkRange(start, position - start, link.Url ?? string.Empty);
+                break;
+            }
+
+            case FootnoteLink footnoteLink:
+            {
+                var text = footnoteLink.IsBackLink
+                    ? "↩"
+                    : $"[{ResolveFootnoteNumber(footnoteLink)}]";
+
+                var run = new Run(text) { TextDecorations = TextDecorations.Underline };
+                run.Apply(TextElement.ForegroundProperty, Themed.Keys.Link);
+
+                sink.Add(run);
+                position += text.Length;
                 break;
             }
 
@@ -289,5 +304,15 @@ public sealed class InlineRenderer
         }
 
         return span;
+    }
+
+    private static int ResolveFootnoteNumber(FootnoteLink footnoteLink)
+    {
+        if (footnoteLink.Footnote is { Order: > 0 } footnote)
+        {
+            return footnote.Order;
+        }
+
+        return footnoteLink.Index + 1;
     }
 }

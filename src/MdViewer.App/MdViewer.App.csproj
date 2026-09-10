@@ -7,10 +7,10 @@
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <AssemblyName>MdViewer</AssemblyName>
     <RootNamespace>MdViewer.App</RootNamespace>
-    <Version>0.9.1</Version>
-    <AssemblyVersion>0.9.1.0</AssemblyVersion>
-    <FileVersion>0.9.1.0</FileVersion>
-    <InformationalVersion>0.9.1</InformationalVersion>
+    <Version>0.8.1</Version>
+    <AssemblyVersion>0.8.1</AssemblyVersion>
+    <FileVersion>0.8.1</FileVersion>
+    <InformationalVersion>0.8.1</InformationalVersion>
     <Company>Kveldstid AS</Company>
     <Authors>Kveldstid AS</Authors>
     <Product>KT MD Viewer</Product>
@@ -29,6 +29,25 @@
     <!-- Also embedded as a resource so the Window can use it at runtime,
          which is what Linux window managers read. -->
     <AvaloniaResource Include="Assets\**" />
+
+    <!-- ClickOnce needs the icon as a real published file: the manifest's
+         iconFile (from ApplicationIcon) and the FileAssociation DefaultIcon
+         both resolve to the relative path Assets\MdViewer.ico. -->
+    <Content Include="Assets\MdViewer.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <PublishState>Include</PublishState>
+      <Visible>true</Visible>
+    </Content>
+
+    <!-- Keep a root-level alias too; some ClickOnce tooling stores the
+         file-association icon as just "MdViewer.ico". -->
+    <Content Include="Assets\MdViewer.ico" Link="MdViewer.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <PublishState>Include</PublishState>
+      <Visible>false</Visible>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

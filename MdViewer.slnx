@@ -1,7 +1,17 @@
 <Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="ARM" />
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
   <Folder Name="/src/">
     <Project Path="src/MdViewer.App/MdViewer.App.csproj" />
     <Project Path="src/MdViewer.Core/MdViewer.Core.csproj" />
     <Project Path="src/MdViewer.Rendering/MdViewer.Rendering.csproj" />
+    <Project Path="src/MISX-Install/MISX-Install.wapproj" Type="c7167f0d-bc9f-4e6e-afe1-012c56b48db5" Id="81583828-bf15-4289-bdbc-f7c365692726">
+      <Deploy />
+    </Project>
   </Folder>
 </Solution>

@@ -1009,6 +1009,17 @@ public partial class MainWindowViewModel : ViewModelBase
         Find.Query = string.Empty;
     }
 
+    // ==================================================== file associations
+
+    /// <summary>
+    /// Registers MdViewer as a Markdown handler and opens the OS page where the
+    /// user confirms it as the default. Windows owns the final choice, so this
+    /// can only prepare the registration.
+    /// </summary>
+    [RelayCommand]
+    private void SetAsDefaultMarkdownApp() =>
+        StatusMessage = FileAssociationService.Register();
+
     [RelayCommand]
     private void ToggleFocusMode()
     {

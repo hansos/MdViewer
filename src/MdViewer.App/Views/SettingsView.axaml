@@ -132,6 +132,20 @@
       <CheckBox Content="Open the previously used folder"
                 IsChecked="{Binding Settings.ReopenPreviousFolder, Mode=TwoWay}" />
 
+      <!-- ==================== File associations ==================== -->
+      <TextBlock Classes="md-h4" Text="File associations" Margin="0,16,0,0" />
+      <Border Classes="md-heading-rule" Margin="0,0,0,8" />
+
+      <TextBlock Classes="md-caption"
+                 TextWrapping="Wrap"
+                 Text="Registers MdViewer for .md files and opens the Windows Default apps page, where the change has to be confirmed." />
+
+      <Button Classes="start-action"
+              HorizontalAlignment="Left"
+              Margin="0,8,0,0"
+              Content="Set MdViewer as the default Markdown app"
+              Command="{Binding SetAsDefaultMarkdownAppCommand}" />
+
       <Button Classes="start-action"
               HorizontalAlignment="Left"
               Margin="0,24,0,0"
