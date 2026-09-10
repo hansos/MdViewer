@@ -49,7 +49,7 @@ What is still deliberately absent, by milestone:
 Raw HTML is escaped and shown dimmed rather than rendered, and remote images are
 not fetched. Both are deliberate — see SPECIFICATION.md 5.6 and 6.5.
 
-See [Labels · hansos/MdViewer](https://github.com/hansos/MdViewer/labels) for full road map and issue list.
+See [Issues · hansos/MdViewer](https://github.com/hansos/MdViewer/issues) for full road map and issue list.
 
 ## Requirements
 
