@@ -320,7 +320,14 @@ public partial class MainWindow : Window
     private void RestoreScrollOffset(int sourceOffset)
     {
         Dispatcher.UIThread.Post(
-            () => OnScrollToOffsetRequested(sourceOffset),
+            () =>
+            {
+                // Posting alone is not enough: at Loaded priority the incoming
+                // view may still be unmeasured, and an unmeasured text layout
+                // answers nothing useful. Force the pass before asking.
+                UpdateLayout();
+                OnScrollToOffsetRequested(sourceOffset);
+            },
             DispatcherPriority.Loaded);
     }
 

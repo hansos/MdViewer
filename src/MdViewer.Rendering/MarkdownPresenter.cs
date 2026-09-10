@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
+using Avalonia.VisualTree;
 using MdViewer.Core.Documents;
 
 namespace MdViewer.Rendering;
@@ -109,6 +110,22 @@ public class MarkdownPresenter : Decorator
         var target = SpanRegistry.FindControlContaining(sourceOffset);
         if (target is null) return false;
 
+        // BringIntoView() scrolls the minimum amount needed, so it does nothing
+        // when the target already happens to be on screen and otherwise parks it
+        // at a viewport edge. The reading position needs the block at the top,
+        // which means translating its Y into the scroll content and setting the
+        // offset outright.
+        var scroller = this.FindAncestorOfType<ScrollViewer>();
+        if (scroller?.Content is Control content)
+        {
+            var position = target.TranslatePoint(default, content);
+            if (position is not null)
+            {
+                scroller.Offset = new Vector(scroller.Offset.X, Math.Max(0, position.Value.Y));
+                return true;
+            }
+        }
+
         target.BringIntoView();
         return true;
     }
@@ -122,13 +139,22 @@ public class MarkdownPresenter : Decorator
     public int GetSourceOffsetAt(double verticalOffset)
     {
         var result = 0;
+        var bestY = double.NegativeInfinity;
 
+        // Ordered is sorted by source offset, but Y is not monotonic in source
+        // order: nested registrations (table cells, list items, block-quote
+        // children) can start above their parent's successor. Breaking on the
+        // first control past the viewport would stop the walk early, so every
+        // span is considered and the lowest one still at or above the fold wins.
         foreach (var span in SpanRegistry.Ordered)
         {
             var position = span.Control.TranslatePoint(default, this);
             if (position is null) continue;
 
-            if (position.Value.Y > verticalOffset) break;
+            if (position.Value.Y > verticalOffset + 0.5) continue;
+            if (position.Value.Y < bestY) continue;
+
+            bestY = position.Value.Y;
             result = span.Start;
         }
 

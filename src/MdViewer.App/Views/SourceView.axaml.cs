@@ -1,5 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
+using MdViewer.App.ViewModels;
+using MdViewer.Core.Documents;
 using MdViewer.Rendering;
 
 namespace MdViewer.App.Views;
@@ -41,6 +43,16 @@ public partial class SourceView : UserControl
 
     private SelectableTextBlock? Body => this.FindControl<SelectableTextBlock>("SourceText");
 
+    /// <summary>
+    /// Line starts of the document currently on screen. Positions are mapped
+    /// through line numbers rather than through text-layout character indices:
+    /// the source text keeps the file's original endings, and a CRLF counts as
+    /// two characters to Markdig but as one break to the layout, so indexing by
+    /// character drifts one place per line as the reader goes down a document.
+    /// </summary>
+    private SourceLineIndex? LineIndex =>
+        (DataContext as MainWindowViewModel)?.SelectedTab?.LineIndex;
+
     /// <summary>Keeps the gutter aligned with the document it numbers.</summary>
     private void SyncGutter(double verticalOffset)
     {
@@ -68,17 +80,29 @@ public partial class SourceView : UserControl
     {
         var scroller = SourceScroller;
         var body = Body;
-        if (scroller is null || body is null) return 0;
+        var index = LineIndex;
+        if (scroller is null || body is null || index is null) return 0;
 
-        try
+        var lines = body.TextLayout.TextLines;
+        if (lines.Count == 0) return 0;
+
+        var target = scroller.Offset.Y;
+        var y = 0d;
+        var line = lines.Count - 1;
+
+        for (var i = 0; i < lines.Count; i++)
         {
-            var hit = body.TextLayout.HitTestPoint(new Point(0, scroller.Offset.Y));
-            return hit.TextPosition;
+            var height = lines[i].Height;
+            if (y + height > target + 0.5)
+            {
+                line = i;
+                break;
+            }
+
+            y += height;
         }
-        catch (Exception)
-        {
-            return 0;
-        }
+
+        return index.LineToOffset(line);
     }
 
     /// <summary>Scrolls so the line containing the offset is at the top.</summary>
@@ -86,19 +110,23 @@ public partial class SourceView : UserControl
     {
         var scroller = SourceScroller;
         var body = Body;
-        if (scroller is null || body is null) return false;
+        var index = LineIndex;
+        if (scroller is null || body is null || index is null) return false;
 
-        try
+        var lines = body.TextLayout.TextLines;
+        if (lines.Count == 0) return false;
+
+        var line = Math.Min(index.OffsetToLine(Math.Max(0, sourceOffset)), lines.Count - 1);
+
+        var y = 0d;
+        for (var i = 0; i < line; i++)
         {
-            var rect = body.TextLayout.HitTestTextPosition(Math.Max(0, sourceOffset));
-            scroller.Offset = new Vector(scroller.Offset.X, Math.Max(0, rect.Y));
-            SyncGutter(scroller.Offset.Y);
-            return true;
+            y += lines[i].Height;
         }
-        catch (Exception)
-        {
-            return false;
-        }
+
+        scroller.Offset = new Vector(scroller.Offset.X, Math.Max(0, y));
+        SyncGutter(scroller.Offset.Y);
+        return true;
     }
 
     private void ApplyZoomResources() => ZoomTypography.Apply(this, ZoomFactor);
