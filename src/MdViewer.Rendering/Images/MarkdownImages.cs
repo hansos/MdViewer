@@ -25,10 +25,19 @@ internal static class MarkdownImages
     /// </summary>
     private const double InlineMaxHeight = 180;
 
-    private static readonly HttpClient RemoteClient = new()
+    private static readonly HttpClient RemoteClient = CreateRemoteClient();
+
+    private static HttpClient CreateRemoteClient()
     {
-        Timeout = TimeSpan.FromSeconds(20)
-    };
+        var client = new HttpClient
+        {
+            Timeout = TimeSpan.FromSeconds(20)
+        };
+
+        // Some image hosts reject requests that arrive without a user agent.
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("MdViewer");
+        return client;
+    }
 
     public static string AltText(LinkInline image)
     {
@@ -117,8 +126,14 @@ internal static class MarkdownImages
                 return ImageResult.Broken($"Remote image failed: {(int)response.StatusCode}.");
             }
 
-            using var stream = response.Content.ReadAsStream();
-            return ImageResult.Loaded(new Bitmap(stream));
+            // The decoder needs to seek, which a live network stream cannot do,
+            // so the bytes are buffered before they reach the bitmap.
+            using var network = response.Content.ReadAsStream();
+            using var buffer = new MemoryStream();
+            network.CopyTo(buffer);
+            buffer.Position = 0;
+
+            return ImageResult.Loaded(new Bitmap(buffer));
         }
         catch
         {
