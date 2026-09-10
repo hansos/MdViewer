@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -11,7 +12,10 @@ namespace MdViewer.App.Views;
 
 public partial class MainWindow : Window
 {
+    private const double DefaultSidebarWidth = 260;
+
     private MainWindowViewModel? _boundModel;
+    private double _lastSidebarWidth = DefaultSidebarWidth;
 
     public MainWindow()
     {
@@ -38,11 +42,11 @@ public partial class MainWindow : Window
 
     private MainWindowViewModel? Model => DataContext as MainWindowViewModel;
 
-    private MarkdownPresenter? Presenter => this.FindControl<MarkdownPresenter>("Presenter");
+    private MarkdownPresenter? PresenterControl => this.FindControl<MarkdownPresenter>("Presenter");
 
     private ScrollViewer? PreviewScroller => this.FindControl<ScrollViewer>("DocumentScroller");
 
-    private SourceView? Source => this.FindControl<SourceView>("Source");
+    private SourceView? SourceViewControl => this.FindControl<SourceView>("Source");
 
     protected override void OnLoaded(RoutedEventArgs e)
     {
@@ -61,6 +65,7 @@ public partial class MainWindow : Window
         if (_boundModel is not null)
         {
             _boundModel.ScrollToOffsetRequested -= OnScrollToOffsetRequested;
+            _boundModel.PropertyChanged -= OnModelPropertyChanged;
             _boundModel.CaptureScrollOffset = null;
             _boundModel.RestoreScrollOffset = null;
         }
@@ -70,8 +75,53 @@ public partial class MainWindow : Window
         if (_boundModel is not null)
         {
             _boundModel.ScrollToOffsetRequested += OnScrollToOffsetRequested;
+            _boundModel.PropertyChanged += OnModelPropertyChanged;
             _boundModel.CaptureScrollOffset = CaptureScrollOffset;
             _boundModel.RestoreScrollOffset = RestoreScrollOffset;
+
+            ApplySidebarVisibility(_boundModel.IsSidebarVisible);
+        }
+    }
+
+    // =============================================================== sidebar
+
+    private void OnModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(MainWindowViewModel.IsSidebarVisible) && _boundModel is not null)
+        {
+            ApplySidebarVisibility(_boundModel.IsSidebarVisible);
+        }
+    }
+
+    /// <summary>
+    /// A pixel-sized column does not collapse when its child is hidden the way
+    /// an Auto column does, so hiding the sidebar has to zero the column — and
+    /// its MinWidth with it, or the minimum would hold the gap open.
+    /// The width the user dragged to is remembered and restored.
+    /// </summary>
+    private void ApplySidebarVisibility(bool visible)
+    {
+        var grid = this.FindControl<Grid>("BodyGrid");
+        if (grid is null || grid.ColumnDefinitions.Count == 0) return;
+
+        var column = grid.ColumnDefinitions[0];
+
+        if (visible)
+        {
+            column.MinWidth = 180;
+            column.MaxWidth = 640;
+            column.Width = new GridLength(_lastSidebarWidth, GridUnitType.Pixel);
+        }
+        else
+        {
+            if (column.Width.IsAbsolute && column.Width.Value > 0)
+            {
+                _lastSidebarWidth = column.Width.Value;
+            }
+
+            column.MinWidth = 0;
+            column.MaxWidth = 0;
+            column.Width = new GridLength(0, GridUnitType.Pixel);
         }
     }
 
@@ -89,10 +139,10 @@ public partial class MainWindow : Window
 
         if (tab.ViewMode == DocumentViewMode.Source)
         {
-            return Source?.GetTopSourceOffset() ?? tab.ScrollOffset;
+            return SourceViewControl?.GetTopSourceOffset() ?? tab.ScrollOffset;
         }
 
-        var presenter = Presenter;
+        var presenter = PresenterControl;
         var scroller = PreviewScroller;
         if (presenter is null || scroller is null) return tab.ScrollOffset;
 
@@ -117,11 +167,11 @@ public partial class MainWindow : Window
 
         if (tab?.ViewMode == DocumentViewMode.Source)
         {
-            Source?.ScrollToSourceOffset(sourceOffset);
+            SourceViewControl?.ScrollToSourceOffset(sourceOffset);
             return;
         }
 
-        Presenter?.ScrollToSourceOffset(sourceOffset);
+        PresenterControl?.ScrollToSourceOffset(sourceOffset);
     }
 
     // ================================================================= links

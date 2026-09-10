@@ -159,11 +159,22 @@
     </Border>
 
     <!-- ========================= Body ========================= -->
-    <Grid ColumnDefinitions="Auto,Auto,*">
+    <Grid x:Name="BodyGrid">
+      <!--
+        The sidebar column is pixel-sized rather than Auto so the splitter can
+        actually resize it: a GridSplitter changes column widths, and an Auto
+        column sized by a fixed-width child has nothing to change. The column is
+        collapsed to zero in code-behind when the sidebar is hidden, since a
+        pixel column does not collapse on its own the way an Auto one does.
+      -->
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="260" MinWidth="180" MaxWidth="640" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
 
       <!-- ====================== Sidebar ====================== -->
       <Border Grid.Column="0"
-              Width="260"
               Background="{DynamicResource ShellBackgroundBrush}"
               IsVisible="{Binding IsSidebarVisible}">
         <Grid RowDefinitions="*,Auto,1.2*">
@@ -248,10 +259,12 @@
         </Grid>
       </Border>
 
-      <GridSplitter Grid.Column="1" Width="1"
+      <GridSplitter Grid.Column="1" Width="4"
                     Background="{DynamicResource ShellBorderBrush}"
                     ResizeDirection="Columns"
-                    IsVisible="{Binding IsSidebarVisible}" />
+                    ResizeBehavior="PreviousAndNext"
+                    IsVisible="{Binding IsSidebarVisible}"
+                    ToolTip.Tip="Drag to resize the sidebar" />
 
       <!-- ====================== Document pane ====================== -->
       <Panel Grid.Column="2" Background="{DynamicResource ContentBackgroundBrush}">

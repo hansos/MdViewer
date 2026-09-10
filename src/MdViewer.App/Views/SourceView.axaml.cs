@@ -32,7 +32,7 @@ public partial class SourceView : UserControl
         }
     }
 
-    private ScrollViewer? Scroller => this.FindControl<ScrollViewer>("Scroller");
+    private ScrollViewer? SourceScroller => this.FindControl<ScrollViewer>("Scroller");
 
     private SelectableTextBlock? Body => this.FindControl<SelectableTextBlock>("SourceText");
 
@@ -42,7 +42,7 @@ public partial class SourceView : UserControl
     /// </summary>
     public int GetTopSourceOffset()
     {
-        var scroller = Scroller;
+        var scroller = SourceScroller;
         var body = Body;
         if (scroller is null || body is null) return 0;
 
@@ -60,7 +60,7 @@ public partial class SourceView : UserControl
     /// <summary>Scrolls so the line containing the offset is at the top.</summary>
     public bool ScrollToSourceOffset(int sourceOffset)
     {
-        var scroller = Scroller;
+        var scroller = SourceScroller;
         var body = Body;
         if (scroller is null || body is null) return false;
 
