@@ -25,6 +25,7 @@ public partial class MainWindowViewModel : ViewModelBase
     /// the rest. Five is the glance; the history behind it is longer.
     /// </summary>
     private const int CollapsedRecentCount = 5;
+    private static readonly string HelpPagePath = Path.Combine(AppContext.BaseDirectory, "Help", "help-page.md");
 
     private readonly DocumentLoader _loader = new();
     private readonly WorkspaceScanner _scanner = new();
@@ -959,6 +960,20 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [RelayCommand]
     private void CloseAbout() => IsAboutVisible = false;
+
+    [RelayCommand]
+    private async Task OpenHelpPageAsync()
+    {
+        if (!File.Exists(HelpPagePath))
+        {
+            StatusMessage = "The bundled help page is not available in this build.";
+            return;
+        }
+
+        IsSettingsVisible = false;
+        IsAboutVisible = false;
+        await OpenDocumentAsync(HelpPagePath).ConfigureAwait(true);
+    }
 
     /// <summary>Opens the Kveldstid AS website from the about page.</summary>
     [RelayCommand]

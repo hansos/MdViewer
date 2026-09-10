@@ -33,6 +33,7 @@
     <KeyBinding Gesture="Ctrl+D0" Command="{Binding ZoomResetCommand}" />
     <KeyBinding Gesture="Ctrl+Shift+F" Command="{Binding ToggleFocusModeCommand}" />
     <KeyBinding Gesture="Ctrl+OemComma" Command="{Binding ShowSettingsCommand}" />
+    <KeyBinding Gesture="F1" Command="{Binding OpenHelpPageCommand}" />
   </Window.KeyBindings>
 
   <DockPanel LastChildFill="True">
@@ -115,6 +116,9 @@
             <Button Classes="icon" Content="Open" FontSize="12"
                     Command="{Binding OpenFilesCommand}"
                     ToolTip.Tip="Open file (Ctrl+O)" />
+            <Button Classes="icon" Content="Help" FontSize="12"
+                    Command="{Binding OpenHelpPageCommand}"
+                    ToolTip.Tip="Open help page (F1)" />
             <Button Classes="icon" Content="About" FontSize="12"
                     Command="{Binding ShowAboutCommand}"
                     ToolTip.Tip="About this application" />

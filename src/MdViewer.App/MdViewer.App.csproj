@@ -48,6 +48,11 @@
       <PublishState>Include</PublishState>
       <Visible>false</Visible>
     </Content>
+
+    <None Update="Help\**\*.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
