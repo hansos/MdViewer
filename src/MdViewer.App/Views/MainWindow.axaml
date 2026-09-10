@@ -285,7 +285,7 @@
                     ToolTip.Tip="Drag to resize the sidebar" />
 
       <!-- ====================== Document pane ====================== -->
-      <Panel Grid.Column="2" Background="{DynamicResource ContentBackgroundBrush}">
+      <Panel x:Name="DocumentPane" Grid.Column="2" Background="{DynamicResource ContentBackgroundBrush}">
 
         <!-- No tabs open: the start view and its recent documents (5.14) -->
         <views:StartView IsVisible="{Binding HasNoTabs}" />
@@ -297,11 +297,13 @@
                       IsVisible="{Binding SelectedTab.ShowsPreview, FallbackValue=False}">
           <rendering:MarkdownPresenter x:Name="Presenter"
                                        Document="{Binding SelectedTab.Document}"
+                                        ZoomFactor="{Binding SelectedTab.Zoom, FallbackValue=1.0}"
                                        ContentMaxWidth="{DynamicResource ContentMaxWidth}" />
         </ScrollViewer>
 
         <!-- Raw source, read-only (5.15) -->
         <views:SourceView x:Name="Source"
+                          ZoomFactor="{Binding SelectedTab.Zoom, FallbackValue=1.0}"
                           IsVisible="{Binding SelectedTab.ShowsSource, FallbackValue=False}" />
 
         <!-- Load failure: the tab stays open and explains itself (6.4) -->

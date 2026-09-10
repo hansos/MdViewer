@@ -191,6 +191,14 @@
   <x:Double x:Key="H5FontSize">15</x:Double>
   <x:Double x:Key="H6FontSize">14</x:Double>
 
+  <x:Double x:Key="H1LineHeight">40</x:Double>
+  <x:Double x:Key="H2LineHeight">32</x:Double>
+  <x:Double x:Key="H3LineHeight">28</x:Double>
+  <x:Double x:Key="CodeLineHeight">21</x:Double>
+  <x:Double x:Key="CodeLangFontSize">11</x:Double>
+  <x:Double x:Key="TableFontSize">14</x:Double>
+  <x:Double x:Key="TableLineHeight">20</x:Double>
+
   <!-- Reading measure. Long lines hurt reading; a setting allows full width. -->
   <x:Double x:Key="ContentMaxWidth">900</x:Double>
 

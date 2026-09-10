@@ -37,6 +37,15 @@ public partial class MainWindow : Window
             presenter.LinkActivated = OnLinkActivated;
         }
 
+        var documentPane = this.FindControl<Panel>("DocumentPane");
+        if (documentPane is not null)
+        {
+            documentPane.AddHandler(
+                InputElement.PointerWheelChangedEvent,
+                OnDocumentPointerWheelChanged,
+                RoutingStrategies.Tunnel);
+        }
+
         DataContextChanged += OnDataContextChanged;
     }
 
@@ -122,6 +131,28 @@ public partial class MainWindow : Window
             column.MinWidth = 0;
             column.MaxWidth = 0;
             column.Width = new GridLength(0, GridUnitType.Pixel);
+        }
+    }
+
+    // ================================================================== zoom
+
+    private void OnDocumentPointerWheelChanged(object? sender, PointerWheelEventArgs e)
+    {
+        var model = Model;
+        if (model?.SelectedTab is null) return;
+        if (!e.KeyModifiers.HasFlag(KeyModifiers.Control)) return;
+
+        if (e.Delta.Y > 0)
+        {
+            if (model.ZoomInCommand.CanExecute(null)) model.ZoomInCommand.Execute(null);
+            e.Handled = true;
+            return;
+        }
+
+        if (e.Delta.Y < 0)
+        {
+            if (model.ZoomOutCommand.CanExecute(null)) model.ZoomOutCommand.Execute(null);
+            e.Handled = true;
         }
     }
 

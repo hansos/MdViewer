@@ -20,6 +20,9 @@ public class MarkdownPresenter : Decorator
     public static readonly StyledProperty<double> ContentMaxWidthProperty =
         AvaloniaProperty.Register<MarkdownPresenter, double>(nameof(ContentMaxWidth), 900d);
 
+    public static readonly StyledProperty<double> ZoomFactorProperty =
+        AvaloniaProperty.Register<MarkdownPresenter, double>(nameof(ZoomFactor), 1d);
+
     private readonly MarkdownRenderer _renderer = new();
 
     public MarkdownPresenter()
@@ -41,6 +44,13 @@ public class MarkdownPresenter : Decorator
         set => SetValue(ContentMaxWidthProperty, value);
     }
 
+    /// <summary>Per-tab zoom factor (0.5-3.0).</summary>
+    public double ZoomFactor
+    {
+        get => GetValue(ZoomFactorProperty);
+        set => SetValue(ZoomFactorProperty, value);
+    }
+
     /// <summary>
     /// Source spans for the currently rendered document. The shell uses this to
     /// scroll to a heading, restore a reading position by offset, and — from M5 —
@@ -54,6 +64,12 @@ public class MarkdownPresenter : Decorator
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
+
+        if (change.Property == ZoomFactorProperty)
+        {
+            ApplyZoomResources();
+            return;
+        }
 
         if (change.Property == DocumentProperty || change.Property == ContentMaxWidthProperty)
         {
@@ -100,6 +116,7 @@ public class MarkdownPresenter : Decorator
 
     private void Rebuild()
     {
+        ApplyZoomResources();
         SpanRegistry = new SourceSpanRegistry();
 
         var document = Document;
@@ -126,4 +143,6 @@ public class MarkdownPresenter : Decorator
             Child = body
         };
     }
+
+    private void ApplyZoomResources() => ZoomTypography.Apply(this, ZoomFactor);
 }

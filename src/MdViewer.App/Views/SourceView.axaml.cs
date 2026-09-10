@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using MdViewer.Rendering;
 
 namespace MdViewer.App.Views;
 
@@ -13,6 +14,9 @@ namespace MdViewer.App.Views;
 /// </summary>
 public partial class SourceView : UserControl
 {
+    public static readonly StyledProperty<double> ZoomFactorProperty =
+        AvaloniaProperty.Register<SourceView, double>(nameof(ZoomFactor), 1d);
+
     private readonly TranslateTransform _gutterOffset = new();
 
     public SourceView()
@@ -30,11 +34,29 @@ public partial class SourceView : UserControl
         {
             scroller.ScrollChanged += (_, _) => _gutterOffset.Y = -scroller.Offset.Y;
         }
+
+        ApplyZoomResources();
+    }
+
+    public double ZoomFactor
+    {
+        get => GetValue(ZoomFactorProperty);
+        set => SetValue(ZoomFactorProperty, value);
     }
 
     private ScrollViewer? SourceScroller => this.FindControl<ScrollViewer>("Scroller");
 
     private SelectableTextBlock? Body => this.FindControl<SelectableTextBlock>("SourceText");
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+
+        if (change.Property == ZoomFactorProperty)
+        {
+            ApplyZoomResources();
+        }
+    }
 
     /// <summary>
     /// The source offset of the first character visible at the top of the
@@ -76,4 +98,6 @@ public partial class SourceView : UserControl
             return false;
         }
     }
+
+    private void ApplyZoomResources() => ZoomTypography.Apply(this, ZoomFactor);
 }
