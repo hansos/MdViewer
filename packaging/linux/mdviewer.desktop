@@ -1,0 +1,19 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=MdViewer
+GenericName=Markdown Viewer
+Comment=Read Markdown documents in tabs
+Exec=mdviewer %F
+Icon=mdviewer
+Terminal=false
+Categories=Office;Viewer;TextTools;Utility;
+Keywords=markdown;md;viewer;documentation;readme;
+
+# Registers MdViewer as a handler for Markdown (SPECIFICATION.md 4.3, 7.2).
+# text/markdown is the registered type; the x- variants are what several
+# editors and file managers actually emit, so all three are claimed.
+MimeType=text/markdown;text/x-markdown;text/plain;
+
+StartupNotify=true
+StartupWMClass=MdViewer

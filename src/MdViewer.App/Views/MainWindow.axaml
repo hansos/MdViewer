@@ -9,6 +9,7 @@
         x:Class="MdViewer.App.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="MdViewer"
+        Icon="/Assets/MdViewer.ico"
         Width="1280" Height="860"
         MinWidth="640" MinHeight="420"
         Background="{DynamicResource ShellBackgroundBrush}"
