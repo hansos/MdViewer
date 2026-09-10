@@ -35,6 +35,7 @@ public partial class MainWindow : Window
         if (presenter is not null)
         {
             presenter.LinkActivated = OnLinkActivated;
+            presenter.RemoteImagesRequested = OnRemoteImagesRequested;
         }
 
         var documentPane = this.FindControl<Panel>("DocumentPane");
@@ -211,6 +212,11 @@ public partial class MainWindow : Window
     {
         if (Model is null) return;
         _ = Model.ActivateLinkAsync(url);
+    }
+
+    private void OnRemoteImagesRequested()
+    {
+        Model?.EnableRemoteImagesForSelectedTab();
     }
 
     // ============================================================== file tree

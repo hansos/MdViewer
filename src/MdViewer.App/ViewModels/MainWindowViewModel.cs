@@ -469,6 +469,15 @@ public partial class MainWindowViewModel : ViewModelBase
         StatusMessage = $"Opening non-Markdown files is not enabled yet: {Path.GetFileName(target)}";
     }
 
+    public void EnableRemoteImagesForSelectedTab()
+    {
+        var tab = SelectedTab;
+        if (tab?.Document is null) return;
+
+        tab.AllowRemoteImages = true;
+        StatusMessage = null;
+    }
+
     private void OpenExternal(string url)
     {
         try

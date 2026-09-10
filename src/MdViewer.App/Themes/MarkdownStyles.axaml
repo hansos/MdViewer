@@ -292,6 +292,48 @@
     <Setter Property="TextWrapping" Value="Wrap" />
   </Style>
 
+  <!-- ================================ Images ================================ -->
+
+  <Style Selector="Border.md-image-block">
+    <Setter Property="Margin" Value="0,0,0,18" />
+  </Style>
+
+  <Style Selector="Image.md-image">
+    <Setter Property="Stretch" Value="Uniform" />
+  </Style>
+
+  <Style Selector="Border.md-image-placeholder">
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MediumCornerRadius}" />
+    <Setter Property="Padding" Value="12,10" />
+    <Setter Property="Margin" Value="0,0,0,18" />
+  </Style>
+
+  <Style Selector="Border.md-image-placeholder.md-image-remote">
+    <Setter Property="BorderBrush" Value="{DynamicResource CalloutNoteAccentBrush}" />
+    <Setter Property="Background" Value="{DynamicResource CalloutNoteBackgroundBrush}" />
+  </Style>
+
+  <Style Selector="Border.md-image-placeholder.md-image-broken">
+    <Setter Property="BorderBrush" Value="{DynamicResource CalloutWarningAccentBrush}" />
+    <Setter Property="Background" Value="{DynamicResource CalloutWarningBackgroundBrush}" />
+  </Style>
+
+  <Style Selector="Button.md-image-load">
+    <Setter Property="Padding" Value="8,4" />
+    <Setter Property="FontSize" Value="12" />
+  </Style>
+
+  <!-- Images inside a text flow sit on the baseline, so they carry no block spacing. -->
+  <Style Selector="Border.md-image-block.inline">
+    <Setter Property="Margin" Value="0" />
+  </Style>
+
+  <Style Selector="Border.md-image-placeholder.inline">
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="Padding" Value="6,4" />
+  </Style>
+
   <!-- ============================ Thematic break ============================ -->
 
   <Style Selector="Border.md-rule">

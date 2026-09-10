@@ -13,12 +13,16 @@ public sealed class RenderContext
         string baseDirectory,
         ISourceSpanRegistrar spanRegistrar,
         Action<string> onLinkActivated,
+        bool allowRemoteImages = false,
+        Action? onLoadRemoteImagesRequested = null,
         bool reducedMode = false)
     {
         Renderer = renderer;
         BaseDirectory = baseDirectory;
         SpanRegistrar = spanRegistrar;
         OnLinkActivated = onLinkActivated;
+        AllowRemoteImages = allowRemoteImages;
+        OnLoadRemoteImagesRequested = onLoadRemoteImagesRequested;
         ReducedMode = reducedMode;
     }
 
@@ -39,6 +43,18 @@ public sealed class RenderContext
     public Action<string> OnLinkActivated { get; }
 
     /// <summary>
+    /// True when this document has consent to fetch remote images in this
+    /// session (SPECIFICATION.md 5.6).
+    /// </summary>
+    public bool AllowRemoteImages { get; }
+
+    /// <summary>
+    /// Raised by image placeholders to ask the shell to enable remote images
+    /// for this document.
+    /// </summary>
+    public Action? OnLoadRemoteImagesRequested { get; }
+
+    /// <summary>
     /// Set for documents over the size threshold: highlighting and diagram
     /// rendering are skipped (SPECIFICATION.md 5.10).
     /// </summary>
@@ -47,7 +63,14 @@ public sealed class RenderContext
     /// <summary>Nesting depth, so quotes and lists can style by level.</summary>
     public int Depth { get; private init; }
 
-    public RenderContext Nested() => new(Renderer, BaseDirectory, SpanRegistrar, OnLinkActivated, ReducedMode)
+    public RenderContext Nested() => new(
+        Renderer,
+        BaseDirectory,
+        SpanRegistrar,
+        OnLinkActivated,
+        AllowRemoteImages,
+        OnLoadRemoteImagesRequested,
+        ReducedMode)
     {
         Depth = Depth + 1
     };

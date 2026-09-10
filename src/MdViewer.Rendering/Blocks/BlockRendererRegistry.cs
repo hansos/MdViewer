@@ -16,6 +16,7 @@ public sealed class BlockRendererRegistry
 
     public static BlockRendererRegistry CreateDefault() => new BlockRendererRegistry()
         .Add(new HeadingBlockRenderer())
+        .Add(new ImageBlockRenderer())
         .Add(new ParagraphBlockRenderer())
         .Add(new CodeBlockRenderer())
         .Add(new TableBlockRenderer())

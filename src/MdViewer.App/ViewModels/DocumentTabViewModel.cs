@@ -56,6 +56,13 @@ public partial class DocumentTabViewModel : ViewModelBase
     private double _zoom = 1.0;
 
     /// <summary>
+    /// Per-document consent for remote images (SPECIFICATION.md 5.6).
+    /// Remote image placeholders can flip this to true via the shell.
+    /// </summary>
+    [ObservableProperty]
+    private bool _allowRemoteImages;
+
+    /// <summary>
     /// Reading position, as a source offset rather than a pixel offset. That is
     /// what lets a reload keep the reader's place when the document changed
     /// above them, and what carries the position across a view-mode switch

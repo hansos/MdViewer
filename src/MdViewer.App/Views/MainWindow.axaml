@@ -297,6 +297,7 @@
                       IsVisible="{Binding SelectedTab.ShowsPreview, FallbackValue=False}">
           <rendering:MarkdownPresenter x:Name="Presenter"
                                        Document="{Binding SelectedTab.Document}"
+                                       AllowRemoteImages="{Binding SelectedTab.AllowRemoteImages, FallbackValue=False}"
                                         ZoomFactor="{Binding SelectedTab.Zoom, FallbackValue=1.0}"
                                        ContentMaxWidth="{DynamicResource ContentMaxWidth}" />
         </ScrollViewer>

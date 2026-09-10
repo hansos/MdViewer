@@ -23,6 +23,9 @@ public class MarkdownPresenter : Decorator
     public static readonly StyledProperty<double> ZoomFactorProperty =
         AvaloniaProperty.Register<MarkdownPresenter, double>(nameof(ZoomFactor), 1d);
 
+    public static readonly StyledProperty<bool> AllowRemoteImagesProperty =
+        AvaloniaProperty.Register<MarkdownPresenter, bool>(nameof(AllowRemoteImages), false);
+
     private readonly MarkdownRenderer _renderer = new();
 
     public MarkdownPresenter()
@@ -52,6 +55,16 @@ public class MarkdownPresenter : Decorator
     }
 
     /// <summary>
+    /// When true, remote images are fetched for the current document;
+    /// otherwise placeholders are shown (SPECIFICATION.md 5.6).
+    /// </summary>
+    public bool AllowRemoteImages
+    {
+        get => GetValue(AllowRemoteImagesProperty);
+        set => SetValue(AllowRemoteImagesProperty, value);
+    }
+
+    /// <summary>
     /// Source spans for the currently rendered document. The shell uses this to
     /// scroll to a heading, restore a reading position by offset, and — from M5 —
     /// place find highlights.
@@ -60,6 +73,12 @@ public class MarkdownPresenter : Decorator
 
     /// <summary>Raised with the raw href of an activated link (SPECIFICATION.md 5.6).</summary>
     public Action<string>? LinkActivated { get; set; }
+
+    /// <summary>
+    /// Raised when a remote-image placeholder requests per-document consent to
+    /// load images.
+    /// </summary>
+    public Action? RemoteImagesRequested { get; set; }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
@@ -71,7 +90,9 @@ public class MarkdownPresenter : Decorator
             return;
         }
 
-        if (change.Property == DocumentProperty || change.Property == ContentMaxWidthProperty)
+        if (change.Property == DocumentProperty
+            || change.Property == ContentMaxWidthProperty
+            || change.Property == AllowRemoteImagesProperty)
         {
             Rebuild();
         }
@@ -131,6 +152,8 @@ public class MarkdownPresenter : Decorator
             document.BaseDirectory,
             SpanRegistry,
             url => LinkActivated?.Invoke(url),
+            allowRemoteImages: AllowRemoteImages,
+            onLoadRemoteImagesRequested: () => RemoteImagesRequested?.Invoke(),
             reducedMode: document.ByteLength > DocumentLoader.ReducedModeThresholdBytes);
 
         var body = _renderer.RenderDocument(document.Ast, context);

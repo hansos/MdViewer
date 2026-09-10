@@ -5,6 +5,7 @@ using Markdig.Extensions.TaskLists;
 using Markdig.Syntax.Inlines;
 using MarkdigInline = Markdig.Syntax.Inlines.Inline;
 using MdViewer.Core.Markdown;
+using MdViewer.Rendering.Images;
 
 namespace MdViewer.Rendering.Inlines;
 
@@ -93,16 +94,22 @@ public sealed class InlineRenderer
 
             case LinkInline { IsImage: true } image:
             {
-                // Images inside a text flow are rendered as their alt text here;
-                // a block-level image gets a real Image control (5.6). Fetching
-                // remote images without consent is not done at all.
-                var alt = MarkdownText.ToPlainText(image);
-                var text = string.IsNullOrWhiteSpace(alt) ? "[image]" : $"[{alt}]";
+                // Images in a text flow are real images too (5.6); they just get
+                // capped so a paragraph is not swallowed by a picture. Remote
+                // images still require consent, which the loader enforces.
+                var content = MarkdownImages.CreateInline(image, context);
 
-                var run = new Run(text);
-                run.Apply(TextElement.ForegroundProperty, Themed.Keys.TextMuted);
-                sink.Add(run);
-                position += text.Length;
+                sink.Add(new InlineUIContainer(content));
+
+                // Body text pins LineHeight, and a text line clips whatever is
+                // taller than that — which is why an embedded image showed only
+                // its top edge. A local value overrides the style so the line
+                // grows to the image instead.
+                target.LineHeight = double.NaN;
+
+                // An embedded object occupies a single position in the text
+                // flow, which keeps link ranges around it aligned.
+                position += 1;
                 break;
             }
 
