@@ -21,7 +21,7 @@
                 HorizontalAlignment="Center"
                 Margin="40,72,40,48">
 
-      <TextBlock Classes="start-title" Text="MdViewer" />
+      <TextBlock Classes="start-title" Text="KT MD Viewer" />
       <TextBlock Classes="md-caption"
                  Margin="0,4,0,40"
                  Text="No document open." />

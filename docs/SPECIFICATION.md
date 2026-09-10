@@ -1,4 +1,4 @@
-# MdViewer — Specification
+# KT MD Viewer — Specification
 
 A cross-platform Markdown viewer for Windows and Linux, built on Avalonia UI.
 
@@ -13,7 +13,7 @@ A cross-platform Markdown viewer for Windows and Linux, built on Avalonia UI.
 
 ## 1. Purpose and Goals
 
-MdViewer is a fast, native desktop application for reading Markdown documents. It opens files in tabs, renders them with native Avalonia controls, and stays out of the way.
+KT MD Viewer is a fast, native desktop application for reading Markdown documents. It opens files in tabs, renders them with native Avalonia controls, and stays out of the way.
 
 ### 1.1 Design goals
 

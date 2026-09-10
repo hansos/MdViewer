@@ -1,6 +1,6 @@
-# MdViewer
+# KT MD Viewer
 
-A cross-platform Markdown viewer for Windows and Linux, built on Avalonia UI.
+KT MD Viewer is a cross-platform Markdown viewer for Windows and Linux, built on Avalonia UI.
 
 See [docs/SPECIFICATION.md](docs/SPECIFICATION.md) for the full specification.
 
@@ -34,20 +34,22 @@ What works:
 
 What is still deliberately absent, by milestone:
 
-| Missing | Arrives in |
-|---|---|
-| Syntax highlighting in code blocks (they render plain) | M3 — TextMateSharp |
-| GitHub alerts and `:::` containers as callouts | M3 |
-| Full table column algorithm and sticky headers | M3 |
-| Find actually searching (the bar is still a placeholder) | M5 |
-| Cross-block selection, copy-as-source | M5 |
-| File watching, session restore, persisted recent list | M6 |
-| Virtualization — every block is realised eagerly | M7 |
-| Images, diagrams | M6 / M8 |
-| Live zoom (the control updates the indicator only) | M7 |
+| Missing                                                  | Arrives in         |
+| -------------------------------------------------------- | ------------------ |
+| Syntax highlighting in code blocks (they render plain)   | M3 — TextMateSharp |
+| GitHub alerts and `:::` containers as callouts           | M3                 |
+| Full table column algorithm and sticky headers           | M3                 |
+| Find actually searching (the bar is still a placeholder) | M5                 |
+| Cross-block selection, copy-as-source                    | M5                 |
+| File watching, session restore, persisted recent list    | M6                 |
+| Virtualization — every block is realised eagerly         | M7                 |
+| Images, diagrams                                         | M6 / M8            |
+| Live zoom (the control updates the indicator only)       | M7                 |
 
 Raw HTML is escaped and shown dimmed rather than rendered, and remote images are
 not fetched. Both are deliberate — see SPECIFICATION.md 5.6 and 6.5.
+
+See [Labels · hansos/MdViewer](https://github.com/hansos/MdViewer/labels) for full road map and issue list.
 
 ## Requirements
 
@@ -69,16 +71,16 @@ makes its folder the workspace.
 
 ## Try this
 
-| Action | What to look at |
-|---|---|
-| Open `docs/SPECIFICATION.md` | A long real document: heading hierarchy, tables, code blocks, the outline panel |
-| Click a heading in the outline | Scrolls by source offset, not by pixel |
-| Click an internal `#anchor` link | Same mechanism, resolved through the slug table |
-| `Ctrl+P` | Recent first, then fuzzy workspace matches |
-| `Ctrl+E` | Preview ⇄ raw source — note it keeps your place in a long document |
-| `Ctrl+Shift+W` | Closes every tab and shows the start view |
-| Theme button, top right | System → Light → Dark, with no re-parse and no re-render |
-| Single vs double click in the tree | Preview tab (italic) vs permanent tab |
+| Action                             | What to look at                                                                 |
+| ---------------------------------- | ------------------------------------------------------------------------------- |
+| Open `docs/SPECIFICATION.md`       | A long real document: heading hierarchy, tables, code blocks, the outline panel |
+| Click a heading in the outline     | Scrolls by source offset, not by pixel                                          |
+| Click an internal `#anchor` link   | Same mechanism, resolved through the slug table                                 |
+| `Ctrl+P`                           | Recent first, then fuzzy workspace matches                                      |
+| `Ctrl+E`                           | Preview ⇄ raw source — note it keeps your place in a long document              |
+| `Ctrl+Shift+W`                     | Closes every tab and shows the start view                                       |
+| Theme button, top right            | System → Light → Dark, with no re-parse and no re-render                        |
+| Single vs double click in the tree | Preview tab (italic) vs permanent tab                                           |
 
 ## Project structure
 

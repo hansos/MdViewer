@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Version=1.0
-Name=MdViewer
+Name=KT MD Viewer
 GenericName=Markdown Viewer
 Comment=Read Markdown documents in tabs
 Exec=mdviewer %F
