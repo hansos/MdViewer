@@ -100,11 +100,6 @@
     <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
   </Style>
 
-  <!-- Transient tabs (single-click preview, SPECIFICATION.md 5.9) are italic -->
-  <Style Selector=":is(TextBlock).tab-title.transient">
-    <Setter Property="FontStyle" Value="Italic" />
-  </Style>
-
   <!-- ============================== Sidebar ============================== -->
 
   <Style Selector=":is(TextBlock).sidebar-header">

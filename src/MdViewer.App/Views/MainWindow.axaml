@@ -75,7 +75,6 @@
 
                     <TextBlock Grid.Column="1"
                                Classes="tab-title"
-                               Classes.transient="{Binding IsTransient}"
                                Text="{Binding Title}"
                                ToolTip.Tip="{Binding FullPath}" />
 

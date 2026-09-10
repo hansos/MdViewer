@@ -221,7 +221,7 @@ public partial class MainWindow : Window
 
     // ============================================================== file tree
 
-    /// <summary>Single click previews (italic tab, replaced by the next preview).</summary>
+    /// <summary>Single click opens the document in its own tab.</summary>
     private void OnTreeSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (Model is null) return;
@@ -229,16 +229,16 @@ public partial class MainWindow : Window
         if (tree.SelectedItem is not FileTreeItemViewModel item) return;
         if (item.IsDirectory) return;
 
-        _ = Model.ActivateTreeItemAsync(item, permanent: false);
+        _ = Model.ActivateTreeItemAsync(item);
     }
 
-    /// <summary>Double click promotes the preview tab to a permanent one.</summary>
+    /// <summary>Double click is equivalent to a single click.</summary>
     private void OnTreeDoubleTapped(object? sender, TappedEventArgs e)
     {
         if (Model is null) return;
         if (sender is not TreeView tree) return;
         if (tree.SelectedItem is not FileTreeItemViewModel item) return;
 
-        _ = Model.ActivateTreeItemAsync(item, permanent: true);
+        _ = Model.ActivateTreeItemAsync(item);
     }
 }

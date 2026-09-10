@@ -387,7 +387,7 @@ public interface IDiagramRenderer
 - Respects `.gitignore` when present at the root, and always hides `.git`, `node_modules`, `bin`, `obj`, and dotfiles — all overridable in settings.
 - Live updates via the same watcher infrastructure as §5.10, debounced.
 - `Ctrl+P` quick-open: fuzzy filename match across the workspace, with a background index built on open and maintained by the watcher. Capped at 50,000 files; beyond that, quick-open falls back to prefix search and says so.
-- Single click previews in a transient tab (italic title, replaced by the next preview); double click promotes it to a permanent tab.
+- Every document opens in its own tab. A single click in the tree opens the document; double click is equivalent. Clicking a document that is already open focuses its existing tab. There are no preview (transient) tabs — a viewer is not an editor, and clicking through a folder to read must not close the previous document.
 
 ### 5.10 File loading, watching, and encoding
 
@@ -631,7 +631,7 @@ Diagrams (§5.5) sit in M8 deliberately: they depend on an external tool and an 
 1. **SVG dependency** (§2.2) — does an Avalonia 12–compatible `Avalonia.Svg.Skia` land before M8, or do we ship PNG rasterization?
 2. **Wayland default** (§7.2) — at what point does the native Wayland backend become the default rather than opt-in? Proposed: when it passes the full test matrix on Fedora and Ubuntu LTS.
 3. **Table sticky headers** (§5.4) — worth the complexity in v1, or defer? Proposed: implement in M3 only if it does not threaten the M3 exit criterion.
-4. **Preview tabs** (§5.9) — the single-click-preview model is familiar from code editors but can surprise. Proposed: ship it on, with a setting.
+4. **Preview tabs** (§5.9) — *Settled: off.* Single-click preview is familiar from code editors but the wrong default for a viewer; every document now opens in its own tab, with no setting.
 5. **Smart punctuation default** (§5.1) — off is safer for technical documents; on reads better for prose. Proposed: off, revisit after use.
 6. **Zoom persistence scope** — per tab (as specified) or global? Per tab is more flexible but harder to reason about. Proposed: per tab, with the last-used value as the default for new tabs.
 

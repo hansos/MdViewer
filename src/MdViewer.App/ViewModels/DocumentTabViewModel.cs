@@ -20,9 +20,6 @@ public partial class DocumentTabViewModel : ViewModelBase
 
     /// <summary>
     /// Rendered or raw (SPECIFICATION.md 5.15). Per tab, Preview by default.
-    ///
-    /// Not to be confused with <see cref="IsTransient"/>, which is about the
-    /// tab, not the document.
     /// </summary>
     [ObservableProperty]
     private DocumentViewMode _viewMode = DocumentViewMode.Preview;
@@ -43,13 +40,6 @@ public partial class DocumentTabViewModel : ViewModelBase
     /// </summary>
     [ObservableProperty]
     private bool _isModifiedOnDisk;
-
-    /// <summary>
-    /// A tab opened by a single click in the file tree, shown in italics and
-    /// replaced by the next such click until promoted (SPECIFICATION.md 5.9).
-    /// </summary>
-    [ObservableProperty]
-    private bool _isTransient;
 
     /// <summary>Per-tab zoom, 0.5 to 3.0 (SPECIFICATION.md 5.11).</summary>
     [ObservableProperty]

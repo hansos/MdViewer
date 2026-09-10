@@ -23,8 +23,8 @@ What works:
   the OS handler; relative `.md` links open in a new tab
 - Encoding detection (BOM, UTF-8 scan, system fallback) and line-ending
   detection, both shown in the status bar
-- Workspace tree with lazy directory loading; single click previews, double
-  click opens permanently
+- Workspace tree with lazy directory loading; every document opens in its own
+  tab
 - Quick-open (`Ctrl+P`) over a real workspace index, with recent documents first
 - Recent documents on the start view, populated by what you actually open
 - **Preview / raw toggle** (`Ctrl+E`, or the segmented control in the status bar).
@@ -80,7 +80,7 @@ makes its folder the workspace.
 | `Ctrl+E`                           | Preview ⇄ raw source — note it keeps your place in a long document              |
 | `Ctrl+Shift+W`                     | Closes every tab and shows the start view                                       |
 | Theme button, top right            | System → Light → Dark, with no re-parse and no re-render                        |
-| Single vs double click in the tree | Preview tab (italic) vs permanent tab                                           |
+| Single or double click in the tree | Opens the document in its own tab; an already open document is focused         |
 
 ## Project structure
 

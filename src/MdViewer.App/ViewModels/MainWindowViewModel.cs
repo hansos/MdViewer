@@ -133,7 +133,7 @@ public partial class MainWindowViewModel : ViewModelBase
     /// Opens a document, or focuses the tab that already has it. Reading and
     /// parsing happen on a thread-pool thread; only the tab update runs here.
     /// </summary>
-    public async Task OpenDocumentAsync(string path, bool preview = false)
+    public async Task OpenDocumentAsync(string path)
     {
         if (string.IsNullOrWhiteSpace(path)) return;
 
@@ -142,40 +142,23 @@ public partial class MainWindowViewModel : ViewModelBase
         var existing = Tabs.FirstOrDefault(t => PathsEqual(t.FullPath, full));
         if (existing is not null)
         {
-            // A previewed tab that is opened again is promoted to permanent.
-            if (!preview) existing.IsTransient = false;
             SelectedTab = existing;
             return;
         }
 
-        var tab = CreateTab(full, preview);
+        var tab = CreateTab(full);
         SelectedTab = tab;
 
         await LoadIntoAsync(tab, full).ConfigureAwait(true);
     }
 
     /// <summary>
-    /// A preview tab takes the place of the previous preview tab rather than
-    /// accumulating one tab per file glanced at in the tree
-    /// (SPECIFICATION.md 5.9). FullPath is immutable, so the old preview is
-    /// removed and the new one takes its position in the strip.
+    /// Every document opens in its own tab (SPECIFICATION.md 5.9); a new tab is
+    /// appended to the end of the strip.
     /// </summary>
-    private DocumentTabViewModel CreateTab(string full, bool preview)
+    private DocumentTabViewModel CreateTab(string full)
     {
-        var tab = new DocumentTabViewModel(Path.GetFileName(full), full) { IsTransient = preview };
-
-        if (preview)
-        {
-            var existingPreview = Tabs.FirstOrDefault(t => t.IsTransient);
-            if (existingPreview is not null)
-            {
-                var index = Tabs.IndexOf(existingPreview);
-                Tabs.RemoveAt(index);
-                Tabs.Insert(index, tab);
-                return tab;
-            }
-        }
-
+        var tab = new DocumentTabViewModel(Path.GetFileName(full), full);
         Tabs.Add(tab);
         return tab;
     }
@@ -267,8 +250,8 @@ public partial class MainWindowViewModel : ViewModelBase
         RefreshQuickOpenSources();
     }
 
-    /// <summary>Single click previews, double click opens permanently.</summary>
-    public async Task ActivateTreeItemAsync(FileTreeItemViewModel? item, bool permanent)
+    /// <summary>Opens the item in its own tab; directories toggle expansion.</summary>
+    public async Task ActivateTreeItemAsync(FileTreeItemViewModel? item)
     {
         if (item is null) return;
 
@@ -278,7 +261,7 @@ public partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        await OpenDocumentAsync(item.FullPath, preview: !permanent).ConfigureAwait(true);
+        await OpenDocumentAsync(item.FullPath).ConfigureAwait(true);
     }
 
     // ====================================================== recent documents
