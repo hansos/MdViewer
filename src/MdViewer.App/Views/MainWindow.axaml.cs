@@ -16,6 +16,7 @@ public partial class MainWindow : Window
 
     private MainWindowViewModel? _boundModel;
     private double _lastSidebarWidth = DefaultSidebarWidth;
+    private bool _syncingTreeSelection;
 
     public MainWindow()
     {
@@ -100,6 +101,10 @@ public partial class MainWindow : Window
         if (e.PropertyName == nameof(MainWindowViewModel.IsSidebarVisible) && _boundModel is not null)
         {
             ApplySidebarVisibility(_boundModel.IsSidebarVisible);
+        }
+        else if (e.PropertyName == nameof(MainWindowViewModel.SelectedTab))
+        {
+            SyncTreeSelectionWithSelectedTab();
         }
     }
 
@@ -221,9 +226,90 @@ public partial class MainWindow : Window
 
     // ============================================================== file tree
 
+    /// <summary>
+    /// Selecting a tab highlights and focuses the matching entry in the file
+    /// tree, expanding the folders on the way down and scrolling it into view.
+    /// </summary>
+    private void SyncTreeSelectionWithSelectedTab()
+    {
+        var path = Model?.SelectedTab?.FullPath;
+        if (string.IsNullOrEmpty(path)) return;
+
+        var tree = this.FindControl<TreeView>("FileTree");
+        if (tree is null || Model is null) return;
+
+        var item = FindTreeItem(Model.WorkspaceRoots, path);
+        if (item is null || ReferenceEquals(tree.SelectedItem, item)) return;
+
+        _syncingTreeSelection = true;
+        try
+        {
+            tree.SelectedItem = item;
+        }
+        finally
+        {
+            _syncingTreeSelection = false;
+        }
+
+        // Containers for freshly expanded folders are only realised after the
+        // next layout pass, so focusing has to wait for it.
+        Dispatcher.UIThread.Post(
+            () =>
+            {
+                if (tree.TreeContainerFromItem(item) is TreeViewItem container)
+                {
+                    container.BringIntoView();
+                    container.Focus();
+                }
+            },
+            DispatcherPriority.Loaded);
+    }
+
+    /// <summary>
+    /// Depth-first lookup that expands directories along the path, which also
+    /// triggers their lazy child enumeration.
+    /// </summary>
+    private static FileTreeItemViewModel? FindTreeItem(
+        IEnumerable<FileTreeItemViewModel> items,
+        string fullPath)
+    {
+        foreach (var item in items)
+        {
+            if (string.IsNullOrEmpty(item.FullPath)) continue;
+
+            if (!item.IsDirectory)
+            {
+                if (PathsEqual(item.FullPath, fullPath)) return item;
+                continue;
+            }
+
+            if (!IsUnder(fullPath, item.FullPath)) continue;
+
+            item.IsExpanded = true;
+
+            var match = FindTreeItem(item.Children, fullPath);
+            if (match is not null) return match;
+        }
+
+        return null;
+    }
+
+    private static bool PathsEqual(string left, string right) =>
+        string.Equals(
+            Path.TrimEndingDirectorySeparator(left),
+            Path.TrimEndingDirectorySeparator(right),
+            StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsUnder(string candidate, string directory)
+    {
+        var root = Path.TrimEndingDirectorySeparator(directory) + Path.DirectorySeparatorChar;
+        return candidate.StartsWith(root, StringComparison.OrdinalIgnoreCase);
+    }
+
     /// <summary>Single click opens the document in its own tab.</summary>
     private void OnTreeSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
+        if (_syncingTreeSelection) return;
         if (Model is null) return;
         if (sender is not TreeView tree) return;
         if (tree.SelectedItem is not FileTreeItemViewModel item) return;
