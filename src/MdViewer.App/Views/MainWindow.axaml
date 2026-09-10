@@ -20,6 +20,7 @@
     <KeyBinding Gesture="Ctrl+K" Command="{Binding OpenFolderCommand}" />
     <KeyBinding Gesture="Ctrl+F" Command="{Binding ToggleFindBarCommand}" />
     <KeyBinding Gesture="Ctrl+P" Command="{Binding ShowQuickOpenCommand}" />
+    <KeyBinding Gesture="Ctrl+Home" Command="{Binding ShowStartPageCommand}" />
     <KeyBinding Gesture="Escape" Command="{Binding DismissOverlaysCommand}" />
     <KeyBinding Gesture="Ctrl+B" Command="{Binding ToggleSidebarCommand}" />
     <KeyBinding Gesture="Ctrl+E" Command="{Binding ToggleViewModeCommand}" />
@@ -41,7 +42,7 @@
             Background="{DynamicResource ShellChromeBrush}"
             BorderBrush="{DynamicResource ShellBorderBrush}"
             BorderThickness="0,0,0,1">
-      <Grid ColumnDefinitions="Auto,*,Auto" Margin="6,6,6,0">
+      <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="6,6,6,0">
 
         <ToggleButton Grid.Column="0"
                       Classes="icon"
@@ -56,7 +57,20 @@
                 Fill="Transparent" />
         </ToggleButton>
 
-        <ScrollViewer Grid.Column="1"
+        <!-- Home: the way back to the start page while tabs are open (5.14) -->
+        <Button Grid.Column="1"
+                Classes="icon"
+                Margin="0,0,6,6"
+                Command="{Binding ShowStartPageCommand}"
+                ToolTip.Tip="Start page (Ctrl+Home)">
+          <Path Width="14" Height="14" Stretch="Uniform"
+                Data="M3 11 L12 3 L21 11 M5 10 V21 H19 V10"
+                Stroke="{DynamicResource TextSecondaryBrush}"
+                StrokeThickness="1.6"
+                Fill="Transparent" />
+        </Button>
+
+        <ScrollViewer Grid.Column="2"
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Disabled">
           <ListBox x:Name="TabStrip"
@@ -96,7 +110,7 @@
           </ListBox>
         </ScrollViewer>
 
-        <Grid Grid.Column="2" Margin="6,0,0,6">
+        <Grid Grid.Column="3" Margin="6,0,0,6">
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="2">
             <Button Classes="icon" Content="Open" FontSize="12"
                     Command="{Binding OpenFilesCommand}"
@@ -293,9 +307,6 @@
       <!-- ====================== Document pane ====================== -->
       <Panel x:Name="DocumentPane" Grid.Column="2" Background="{DynamicResource ContentBackgroundBrush}">
 
-        <!-- No tabs open: the start view and its recent documents (5.14) -->
-        <views:StartView IsVisible="{Binding HasNoTabs}" />
-
         <!-- The rendered document -->
         <ScrollViewer x:Name="DocumentScroller"
                       HorizontalScrollBarVisibility="Disabled"
@@ -334,6 +345,13 @@
                    VerticalAlignment="Center"
                    Text="Loading…"
                    IsVisible="{Binding SelectedTab.IsLoading, FallbackValue=False}" />
+
+        <!--
+          The start view and its recent documents (5.14). It is the empty state
+          when no tabs are open, and is also reachable from Home at any time, in
+          which case it covers the document rather than replacing it.
+        -->
+        <views:StartView IsVisible="{Binding IsStartPageVisible}" />
 
         <!-- Find bar overlay (5.7): it does not reflow the document -->
         <Border Classes="find-bar"

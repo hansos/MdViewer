@@ -19,6 +19,12 @@ namespace MdViewer.App.ViewModels;
 /// </summary>
 public partial class MainWindowViewModel : ViewModelBase
 {
+    /// <summary>
+    /// How many recent documents the start page shows before the user asks for
+    /// the rest. Five is the glance; the history behind it is longer.
+    /// </summary>
+    private const int CollapsedRecentCount = 5;
+
     private readonly DocumentLoader _loader = new();
     private readonly WorkspaceScanner _scanner = new();
     private readonly RecentDocumentList _recent = new();
@@ -41,6 +47,20 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private DocumentTabViewModel? _selectedTab;
+
+    /// <summary>
+    /// The start page is more than an empty state: the Home affordance in the
+    /// tab strip brings it back at any time (SPECIFICATION.md 5.14), so it can
+    /// be shown while tabs are open. It then overlays the document pane and is
+    /// dismissed by opening something or by returning to the current tab.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsStartPageVisible))]
+    private bool _isStartPageRequested;
+
+    /// <summary>Whether the start page lists the whole history or just the newest few.</summary>
+    [ObservableProperty]
+    private bool _isRecentExpanded;
 
     [ObservableProperty]
     private OutlineItemViewModel? _selectedOutlineItem;
@@ -105,6 +125,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         WorkspaceRoots = new ObservableCollection<FileTreeItemViewModel>();
         RecentDocuments = new ObservableCollection<RecentDocumentViewModel>();
+        VisibleRecentDocuments = new ObservableCollection<RecentDocumentViewModel>();
     }
 
     /// <summary>Set by the view; the view models never touch Avalonia directly.</summary>
@@ -121,6 +142,13 @@ public partial class MainWindowViewModel : ViewModelBase
     public ObservableCollection<FileTreeItemViewModel> WorkspaceRoots { get; }
 
     public ObservableCollection<RecentDocumentViewModel> RecentDocuments { get; }
+
+    /// <summary>
+    /// What the start page actually lists: the newest few, or the whole history
+    /// once the user asks for it. The full list is kept, so expanding costs no
+    /// file system work.
+    /// </summary>
+    public ObservableCollection<RecentDocumentViewModel> VisibleRecentDocuments { get; }
 
     public FindViewModel Find { get; }
 
@@ -146,11 +174,36 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public bool HasRecentDocuments => RecentDocuments.Count > 0;
 
+    /// <summary>
+    /// Shown when nothing is open, and whenever the user asks for it by Home.
+    /// </summary>
+    public bool IsStartPageVisible => HasNoTabs || IsStartPageRequested;
+
+    /// <summary>
+    /// There is only somewhere to go back to while a document is open.
+    /// </summary>
+    public bool CanLeaveStartPage => !HasNoTabs;
+
+    public bool HasMoreRecentDocuments => RecentDocuments.Count > CollapsedRecentCount;
+
+    public string RecentToggleText =>
+        IsRecentExpanded ? "Show fewer" : $"Show all {RecentDocuments.Count}";
+
     private void OnTabsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         OnPropertyChanged(nameof(HasNoTabs));
+        OnPropertyChanged(nameof(IsStartPageVisible));
+        OnPropertyChanged(nameof(CanLeaveStartPage));
         RequestSave();
     }
+
+    // ============================================================ start page
+
+    [RelayCommand]
+    private void ShowStartPage() => IsStartPageRequested = true;
+
+    [RelayCommand]
+    private void HideStartPage() => IsStartPageRequested = false;
 
     // ============================================================== startup
 
@@ -392,6 +445,8 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (string.IsNullOrWhiteSpace(path)) return;
 
+        IsStartPageRequested = false;
+
         var full = Path.GetFullPath(path);
 
         var existing = Tabs.FirstOrDefault(t => PathsEqual(t.FullPath, full));
@@ -544,8 +599,32 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         OnPropertyChanged(nameof(HasRecentDocuments));
+        RefreshVisibleRecent();
         RefreshQuickOpenSources();
     }
+
+    /// <summary>
+    /// Projects the history onto what the start page shows: the newest few, or
+    /// all of it once expanded.
+    /// </summary>
+    private void RefreshVisibleRecent()
+    {
+        var take = IsRecentExpanded ? RecentDocuments.Count : CollapsedRecentCount;
+
+        VisibleRecentDocuments.Clear();
+        foreach (var item in RecentDocuments.Take(take))
+        {
+            VisibleRecentDocuments.Add(item);
+        }
+
+        OnPropertyChanged(nameof(HasMoreRecentDocuments));
+        OnPropertyChanged(nameof(RecentToggleText));
+    }
+
+    partial void OnIsRecentExpandedChanged(bool value) => RefreshVisibleRecent();
+
+    [RelayCommand]
+    private void ToggleRecentExpanded() => IsRecentExpanded = !IsRecentExpanded;
 
     private void RefreshQuickOpenSources()
     {
@@ -736,7 +815,15 @@ public partial class MainWindowViewModel : ViewModelBase
         ScrollToOffsetRequested?.Invoke(value.SourceOffset);
     }
 
-    partial void OnSelectedTabChanged(DocumentTabViewModel? value) => RequestSave();
+    partial void OnSelectedTabChanged(DocumentTabViewModel? value)
+    {
+        if (value is not null)
+        {
+            IsStartPageRequested = false;
+        }
+
+        RequestSave();
+    }
 
     partial void OnIsSidebarVisibleChanged(bool value) => RequestSave();
 
@@ -775,6 +862,11 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         IsSettingsVisible = false;
+
+        if (CanLeaveStartPage)
+        {
+            IsStartPageRequested = false;
+        }
     }
 
     [RelayCommand]

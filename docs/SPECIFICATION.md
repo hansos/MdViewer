@@ -437,7 +437,7 @@ public interface IDiagramRenderer
 
 ### 5.14 Recent documents
 
-The five most recently opened documents are remembered across sessions. Where they are *shown* was a decision with two obvious answers and a better third one, so the reasoning is recorded.
+The most recently opened documents are remembered across sessions. Where they are *shown* was a decision with two obvious answers and a better third one, so the reasoning is recorded.
 
 **Not a node in the file tree.** The workspace tree is a location structure: every node maps to a path beneath the workspace root, and expanding it is navigation through a hierarchy. A recent list is a *query result*, and its entries frequently live outside the current workspace — a "Recent" node would have to display paths that do not belong under the root it hangs from. Beyond that, context menus, `.gitignore` filtering and future drag-and-drop all behave differently for the two kinds of node, which spreads type checks through a single control.
 
@@ -445,7 +445,7 @@ The five most recently opened documents are remembered across sessions. Where th
 
 So recency surfaces in the three places where it is actually used:
 
-1. **The start view — primary.** When no tabs are open, the document pane shows the recent documents as cards. This is the moment the need is real and the screen is free.
+1. **The start view — primary.** When no tabs are open, the document pane shows the recent documents as cards. This is the moment the need is real and the screen is free. The start view is not only an empty state: a **Home** affordance at the left of the tab strip (and `Ctrl+Home`) brings it back at any time, where it covers the document pane until the user opens something, picks a tab, or presses `Esc`. Its actions — open file, open folder, quick open — are therefore reachable during a session, not only before one starts. It lists the newest five at rest, with a *Show all* toggle for the rest of the history.
 2. **Quick-open with an empty query — secondary.** `Ctrl+P` opens onto the recent list before anything is typed, and recent entries outrank equally-scored workspace files once a query is entered. This matches the muscle memory people bring from code editors.
 3. **A File ▸ Recent menu — tertiary.** For reopening a closed document while other tabs are open. Deferred until there is a menu bar to hang it from.
 
@@ -453,7 +453,7 @@ So recency surfaces in the three places where it is actually used:
 
 **Rules.**
 
-- Capped at 5 by default, configurable to 20. Most-recent-first.
+- Capped at 20. Most-recent-first; the start view shows the newest 5 until expanded.
 - De-duplicated by path, compared case-insensitively on Windows and case-sensitively on Linux. Treating both file systems alike produces either duplicate entries on Windows or wrongly merged ones on Linux.
 - Persisted in `session.json` (§5.13) and restored with it.
 - **Existence is checked at display time, never at startup.** Startup must not block on the file system, so a missing file is shown as unavailable — visibly, in place — rather than silently dropped. The user learns that the file moved instead of watching an entry disappear.

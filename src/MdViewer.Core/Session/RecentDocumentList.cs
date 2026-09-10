@@ -16,7 +16,12 @@ namespace MdViewer.Core.Session;
 /// </summary>
 public sealed class RecentDocumentList
 {
-    public const int DefaultCapacity = 5;
+    /// <summary>
+    /// The history is deeper than the handful the start page shows at rest. The
+    /// start page reveals the rest on demand, so a larger cap costs nothing in
+    /// chrome while making the list useful beyond the last few minutes of work.
+    /// </summary>
+    public const int DefaultCapacity = 20;
 
     private static readonly StringComparer PathComparer =
         OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;

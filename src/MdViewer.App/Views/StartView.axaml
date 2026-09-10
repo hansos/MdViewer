@@ -10,26 +10,38 @@
   <!--
     Start view (SPECIFICATION.md 5.14).
 
-    Shown only when no tabs are open. This is where the recent list belongs:
-    it is exactly the moment the user needs it, the screen is free, and it
-    costs no permanent chrome while reading. Once tabs are open, the tab strip
-    already is the recent list, and Ctrl+P covers the rest.
+    The empty state when no tabs are open, and reachable at any time from Home
+    in the tab strip. When a document is open it covers the document pane, so it
+    needs an opaque background and a way back to what was being read. Its action
+    buttons are therefore always available, not only on an empty session.
   -->
 
-  <ScrollViewer VerticalScrollBarVisibility="Auto">
+  <ScrollViewer VerticalScrollBarVisibility="Auto"
+                Background="{DynamicResource ContentBackgroundBrush}">
     <StackPanel MaxWidth="620"
                 HorizontalAlignment="Center"
                 Margin="40,72,40,48">
 
+      <!-- Only offer a way back when there is something to go back to -->
+      <Button Classes="start-action"
+              HorizontalAlignment="Left"
+              Margin="0,0,0,20"
+              Content="&#x2190;  Back to document   Esc"
+              IsVisible="{Binding CanLeaveStartPage}"
+              Command="{Binding HideStartPageCommand}" />
+
       <TextBlock Classes="start-title" Text="KT MD Viewer" />
       <TextBlock Classes="md-caption"
                  Margin="0,4,0,40"
+                 IsVisible="{Binding !CanLeaveStartPage}"
                  Text="No document open." />
+
+      <Border Height="44" IsVisible="{Binding CanLeaveStartPage}" />
 
       <TextBlock Classes="sidebar-header" Text="RECENT" Margin="2,0,0,10"
                  IsVisible="{Binding HasRecentDocuments}" />
 
-      <ItemsControl ItemsSource="{Binding RecentDocuments}"
+      <ItemsControl ItemsSource="{Binding VisibleRecentDocuments}"
                     IsVisible="{Binding HasRecentDocuments}">
         <ItemsControl.ItemTemplate>
           <DataTemplate x:DataType="vm:RecentDocumentViewModel">
@@ -57,6 +69,13 @@
         </ItemsControl.ItemTemplate>
       </ItemsControl>
 
+      <Button Classes="start-action"
+              HorizontalAlignment="Left"
+              Margin="0,10,0,0"
+              IsVisible="{Binding HasMoreRecentDocuments}"
+              Content="{Binding RecentToggleText}"
+              Command="{Binding ToggleRecentExpandedCommand}" />
+
       <TextBlock Classes="md-caption"
                  Margin="2,10,0,0"
                  TextWrapping="Wrap"
@@ -71,7 +90,7 @@
                    Text="Nothing opened yet. Open a file, or open a folder to browse a workspace in the sidebar." />
         <TextBlock Classes="md-caption"
                    TextWrapping="Wrap"
-                   Text="The five most recent documents will appear here. They are remembered for this session; persisting them across launches lands with session restore in M6." />
+                   Text="The most recent documents will appear here, newest first. They are remembered for this session; persisting them across launches lands with session restore in M6." />
       </StackPanel>
 
       <!-- Actions -->
