@@ -10,6 +10,7 @@ namespace MdViewer.App;
 /// internal function is implemented, and is deleted in M2/M6 when the real
 /// producers land.
 /// </summary>
+[Obsolete("The hand-authored visual reference the block renderers are checked against, Can be deleted.")]
 internal static class SampleData
 {
     public static IReadOnlyList<OutlineNode> Outline()
