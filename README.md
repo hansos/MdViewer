@@ -80,7 +80,7 @@ makes its folder the workspace.
 | `Ctrl+E`                           | Preview ⇄ raw source — note it keeps your place in a long document              |
 | `Ctrl+Shift+W`                     | Closes every tab and shows the start view                                       |
 | Theme button, top right            | System → Light → Dark, with no re-parse and no re-render                        |
-| Single or double click in the tree | Opens the document in its own tab; an already open document is focused         |
+| Single or double click in the tree | Opens the document in its own tab; an already open document is focused          |
 
 ## Project structure
 

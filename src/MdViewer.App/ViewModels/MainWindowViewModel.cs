@@ -22,9 +22,22 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly DocumentLoader _loader = new();
     private readonly WorkspaceScanner _scanner = new();
     private readonly RecentDocumentList _recent = new();
+    private readonly SettingsStore _settingsStore = new();
+    private readonly SessionStore _sessionStore = new();
+
+    private AppSettings _settings = new();
+    private SessionState _session = new();
 
     private CancellationTokenSource? _loadCancellation;
     private CancellationTokenSource? _themePopupCancellation;
+    private CancellationTokenSource? _saveDebounce;
+
+    /// <summary>
+    /// True while the session is being rebuilt. Restoration touches almost
+    /// every observable the save logic listens to, and saving the session we
+    /// are halfway through restoring would be, at best, pointless.
+    /// </summary>
+    private bool _isRestoring;
 
     [ObservableProperty]
     private DocumentTabViewModel? _selectedTab;
@@ -33,7 +46,26 @@ public partial class MainWindowViewModel : ViewModelBase
     private OutlineItemViewModel? _selectedOutlineItem;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSidebarPresent))]
     private bool _isSidebarVisible = true;
+
+    /// <summary>
+    /// Whether the sidebar column should occupy space at all. The toggle alone
+    /// is not enough: with both explorer and outline turned off the sidebar has
+    /// nothing left to show, and an empty panel is just a gap the user cannot
+    /// close from the toggle. Hiding the whole column keeps the two settings and
+    /// the toggle expressing one idea.
+    /// </summary>
+    public bool IsSidebarPresent =>
+        IsSidebarVisible && (Settings.ShowExplorerPanel || Settings.ShowOutlinePanel);
+
+    /// <summary>
+    /// Whether the sidebar toggle is worth offering. With both panels switched
+    /// off the toggle has nothing to reveal, so showing it would be a control
+    /// that visibly does nothing when clicked.
+    /// </summary>
+    public bool CanToggleSidebar =>
+        Settings.ShowExplorerPanel || Settings.ShowOutlinePanel;
 
     [ObservableProperty]
     private bool _isFindBarVisible;
@@ -43,6 +75,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private bool _isFocusMode;
+
+    [ObservableProperty]
+    private bool _isSettingsVisible;
 
     [ObservableProperty]
     private string _themeName = "System";
@@ -62,6 +97,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         Find = new FindViewModel();
+        Settings = new SettingsViewModel();
         QuickOpen = new QuickOpenViewModel(Array.Empty<QuickOpenResultViewModel>(), Array.Empty<QuickOpenResultViewModel>());
 
         Tabs = new ObservableCollection<DocumentTabViewModel>();
@@ -88,6 +124,18 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public FindViewModel Find { get; }
 
+    /// <summary>Settings surface (SPECIFICATION.md 5.13).</summary>
+    public SettingsViewModel Settings { get; }
+
+    /// <summary>
+    /// Supplied by the view: window bounds, window state and the sidebar
+    /// splitter width are things only the window knows, so it fills them in
+    /// before a save and puts them back on restore (SPECIFICATION.md 5.13).
+    /// </summary>
+    public Action<SessionState>? CaptureViewState { get; set; }
+
+    public Action<SessionState>? ApplyViewState { get; set; }
+
     public QuickOpenViewModel QuickOpen { get; }
 
     public string? WorkspaceRoot { get; private set; }
@@ -99,32 +147,239 @@ public partial class MainWindowViewModel : ViewModelBase
     public bool HasRecentDocuments => RecentDocuments.Count > 0;
 
     private void OnTabsChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        => OnPropertyChanged(nameof(HasNoTabs));
+    {
+        OnPropertyChanged(nameof(HasNoTabs));
+        RequestSave();
+    }
 
     // ============================================================== startup
 
     /// <summary>
-    /// Command-line arguments open as tabs; the first one's folder becomes the
-    /// workspace (SPECIFICATION.md 4.3).
+    /// Loads settings, then either opens the command-line arguments or restores
+    /// the previous session (SPECIFICATION.md 4.3, 5.13). Files given on the
+    /// command line win: an explicit request is not a session to restore.
     /// </summary>
     public async Task InitializeAsync(IReadOnlyList<string> args)
     {
-        var paths = args
-            .Where(a => !a.StartsWith('-'))
-            .Select(a => Path.GetFullPath(a))
-            .Where(File.Exists)
+        _isRestoring = true;
+
+        try
+        {
+            _settings = _settingsStore.Load();
+            Settings.LoadFrom(_settings);
+            Settings.PropertyChanged += OnSettingsPropertyChanged;
+            ApplySettings();
+
+            var paths = args
+                .Where(a => !a.StartsWith('-'))
+                .Select(a => Path.GetFullPath(a))
+                .Where(File.Exists)
+                .ToList();
+
+            if (paths.Count > 0)
+            {
+                var folder = Path.GetDirectoryName(paths[0]);
+                if (!string.IsNullOrEmpty(folder)) SetWorkspace(folder);
+
+                foreach (var path in paths)
+                {
+                    await OpenDocumentAsync(path).ConfigureAwait(true);
+                }
+
+                return;
+            }
+
+            // --no-restore skips restoration for one launch (SPECIFICATION.md 5.13).
+            if (args.Any(a => string.Equals(a, "--no-restore", StringComparison.OrdinalIgnoreCase)))
+            {
+                return;
+            }
+
+            await RestoreSessionAsync().ConfigureAwait(true);
+        }
+        finally
+        {
+            _isRestoring = false;
+        }
+    }
+
+    /// <summary>
+    /// Rebuilds the previous session. Nothing here is allowed to be fatal: a
+    /// file that has since been deleted is skipped silently rather than
+    /// blocking startup (SPECIFICATION.md 5.13).
+    /// </summary>
+    private async Task RestoreSessionAsync()
+    {
+        _session = _sessionStore.Load();
+
+        RestoreRecent();
+
+        if (Settings.ReopenPreviousFolder &&
+            !string.IsNullOrEmpty(_settings.LastFolder) &&
+            Directory.Exists(_settings.LastFolder))
+        {
+            SetWorkspace(_settings.LastFolder);
+        }
+
+        IsSidebarVisible = _session.IsSidebarVisible;
+        ApplyViewState?.Invoke(_session);
+
+        foreach (var saved in _session.Tabs)
+        {
+            if (string.IsNullOrEmpty(saved.Path) || !File.Exists(saved.Path)) continue;
+
+            var tab = CreateTab(Path.GetFullPath(saved.Path));
+            tab.ViewMode = saved.ViewMode;
+            tab.Zoom = saved.Zoom <= 0 ? 1.0 : saved.Zoom;
+            tab.ScrollOffset = saved.ScrollOffset;
+
+            await LoadIntoAsync(tab, tab.FullPath).ConfigureAwait(true);
+        }
+
+        if (Tabs.Count == 0) return;
+
+        var index = _session.ActiveTabIndex;
+        SelectedTab = index >= 0 && index < Tabs.Count ? Tabs[index] : Tabs[0];
+
+        if (SelectedTab.ScrollOffset > 0)
+        {
+            RestoreScrollOffset?.Invoke(SelectedTab.ScrollOffset);
+        }
+    }
+
+    private void RestoreRecent()
+    {
+        foreach (var entry in _session.Recent.AsEnumerable().Reverse())
+        {
+            if (string.IsNullOrEmpty(entry.Path)) continue;
+
+            _recent.Touch(new RecentDocument(
+                entry.Path,
+                string.IsNullOrEmpty(entry.Title) ? Path.GetFileName(entry.Path) : entry.Title,
+                entry.LastOpenedUtc,
+                entry.ScrollOffset));
+        }
+
+        RefreshRecent();
+    }
+
+    // ========================================================== persistence
+
+    private void OnSettingsPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(SettingsViewModel.ShowExplorerPanel)
+            or nameof(SettingsViewModel.ShowOutlinePanel))
+        {
+            OnPropertyChanged(nameof(IsSidebarPresent));
+            OnPropertyChanged(nameof(CanToggleSidebar));
+            ToggleSidebarCommand.NotifyCanExecuteChanged();
+        }
+
+        ApplySettings();
+        RequestSave();
+    }
+
+    /// <summary>
+    /// Pushes the settings that have a visible effect into the running app:
+    /// the theme variant and the typography tokens (SPECIFICATION.md 5.11).
+    /// Panel visibility is bound directly by the views.
+    /// </summary>
+    private void ApplySettings()
+    {
+        ThemeName = Settings.Theme;
+
+        var app = Application.Current;
+        if (app is null) return;
+
+        app.RequestedThemeVariant = Settings.Theme switch
+        {
+            "Light" => ThemeVariant.Light,
+            "Dark" => ThemeVariant.Dark,
+            _ => ThemeVariant.Default,
+        };
+
+        AppTypography.Apply(app, Settings);
+    }
+
+    /// <summary>
+    /// Coalesces the storm of changes a single user action produces into one
+    /// write, on the 2-second debounce the spec asks for (SPECIFICATION.md 5.13).
+    /// </summary>
+    private void RequestSave()
+    {
+        if (_isRestoring) return;
+
+        _saveDebounce?.Cancel();
+
+        var cancellation = new CancellationTokenSource();
+        _saveDebounce = cancellation;
+
+        _ = DebouncedSaveAsync(cancellation);
+    }
+
+    private async Task DebouncedSaveAsync(CancellationTokenSource cancellation)
+    {
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(2), cancellation.Token).ConfigureAwait(true);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        if (_saveDebounce == cancellation) SaveNow();
+    }
+
+    /// <summary>
+    /// Writes settings and session immediately. Called on clean exit, so the
+    /// last two seconds of a session are never lost.
+    /// </summary>
+    public void SaveNow()
+    {
+        _saveDebounce?.Cancel();
+
+        Settings.WriteTo(_settings);
+        _settings.LastFolder = WorkspaceRoot;
+        _settingsStore.Save(_settings);
+
+        CaptureSession();
+        _sessionStore.Save(_session);
+    }
+
+    private void CaptureSession()
+    {
+        // The live view knows the reading position of the tab on screen; the
+        // others still hold the offset captured when they were last left.
+        if (SelectedTab is not null && CaptureScrollOffset is not null)
+        {
+            SelectedTab.ScrollOffset = CaptureScrollOffset();
+        }
+
+        _session.Tabs = Tabs
+            .Select(t => new SessionTab
+            {
+                Path = t.FullPath,
+                ScrollOffset = t.ScrollOffset,
+                ViewMode = t.ViewMode,
+                Zoom = t.Zoom,
+            })
             .ToList();
 
-        if (paths.Count > 0)
-        {
-            var folder = Path.GetDirectoryName(paths[0]);
-            if (!string.IsNullOrEmpty(folder)) SetWorkspace(folder);
+        _session.ActiveTabIndex = SelectedTab is null ? -1 : Tabs.IndexOf(SelectedTab);
+        _session.IsSidebarVisible = IsSidebarVisible;
 
-            foreach (var path in paths)
+        _session.Recent = _recent.Items
+            .Select(r => new SessionRecentDocument
             {
-                await OpenDocumentAsync(path).ConfigureAwait(true);
-            }
-        }
+                Path = r.Path,
+                Title = r.Title,
+                LastOpenedUtc = r.LastOpenedUtc,
+                ScrollOffset = r.ScrollOffset,
+            })
+            .ToList();
+
+        CaptureViewState?.Invoke(_session);
     }
 
     // ============================================================ documents
@@ -248,6 +503,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         OnPropertyChanged(nameof(HasWorkspace));
         RefreshQuickOpenSources();
+        RequestSave();
     }
 
     /// <summary>Opens the item in its own tab; directories toggle expansion.</summary>
@@ -360,6 +616,7 @@ public partial class MainWindowViewModel : ViewModelBase
         tab.ScrollOffset = CaptureScrollOffset?.Invoke() ?? tab.ScrollOffset;
         tab.ViewMode = mode;
         RestoreScrollOffset?.Invoke(tab.ScrollOffset);
+        RequestSave();
     }
 
     [RelayCommand]
@@ -479,9 +736,13 @@ public partial class MainWindowViewModel : ViewModelBase
         ScrollToOffsetRequested?.Invoke(value.SourceOffset);
     }
 
+    partial void OnSelectedTabChanged(DocumentTabViewModel? value) => RequestSave();
+
+    partial void OnIsSidebarVisibleChanged(bool value) => RequestSave();
+
     // ================================================================ chrome
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanToggleSidebar))]
     private void ToggleSidebar() => IsSidebarVisible = !IsSidebarVisible;
 
     [RelayCommand]
@@ -490,6 +751,12 @@ public partial class MainWindowViewModel : ViewModelBase
         IsFindBarVisible = !IsFindBarVisible;
         if (!IsFindBarVisible) Find.Query = string.Empty;
     }
+
+    [RelayCommand]
+    private void ShowSettings() => IsSettingsVisible = true;
+
+    [RelayCommand]
+    private void CloseSettings() => IsSettingsVisible = false;
 
     [RelayCommand]
     private void DismissOverlays()
@@ -504,7 +771,10 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             IsFindBarVisible = false;
             Find.Query = string.Empty;
+            return;
         }
+
+        IsSettingsVisible = false;
     }
 
     [RelayCommand]
@@ -553,6 +823,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (SelectedTab is null) return;
         SelectedTab.Zoom = Math.Min(3.0, Math.Round(SelectedTab.Zoom + 0.1, 2));
+        RequestSave();
     }
 
     [RelayCommand]
@@ -560,44 +831,35 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (SelectedTab is null) return;
         SelectedTab.Zoom = Math.Max(0.5, Math.Round(SelectedTab.Zoom - 0.1, 2));
+        RequestSave();
     }
 
     [RelayCommand]
     private void ZoomReset()
     {
         if (SelectedTab is not null) SelectedTab.Zoom = 1.0;
+        RequestSave();
     }
 
     // ================================================================= theme
 
+    /// <summary>
+    /// System → Light → Dark. The button and the settings page are two views of
+    /// one value, so this writes the setting and lets <see cref="ApplySettings"/>
+    /// do the applying and the saving.
+    /// </summary>
     [RelayCommand]
     private void CycleTheme()
     {
-        var app = Application.Current;
-        if (app is null) return;
-
-        string selectedTheme;
-
-        if (app.RequestedThemeVariant == ThemeVariant.Light)
+        var next = Settings.Theme switch
         {
-            app.RequestedThemeVariant = ThemeVariant.Dark;
-            ThemeName = "Dark";
-            selectedTheme = "Dark";
-        }
-        else if (app.RequestedThemeVariant == ThemeVariant.Dark)
-        {
-            app.RequestedThemeVariant = ThemeVariant.Default;
-            ThemeName = "System";
-            selectedTheme = "System";
-        }
-        else
-        {
-            app.RequestedThemeVariant = ThemeVariant.Light;
-            ThemeName = "Light";
-            selectedTheme = "Light";
-        }
+            "Light" => "Dark",
+            "Dark" => "System",
+            _ => "Light",
+        };
 
-        _ = ShowThemePopupAsync(selectedTheme);
+        Settings.Theme = next;
+        _ = ShowThemePopupAsync(next);
     }
 
     private async Task ShowThemePopupAsync(string themeName)

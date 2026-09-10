@@ -10,20 +10,31 @@
   <!--
     Raw Markdown source, read-only (SPECIFICATION.md 5.15).
 
-    The gutter sits OUTSIDE the scroll viewer and is translated vertically to
-    follow it, so line numbers stay put when a long line scrolls the text
-    sideways. Inside the viewer they would slide off the left edge, which is
-    exactly when you most want to know which line you are on.
+    The gutter sits OUTSIDE the document scroll viewer and follows it, so line
+    numbers stay put when a long line scrolls the text sideways. Inside the
+    viewer they would slide off the left edge, which is exactly when you most
+    want to know which line you are on.
+
+    It still needs a scroll host of its own: a bare TextBlock is measured
+    against the viewport height, and its text layout is then truncated at the
+    last line that fits. The host is scrolled from code, never by the user.
   -->
 
   <Grid ColumnDefinitions="Auto,*" Background="{DynamicResource CodeBlockBackgroundBrush}">
 
     <Border Grid.Column="0"
             Classes="source-gutter"
-            ClipToBounds="True">
-      <TextBlock x:Name="Gutter"
-                 Classes="md-line-number"
-                 Text="{Binding SelectedTab.LineNumberColumn}" />
+            ClipToBounds="True"
+            IsVisible="{Binding Settings.ShowLineNumbersInRawView}">
+      <ScrollViewer x:Name="GutterScroller"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Hidden"
+                    IsHitTestVisible="False">
+        <TextBlock x:Name="Gutter"
+                   Classes="md-line-number"
+                   Margin="0,0,0,40"
+                   Text="{Binding SelectedTab.LineNumberColumn}" />
+      </ScrollViewer>
     </Border>
 
     <ScrollViewer Grid.Column="1"

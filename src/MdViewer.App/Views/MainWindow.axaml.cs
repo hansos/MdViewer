@@ -6,6 +6,7 @@ using Avalonia.Threading;
 using MdViewer.App.Services;
 using MdViewer.App.ViewModels;
 using MdViewer.Core.Documents;
+using MdViewer.Core.Session;
 using MdViewer.Rendering;
 
 namespace MdViewer.App.Views;
@@ -79,6 +80,9 @@ public partial class MainWindow : Window
             _boundModel.PropertyChanged -= OnModelPropertyChanged;
             _boundModel.CaptureScrollOffset = null;
             _boundModel.RestoreScrollOffset = null;
+            _boundModel.CaptureViewState = null;
+            _boundModel.ApplyViewState = null;
+            _boundModel.Settings.PropertyChanged -= OnSettingsPropertyChanged;
         }
 
         _boundModel = Model;
@@ -89,18 +93,104 @@ public partial class MainWindow : Window
             _boundModel.PropertyChanged += OnModelPropertyChanged;
             _boundModel.CaptureScrollOffset = CaptureScrollOffset;
             _boundModel.RestoreScrollOffset = RestoreScrollOffset;
+            _boundModel.CaptureViewState = CaptureViewState;
+            _boundModel.ApplyViewState = ApplyViewState;
+            _boundModel.Settings.PropertyChanged += OnSettingsPropertyChanged;
 
-            ApplySidebarVisibility(_boundModel.IsSidebarVisible);
+            ApplySidebarVisibility(_boundModel.IsSidebarPresent);
+            ApplySidebarSections();
         }
+    }
+
+    private void OnSettingsPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(ViewModels.SettingsViewModel.ShowExplorerPanel)
+            or nameof(ViewModels.SettingsViewModel.ShowOutlinePanel))
+        {
+            // The column itself is collapsed via IsSidebarPresent on the model.
+            ApplySidebarSections();
+        }
+    }
+
+    // =========================================================== window state
+
+    /// <summary>
+    /// Window bounds, window state and the sidebar splitter width are the parts
+    /// of the session only the window can answer for (SPECIFICATION.md 5.13).
+    /// </summary>
+    private void CaptureViewState(SessionState session)
+    {
+        session.IsMaximized = WindowState == WindowState.Maximized;
+
+        // Only a normal window's bounds are worth remembering: a maximized
+        // one would restore to the size of the screen it happened to be on.
+        if (WindowState == WindowState.Normal)
+        {
+            session.WindowWidth = Width;
+            session.WindowHeight = Height;
+            session.WindowX = Position.X;
+            session.WindowY = Position.Y;
+        }
+
+        var grid = this.FindControl<Grid>("BodyGrid");
+        var column = grid?.ColumnDefinitions.Count > 0 ? grid.ColumnDefinitions[0] : null;
+
+        session.SidebarWidth = column is not null && column.Width.IsAbsolute && column.Width.Value > 0
+            ? column.Width.Value
+            : _lastSidebarWidth;
+    }
+
+    private void ApplyViewState(SessionState session)
+    {
+        if (session.SidebarWidth > 0)
+        {
+            _lastSidebarWidth = session.SidebarWidth;
+            ApplySidebarVisibility(Model?.IsSidebarPresent ?? true);
+        }
+
+        if (session.WindowWidth is > 0 && session.WindowHeight is > 0)
+        {
+            Width = session.WindowWidth.Value;
+            Height = session.WindowHeight.Value;
+        }
+
+        if (session.WindowX is not null && session.WindowY is not null)
+        {
+            var position = new PixelPoint((int)session.WindowX.Value, (int)session.WindowY.Value);
+            if (IsOnAScreen(position))
+            {
+                Position = position;
+            }
+        }
+
+        if (session.IsMaximized)
+        {
+            WindowState = WindowState.Maximized;
+        }
+    }
+
+    /// <summary>
+    /// A saved position can point at a monitor that is no longer attached.
+    /// Restoring it would put the window somewhere the user cannot reach it,
+    /// so an off-screen position is dropped and the default one kept.
+    /// </summary>
+    private bool IsOnAScreen(PixelPoint position) =>
+        Screens.All.Any(screen => screen.Bounds.Contains(position));
+
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        // A clean exit flushes whatever the debounce is still holding.
+        Model?.SaveNow();
+        base.OnClosing(e);
     }
 
     // =============================================================== sidebar
 
     private void OnModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(MainWindowViewModel.IsSidebarVisible) && _boundModel is not null)
+        if (e.PropertyName == nameof(MainWindowViewModel.IsSidebarPresent) && _boundModel is not null)
         {
-            ApplySidebarVisibility(_boundModel.IsSidebarVisible);
+            ApplySidebarVisibility(_boundModel.IsSidebarPresent);
         }
         else if (e.PropertyName == nameof(MainWindowViewModel.SelectedTab))
         {
@@ -137,6 +227,42 @@ public partial class MainWindow : Window
             column.MinWidth = 0;
             column.MaxWidth = 0;
             column.Width = new GridLength(0, GridUnitType.Pixel);
+        }
+    }
+
+    /// <summary>
+    /// Explorer and outline live in star-sized rows, and a star row keeps its
+    /// share of the height when its child is merely hidden. Turning a panel off
+    /// therefore has to zero the row, the same way hiding the sidebar zeroes
+    /// its column.
+    /// </summary>
+    private void ApplySidebarSections()
+    {
+        var settings = Model?.Settings;
+        if (settings is null) return;
+
+        var grid = this.FindControl<Grid>("SidebarGrid");
+        if (grid is null || grid.RowDefinitions.Count < 3) return;
+
+        grid.RowDefinitions[0].Height = settings.ShowExplorerPanel
+            ? new GridLength(1, GridUnitType.Star)
+            : new GridLength(0, GridUnitType.Pixel);
+
+        grid.RowDefinitions[2].Height = settings.ShowOutlinePanel
+            ? new GridLength(1.2, GridUnitType.Star)
+            : new GridLength(0, GridUnitType.Pixel);
+
+        var explorer = this.FindControl<Grid>("ExplorerSection");
+        if (explorer is not null) explorer.IsVisible = settings.ShowExplorerPanel;
+
+        var outline = this.FindControl<Grid>("OutlineSection");
+        if (outline is not null) outline.IsVisible = settings.ShowOutlinePanel;
+
+        // The splitter only means something with a panel on each side of it.
+        var splitter = this.FindControl<GridSplitter>("SidebarSplitter");
+        if (splitter is not null)
+        {
+            splitter.IsVisible = settings.ShowExplorerPanel && settings.ShowOutlinePanel;
         }
     }
 

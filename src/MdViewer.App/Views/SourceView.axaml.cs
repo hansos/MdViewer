@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Media;
 using MdViewer.Rendering;
 
 namespace MdViewer.App.Views;
@@ -17,22 +16,14 @@ public partial class SourceView : UserControl
     public static readonly StyledProperty<double> ZoomFactorProperty =
         AvaloniaProperty.Register<SourceView, double>(nameof(ZoomFactor), 1d);
 
-    private readonly TranslateTransform _gutterOffset = new();
-
     public SourceView()
     {
         InitializeComponent();
 
-        var gutter = this.FindControl<TextBlock>("Gutter");
-        if (gutter is not null)
-        {
-            gutter.RenderTransform = _gutterOffset;
-        }
-
         var scroller = this.FindControl<ScrollViewer>("Scroller");
         if (scroller is not null)
         {
-            scroller.ScrollChanged += (_, _) => _gutterOffset.Y = -scroller.Offset.Y;
+            scroller.ScrollChanged += (_, _) => SyncGutter(scroller.Offset.Y);
         }
 
         ApplyZoomResources();
@@ -46,7 +37,18 @@ public partial class SourceView : UserControl
 
     private ScrollViewer? SourceScroller => this.FindControl<ScrollViewer>("Scroller");
 
+    private ScrollViewer? GutterScrollHost => this.FindControl<ScrollViewer>("GutterScroller");
+
     private SelectableTextBlock? Body => this.FindControl<SelectableTextBlock>("SourceText");
+
+    /// <summary>Keeps the gutter aligned with the document it numbers.</summary>
+    private void SyncGutter(double verticalOffset)
+    {
+        var gutter = GutterScrollHost;
+        if (gutter is null) return;
+
+        gutter.Offset = new Vector(0, verticalOffset);
+    }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
@@ -90,7 +92,7 @@ public partial class SourceView : UserControl
         {
             var rect = body.TextLayout.HitTestTextPosition(Math.Max(0, sourceOffset));
             scroller.Offset = new Vector(scroller.Offset.X, Math.Max(0, rect.Y));
-            _gutterOffset.Y = -scroller.Offset.Y;
+            SyncGutter(scroller.Offset.Y);
             return true;
         }
         catch (Exception)
