@@ -1,0 +1,98 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:MdViewer.App.ViewModels"
+             mc:Ignorable="d"
+             x:Class="MdViewer.App.Views.AboutView"
+             x:DataType="vm:MainWindowViewModel"
+             Background="{DynamicResource ContentBackgroundBrush}">
+
+  <!--
+    About page. Like the settings page it fills the document pane instead of
+    opening a modal dialog, so it scrolls and closes with Esc.
+  -->
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel MaxWidth="720"
+                HorizontalAlignment="Center"
+                Margin="40,32,40,64"
+                Spacing="8">
+
+      <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+        <TextBlock Grid.Column="0" Classes="md-h2" Text="About" />
+        <Button Grid.Column="1"
+                Classes="icon"
+                Content="✕"
+                FontSize="11"
+                VerticalAlignment="Center"
+                Command="{Binding CloseAboutCommand}"
+                ToolTip.Tip="Close about (Esc)" />
+      </Grid>
+
+      <TextBlock Classes="md-h4" Text="{Binding ProductName}" />
+      <TextBlock Classes="md-caption" Text="{Binding VersionDisplay}" />
+      <Button Classes="link"
+              HorizontalAlignment="Left"
+              Command="{Binding OpenWebsiteCommand}"
+              ToolTip.Tip="{Binding WebsiteUrl}">
+        <TextBlock Text="{Binding CompanyName}" TextDecorations="Underline" />
+      </Button>
+      <Button Classes="link"
+              HorizontalAlignment="Left"
+              Command="{Binding OpenRepositoryCommand}"
+              ToolTip.Tip="{Binding RepositoryUrl}">
+        <TextBlock Text="Source code on GitHub" TextDecorations="Underline" />
+      </Button>
+
+      <!-- ======================= Copyright ====================== -->
+      <TextBlock Classes="md-h4" Text="Copyright" Margin="0,16,0,0" />
+      <Border Classes="md-heading-rule" Margin="0,0,0,8" />
+
+      <TextBlock Classes="md-body"
+                 TextWrapping="Wrap"
+                 Text="{Binding CopyrightText}" />
+      <TextBlock Classes="md-body"
+                 TextWrapping="Wrap"
+                 Text="The copyright notice above must be included in all copies or substantial portions of the software." />
+
+      <!-- ======================== License ======================= -->
+      <TextBlock Classes="md-h4" Text="License" Margin="0,16,0,0" />
+      <Border Classes="md-heading-rule" Margin="0,0,0,8" />
+
+      <TextBlock Classes="md-body"
+                 TextWrapping="Wrap"
+                 Text="This application is released under the MIT License. You are free to use, copy, modify, merge, publish, distribute, sublicense and sell copies of the software, subject to the conditions of that license. The full text is in the LICENSE file shipped with the source." />
+
+      <Button Classes="link"
+              HorizontalAlignment="Left"
+              Command="{Binding OpenLicenseCommand}"
+              ToolTip.Tip="{Binding LicenseUrl}">
+        <TextBlock Text="Click here for the full MIT license on GitHub" TextDecorations="Underline" />
+      </Button>
+
+      <TextBlock Classes="md-body" Margin="0,12,0,0" Text="Third-party components" />
+      <TextBlock Classes="md-caption" Text="Avalonia UI — MIT License" />
+      <TextBlock Classes="md-caption" Text="CommunityToolkit.Mvvm — MIT License" />
+      <TextBlock Classes="md-caption" Text="Markdig — BSD 2-Clause License" />
+      <TextBlock Classes="md-caption" Text="Inter font — SIL Open Font License 1.1" />
+
+      <!-- ====================== Disclaimer ====================== -->
+      <TextBlock Classes="md-h4" Text="Disclaimer" Margin="0,16,0,0" />
+      <Border Classes="md-heading-rule" Margin="0,0,0,8" />
+
+      <TextBlock Classes="md-body"
+                 TextWrapping="Wrap"
+                 Text="The software is provided &quot;as is&quot;, without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and non-infringement." />
+      <TextBlock Classes="md-body"
+                 TextWrapping="Wrap"
+                 Text="In no event shall the authors or copyright holders be liable for any claim, damages, data loss or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or the use or other dealings in the software. The user is responsible for keeping backups of any documents opened with the application." />
+
+      <Button Classes="start-action"
+              HorizontalAlignment="Left"
+              Margin="0,24,0,0"
+              Content="Close"
+              Command="{Binding CloseAboutCommand}" />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

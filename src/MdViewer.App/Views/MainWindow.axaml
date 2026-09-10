@@ -115,6 +115,9 @@
             <Button Classes="icon" Content="Open" FontSize="12"
                     Command="{Binding OpenFilesCommand}"
                     ToolTip.Tip="Open file (Ctrl+O)" />
+            <Button Classes="icon" Content="About" FontSize="12"
+                    Command="{Binding ShowAboutCommand}"
+                    ToolTip.Tip="About this application" />
             <Button Classes="icon" Content="🔍" FontSize="12"
                     Command="{Binding ToggleFindBarCommand}"
                     ToolTip.Tip="Find (Ctrl+F)" />
@@ -449,6 +452,9 @@
 
         <!-- Settings page (5.13): fills the pane instead of a modal dialog -->
         <views:SettingsView IsVisible="{Binding IsSettingsVisible}" />
+
+        <!-- About page: fills the pane, same pattern as settings -->
+        <views:AboutView IsVisible="{Binding IsAboutVisible}" />
       </Panel>
     </Grid>
   </DockPanel>

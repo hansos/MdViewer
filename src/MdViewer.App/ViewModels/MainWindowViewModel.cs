@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Reflection;
 using Avalonia;
 using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -100,6 +101,9 @@ public partial class MainWindowViewModel : ViewModelBase
     private bool _isSettingsVisible;
 
     [ObservableProperty]
+    private bool _isAboutVisible;
+
+    [ObservableProperty]
     private string _themeName = "System";
 
     [ObservableProperty]
@@ -154,6 +158,41 @@ public partial class MainWindowViewModel : ViewModelBase
 
     /// <summary>Settings surface (SPECIFICATION.md 5.13).</summary>
     public SettingsViewModel Settings { get; }
+
+    /// <summary>Product name shown on the about page, read from the assembly.</summary>
+    public string ProductName =>
+        AboutAssembly.GetCustomAttribute<AssemblyProductAttribute>()?.Product ?? "KT Markdown Viewer";
+
+    /// <summary>Version string shown on the about page.</summary>
+    public string VersionDisplay
+    {
+        get
+        {
+            var version = AboutAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+                ?? AboutAssembly.GetName().Version?.ToString()
+                ?? "unknown";
+
+            // Informational versions can carry a "+<commit>" suffix; drop it.
+            var plus = version.IndexOf('+');
+            return "Version " + (plus >= 0 ? version[..plus] : version);
+        }
+    }
+
+    public string CompanyName =>
+        AboutAssembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company ?? "Kveldstid AS";
+
+    public string CopyrightText =>
+        AboutAssembly.GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright ?? "Copyright © Kveldstid AS";
+
+    public string WebsiteUrl => "https://kveldstid.com";
+
+    /// <summary>The MIT license text as published with the source on GitHub.</summary>
+    public string LicenseUrl => "https://github.com/hansos/MdViewer/blob/master/LICENSE";
+
+    /// <summary>The public source repository.</summary>
+    public string RepositoryUrl => "https://github.com/hansos/MdViewer";
+
+    private static Assembly AboutAssembly => typeof(MainWindowViewModel).Assembly;
 
     /// <summary>
     /// Supplied by the view: window bounds, window state and the sidebar
@@ -840,10 +879,36 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void ShowSettings() => IsSettingsVisible = true;
+    private void ShowSettings()
+    {
+        IsAboutVisible = false;
+        IsSettingsVisible = true;
+    }
 
     [RelayCommand]
     private void CloseSettings() => IsSettingsVisible = false;
+
+    [RelayCommand]
+    private void ShowAbout()
+    {
+        IsSettingsVisible = false;
+        IsAboutVisible = true;
+    }
+
+    [RelayCommand]
+    private void CloseAbout() => IsAboutVisible = false;
+
+    /// <summary>Opens the Kveldstid AS website from the about page.</summary>
+    [RelayCommand]
+    private void OpenWebsite() => OpenExternal(WebsiteUrl);
+
+    /// <summary>Opens the full MIT license on GitHub from the about page.</summary>
+    [RelayCommand]
+    private void OpenLicense() => OpenExternal(LicenseUrl);
+
+    /// <summary>Opens the GitHub repository from the about page.</summary>
+    [RelayCommand]
+    private void OpenRepository() => OpenExternal(RepositoryUrl);
 
     [RelayCommand]
     private void DismissOverlays()
@@ -858,6 +923,12 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             IsFindBarVisible = false;
             Find.Query = string.Empty;
+            return;
+        }
+
+        if (IsAboutVisible)
+        {
+            IsAboutVisible = false;
             return;
         }
 

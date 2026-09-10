@@ -18,6 +18,7 @@
     <PackageProjectUrl>https://kveldstid.com</PackageProjectUrl>
     <RepositoryUrl>https://kveldstid.com</RepositoryUrl>
     <Copyright>Copyright © Kveldstid AS</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
     <!-- Windows executable icon (Explorer, taskbar, Alt-Tab). Regenerate with
          python design/icon/build-icons.py — never hand-edit the .ico. -->

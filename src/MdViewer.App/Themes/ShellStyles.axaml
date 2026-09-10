@@ -269,6 +269,25 @@
     <Setter Property="Background" Value="{DynamicResource ShellHoverBrush}" />
   </Style>
 
+  <!-- A text button that reads as a hyperlink, used on the about page. -->
+  <Style Selector="Button.link">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource LinkBrush}" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+
+  <Style Selector="Button.link /template/ ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+
+  <Style Selector="Button.link:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+
   <!-- ============================== Quick open ============================== -->
 
   <Style Selector="Border.quick-open">
