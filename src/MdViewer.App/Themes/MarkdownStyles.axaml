@@ -246,7 +246,7 @@
     <Setter Property="LineHeight" Value="{DynamicResource BodyLineHeight}" />
     <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
     <Setter Property="TextWrapping" Value="Wrap" />
-    <Setter Property="Margin" Value="0,0,0,4" />
+    <Setter Property="Margin" Value="0,0,0,0" />
   </Style>
 
   <Style Selector=":is(TextBlock).md-h5">

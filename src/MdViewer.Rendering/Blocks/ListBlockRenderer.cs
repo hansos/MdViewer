@@ -55,6 +55,7 @@ public sealed class ListBlockRenderer : IBlockRenderer
         var content = new StackPanel();
         foreach (var child in context.Renderer.RenderChildren(item, context.Nested()))
         {
+            if (!list.IsLoose) ApplyItemTextStyling(child);
             content.Children.Add(child);
         }
 
@@ -67,6 +68,18 @@ public sealed class ListBlockRenderer : IBlockRenderer
 
         context.SpanRegistrar.Register(grid, item.Span.Start, item.Span.Length);
         return grid;
+    }
+
+    /// <summary>
+    /// Paragraphs inside a tight list item come back with the body class, whose
+    /// margin is paragraph-sized. Swap it for the tighter list item spacing.
+    /// </summary>
+    private static void ApplyItemTextStyling(Control control)
+    {
+        if (control is not TextBlock text) return;
+
+        text.Classes.Remove("md-body");
+        text.Classes.Add("md-list-item");
     }
 
     private static Control BuildMarker(ListBlock list, ListItemBlock item, ref int ordinal)
