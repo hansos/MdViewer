@@ -95,18 +95,35 @@
           </ListBox>
         </ScrollViewer>
 
-        <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="6,0,0,6" Spacing="2">
-          <Button Classes="icon" Content="Open" FontSize="12"
-                  Command="{Binding OpenFilesCommand}"
-                  ToolTip.Tip="Open file (Ctrl+O)" />
-          <Button Classes="icon" Content="🔍" FontSize="12"
-                  Command="{Binding ToggleFindBarCommand}"
-                  ToolTip.Tip="Find (Ctrl+F)" />
-          <Button Classes="icon" FontSize="12"
-                  Content="{Binding ThemeName}"
-                  Command="{Binding CycleThemeCommand}"
-                  ToolTip.Tip="Theme: System → Light → Dark" />
-        </StackPanel>
+        <Grid Grid.Column="2" Margin="6,0,0,6">
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="2">
+            <Button Classes="icon" Content="Open" FontSize="12"
+                    Command="{Binding OpenFilesCommand}"
+                    ToolTip.Tip="Open file (Ctrl+O)" />
+            <Button Classes="icon" Content="🔍" FontSize="12"
+                    Command="{Binding ToggleFindBarCommand}"
+                    ToolTip.Tip="Find (Ctrl+F)" />
+            <Button x:Name="ThemeButton" Classes="icon" FontSize="14"
+                    Content="🌓"
+                    Command="{Binding CycleThemeCommand}"
+                    ToolTip.Tip="Switch theme (System → Light → Dark)" />
+          </StackPanel>
+
+          <Popup IsOpen="{Binding IsThemePopupVisible}"
+                 Placement="Bottom"
+                 PlacementTarget="{Binding #ThemeButton}"
+                 IsLightDismissEnabled="False"
+                 HorizontalOffset="0"
+                 VerticalOffset="4">
+            <Border Background="{DynamicResource ShellChromeBrush}"
+                    BorderBrush="{DynamicResource ShellBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="8,4">
+              <TextBlock Classes="md-caption" Text="{Binding ThemePopupText}" />
+            </Border>
+          </Popup>
+        </Grid>
       </Grid>
     </Border>
 

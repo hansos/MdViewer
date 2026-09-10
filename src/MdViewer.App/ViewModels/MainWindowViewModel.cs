@@ -24,6 +24,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly RecentDocumentList _recent = new();
 
     private CancellationTokenSource? _loadCancellation;
+    private CancellationTokenSource? _themePopupCancellation;
 
     [ObservableProperty]
     private DocumentTabViewModel? _selectedTab;
@@ -45,6 +46,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _themeName = "System";
+
+    [ObservableProperty]
+    private string _themePopupText = string.Empty;
+
+    [ObservableProperty]
+    private bool _isThemePopupVisible;
 
     [ObservableProperty]
     private string _workspaceName = "No folder";
@@ -577,20 +584,52 @@ public partial class MainWindowViewModel : ViewModelBase
         var app = Application.Current;
         if (app is null) return;
 
+        string selectedTheme;
+
         if (app.RequestedThemeVariant == ThemeVariant.Light)
         {
             app.RequestedThemeVariant = ThemeVariant.Dark;
             ThemeName = "Dark";
+            selectedTheme = "Dark";
         }
         else if (app.RequestedThemeVariant == ThemeVariant.Dark)
         {
             app.RequestedThemeVariant = ThemeVariant.Default;
             ThemeName = "System";
+            selectedTheme = "System";
         }
         else
         {
             app.RequestedThemeVariant = ThemeVariant.Light;
             ThemeName = "Light";
+            selectedTheme = "Light";
+        }
+
+        _ = ShowThemePopupAsync(selectedTheme);
+    }
+
+    private async Task ShowThemePopupAsync(string themeName)
+    {
+        _themePopupCancellation?.Cancel();
+
+        var cancellation = new CancellationTokenSource();
+        _themePopupCancellation = cancellation;
+
+        ThemePopupText = $"Theme: {themeName}";
+        IsThemePopupVisible = true;
+
+        try
+        {
+            await Task.Delay(1200, cancellation.Token).ConfigureAwait(true);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        if (_themePopupCancellation == cancellation)
+        {
+            IsThemePopupVisible = false;
         }
     }
 
