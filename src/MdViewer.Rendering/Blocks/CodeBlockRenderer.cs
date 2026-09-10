@@ -22,6 +22,12 @@ public sealed class CodeBlockRenderer : IBlockRenderer
     /// </summary>
     public const int LargeBlockThreshold = 200 * 1024;
 
+    /// <summary>
+    /// Vertical space reserved below scrollable content for the overlaid
+    /// horizontal scrollbar so the last line stays readable.
+    /// </summary>
+    private const double ScrollBarGutter = 16;
+
     public bool CanRender(Block block) => block is CodeBlock;
 
     public Control Render(Block block, RenderContext context)
@@ -38,6 +44,8 @@ public sealed class CodeBlockRenderer : IBlockRenderer
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
             VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
             Content = body,
+            // The horizontal scrollbar floats over the content, so reserve space for it.
+            Padding = new Avalonia.Thickness(0, 0, 0, ScrollBarGutter),
             Margin = new Avalonia.Thickness(14, 10, 14, 12)
         };
 

@@ -22,6 +22,12 @@ namespace MdViewer.Rendering.Blocks;
 /// </summary>
 public sealed class TableBlockRenderer : IBlockRenderer
 {
+    /// <summary>
+    /// Vertical space reserved below scrollable content for the overlaid
+    /// horizontal scrollbar so the last row stays readable.
+    /// </summary>
+    private const double ScrollBarGutter = 16;
+
     public bool CanRender(Block block) => block is Table;
 
     public Control Render(Block block, RenderContext context)
@@ -74,6 +80,8 @@ public sealed class TableBlockRenderer : IBlockRenderer
         {
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
             VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
+            // The horizontal scrollbar floats over the content, so reserve space for it.
+            Padding = new Avalonia.Thickness(0, 0, 0, ScrollBarGutter),
             Content = grid
         };
 
