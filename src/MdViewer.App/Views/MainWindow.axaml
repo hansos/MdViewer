@@ -1,0 +1,394 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:MdViewer.App.ViewModels"
+        xmlns:views="using:MdViewer.App.Views"
+        xmlns:rendering="using:MdViewer.Rendering"
+        mc:Ignorable="d"
+        x:Class="MdViewer.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="MdViewer"
+        Width="1280" Height="860"
+        MinWidth="640" MinHeight="420"
+        Background="{DynamicResource ShellBackgroundBrush}"
+        FontFamily="{DynamicResource BodyFontFamily}">
+
+  <Window.KeyBindings>
+    <KeyBinding Gesture="Ctrl+O" Command="{Binding OpenFilesCommand}" />
+    <KeyBinding Gesture="Ctrl+K" Command="{Binding OpenFolderCommand}" />
+    <KeyBinding Gesture="Ctrl+F" Command="{Binding ToggleFindBarCommand}" />
+    <KeyBinding Gesture="Ctrl+P" Command="{Binding ShowQuickOpenCommand}" />
+    <KeyBinding Gesture="Escape" Command="{Binding DismissOverlaysCommand}" />
+    <KeyBinding Gesture="Ctrl+B" Command="{Binding ToggleSidebarCommand}" />
+    <KeyBinding Gesture="Ctrl+E" Command="{Binding ToggleViewModeCommand}" />
+    <KeyBinding Gesture="Ctrl+R" Command="{Binding ReloadCommand}" />
+    <KeyBinding Gesture="F5" Command="{Binding ReloadCommand}" />
+    <KeyBinding Gesture="Ctrl+W" Command="{Binding CloseTabCommand}" CommandParameter="{Binding SelectedTab}" />
+    <KeyBinding Gesture="Ctrl+Shift+W" Command="{Binding CloseAllTabsCommand}" />
+    <KeyBinding Gesture="Ctrl+OemPlus" Command="{Binding ZoomInCommand}" />
+    <KeyBinding Gesture="Ctrl+OemMinus" Command="{Binding ZoomOutCommand}" />
+    <KeyBinding Gesture="Ctrl+D0" Command="{Binding ZoomResetCommand}" />
+    <KeyBinding Gesture="Ctrl+Shift+F" Command="{Binding ToggleFocusModeCommand}" />
+  </Window.KeyBindings>
+
+  <DockPanel LastChildFill="True">
+
+    <!-- ========================= Top chrome ========================= -->
+    <Border DockPanel.Dock="Top"
+            Background="{DynamicResource ShellChromeBrush}"
+            BorderBrush="{DynamicResource ShellBorderBrush}"
+            BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="Auto,*,Auto" Margin="6,6,6,0">
+
+        <ToggleButton Grid.Column="0"
+                      Classes="icon"
+                      Margin="0,0,6,6"
+                      IsChecked="{Binding IsSidebarVisible, Mode=TwoWay}"
+                      ToolTip.Tip="Toggle sidebar (Ctrl+B)">
+          <Path Width="14" Height="14" Stretch="Uniform"
+                Data="M3 3 H21 V21 H3 Z M9 3 V21"
+                Stroke="{DynamicResource TextSecondaryBrush}"
+                StrokeThickness="1.6"
+                Fill="Transparent" />
+        </ToggleButton>
+
+        <ScrollViewer Grid.Column="1"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Disabled">
+          <ListBox x:Name="TabStrip"
+                   Classes="tab-strip"
+                   ItemsSource="{Binding Tabs}"
+                   SelectedItem="{Binding SelectedTab, Mode=TwoWay}">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:DocumentTabViewModel">
+                <Border Padding="12,7,6,7" MinWidth="120" MaxWidth="220">
+                  <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6">
+
+                    <Ellipse Grid.Column="0"
+                             Width="6" Height="6"
+                             VerticalAlignment="Center"
+                             Fill="{DynamicResource CalloutWarningAccentBrush}"
+                             IsVisible="{Binding IsModifiedOnDisk}"
+                             ToolTip.Tip="Changed on disk" />
+
+                    <TextBlock Grid.Column="1"
+                               Classes="tab-title"
+                               Classes.transient="{Binding IsTransient}"
+                               Text="{Binding Title}"
+                               ToolTip.Tip="{Binding FullPath}" />
+
+                    <Button Grid.Column="2"
+                            Classes="icon"
+                            Padding="3"
+                            Width="18" Height="18"
+                            Content="✕"
+                            FontSize="9"
+                            ToolTip.Tip="Close (Ctrl+W)"
+                            Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).CloseTabCommand}"
+                            CommandParameter="{Binding}" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </ScrollViewer>
+
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="6,0,0,6" Spacing="2">
+          <Button Classes="icon" Content="Open" FontSize="12"
+                  Command="{Binding OpenFilesCommand}"
+                  ToolTip.Tip="Open file (Ctrl+O)" />
+          <Button Classes="icon" Content="🔍" FontSize="12"
+                  Command="{Binding ToggleFindBarCommand}"
+                  ToolTip.Tip="Find (Ctrl+F)" />
+          <Button Classes="icon" FontSize="12"
+                  Content="{Binding ThemeName}"
+                  Command="{Binding CycleThemeCommand}"
+                  ToolTip.Tip="Theme: System → Light → Dark" />
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- ========================= Status bar ========================= -->
+    <Border DockPanel.Dock="Bottom"
+            Background="{DynamicResource ShellChromeBrush}"
+            BorderBrush="{DynamicResource ShellBorderBrush}"
+            BorderThickness="0,1,0,0"
+            Padding="12,4">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16">
+          <TextBlock Classes="status"
+                     Text="{Binding StatusMessage}"
+                     IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+          <TextBlock Classes="status"
+                     Text="{Binding SelectedTab.FullPath}"
+                     IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNullOrEmpty}}" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+          <Border Classes="segmented" Margin="0,0,12,0"
+                  IsVisible="{Binding SelectedTab.HasDocument, FallbackValue=False}">
+            <StackPanel Orientation="Horizontal">
+              <RadioButton Classes="segment"
+                           Content="Preview"
+                           GroupName="ViewMode"
+                           IsChecked="{Binding SelectedTab.IsPreviewMode, Mode=OneWay}"
+                           Command="{Binding ShowPreviewCommand}"
+                           ToolTip.Tip="Rendered document (Ctrl+E toggles)" />
+              <RadioButton Classes="segment"
+                           Content="Raw"
+                           GroupName="ViewMode"
+                           IsChecked="{Binding SelectedTab.IsSourceMode, Mode=OneWay}"
+                           Command="{Binding ShowSourceCommand}"
+                           ToolTip.Tip="Markdown source, read-only (Ctrl+E toggles)" />
+            </StackPanel>
+          </Border>
+
+          <TextBlock Classes="status" Margin="0,0,12,0"
+                     Text="{Binding SelectedTab.WordCount, StringFormat='{}{0:N0} words'}" />
+          <TextBlock Classes="status" Margin="0,0,12,0" Text="{Binding SelectedTab.EncodingDisplay}" />
+          <TextBlock Classes="status" Margin="0,0,12,0" Text="{Binding SelectedTab.LineEndingDisplay}" />
+          <Button Classes="status" Command="{Binding ZoomOutCommand}" Content="−"
+                  ToolTip.Tip="Zoom out (Ctrl+-)" />
+          <Button Classes="status" Command="{Binding ZoomResetCommand}"
+                  Content="{Binding SelectedTab.ZoomDisplay}"
+                  ToolTip.Tip="Reset zoom (Ctrl+0)" />
+          <Button Classes="status" Command="{Binding ZoomInCommand}" Content="+"
+                  ToolTip.Tip="Zoom in (Ctrl++)" />
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- ========================= Body ========================= -->
+    <Grid ColumnDefinitions="Auto,Auto,*">
+
+      <!-- ====================== Sidebar ====================== -->
+      <Border Grid.Column="0"
+              Width="260"
+              Background="{DynamicResource ShellBackgroundBrush}"
+              IsVisible="{Binding IsSidebarVisible}">
+        <Grid RowDefinitions="*,Auto,1.2*">
+
+          <Grid Grid.Row="0" RowDefinitions="Auto,*">
+            <Border Grid.Row="0" Padding="14,10,10,6">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Classes="sidebar-header" Text="EXPLORER" />
+                <TextBlock Grid.Column="1" Classes="sidebar-header"
+                           Text="{Binding WorkspaceName}" Opacity="0.8" />
+              </Grid>
+            </Border>
+
+            <Panel Grid.Row="1">
+              <TreeView x:Name="FileTree"
+                        Classes="sidebar"
+                        ItemsSource="{Binding WorkspaceRoots}">
+                <TreeView.Styles>
+                  <Style Selector="TreeViewItem" x:DataType="vm:FileTreeItemViewModel">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                  </Style>
+                </TreeView.Styles>
+                <TreeView.ItemTemplate>
+                  <TreeDataTemplate ItemsSource="{Binding Children}"
+                                    x:DataType="vm:FileTreeItemViewModel">
+                    <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,1">
+                      <TextBlock Text="{Binding Glyph}" FontSize="11" VerticalAlignment="Center" />
+                      <TextBlock Classes="tree-text"
+                                 Classes.dim="{Binding IsDirectory}"
+                                 Text="{Binding Name}"
+                                 ToolTip.Tip="{Binding FullPath}" />
+                    </StackPanel>
+                  </TreeDataTemplate>
+                </TreeView.ItemTemplate>
+              </TreeView>
+
+              <StackPanel Margin="16,10" Spacing="8"
+                          IsVisible="{Binding !HasWorkspace}">
+                <TextBlock Classes="tree-text dim" TextWrapping="Wrap"
+                           Text="No folder open." />
+                <Button Classes="start-action" Content="Open folder…"
+                        Command="{Binding OpenFolderCommand}" />
+              </StackPanel>
+            </Panel>
+          </Grid>
+
+          <GridSplitter Grid.Row="1" Height="1" Background="{DynamicResource ShellBorderBrush}"
+                        ResizeDirection="Rows" />
+
+          <Grid Grid.Row="2" RowDefinitions="Auto,*">
+            <Border Grid.Row="0" Padding="14,10,10,6">
+              <TextBlock Classes="sidebar-header" Text="OUTLINE" />
+            </Border>
+
+            <Panel Grid.Row="1">
+              <TreeView Classes="sidebar"
+                        ItemsSource="{Binding SelectedTab.Outline}"
+                        SelectedItem="{Binding SelectedOutlineItem, Mode=TwoWay}">
+                <TreeView.Styles>
+                  <Style Selector="TreeViewItem" x:DataType="vm:OutlineItemViewModel">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                  </Style>
+                </TreeView.Styles>
+                <TreeView.ItemTemplate>
+                  <TreeDataTemplate ItemsSource="{Binding Children}"
+                                    x:DataType="vm:OutlineItemViewModel">
+                    <TextBlock Classes="tree-text"
+                               Margin="0,2"
+                               FontWeight="{Binding LevelWeight}"
+                               Text="{Binding Title}" />
+                  </TreeDataTemplate>
+                </TreeView.ItemTemplate>
+              </TreeView>
+
+              <TextBlock Classes="tree-text dim"
+                         Margin="16,8"
+                         TextWrapping="Wrap"
+                         Text="No headings in this document."
+                         IsVisible="{Binding !SelectedTab.HasOutline, FallbackValue=False}" />
+            </Panel>
+          </Grid>
+        </Grid>
+      </Border>
+
+      <GridSplitter Grid.Column="1" Width="1"
+                    Background="{DynamicResource ShellBorderBrush}"
+                    ResizeDirection="Columns"
+                    IsVisible="{Binding IsSidebarVisible}" />
+
+      <!-- ====================== Document pane ====================== -->
+      <Panel Grid.Column="2" Background="{DynamicResource ContentBackgroundBrush}">
+
+        <!-- No tabs open: the start view and its recent documents (5.14) -->
+        <views:StartView IsVisible="{Binding HasNoTabs}" />
+
+        <!-- The rendered document -->
+        <ScrollViewer x:Name="DocumentScroller"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto"
+                      IsVisible="{Binding SelectedTab.ShowsPreview, FallbackValue=False}">
+          <rendering:MarkdownPresenter x:Name="Presenter"
+                                       Document="{Binding SelectedTab.Document}"
+                                       ContentMaxWidth="{DynamicResource ContentMaxWidth}" />
+        </ScrollViewer>
+
+        <!-- Raw source, read-only (5.15) -->
+        <views:SourceView x:Name="Source"
+                          IsVisible="{Binding SelectedTab.ShowsSource, FallbackValue=False}" />
+
+        <!-- Load failure: the tab stays open and explains itself (6.4) -->
+        <StackPanel Margin="40,80"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    MaxWidth="460"
+                    Spacing="10"
+                    IsVisible="{Binding SelectedTab.HasError, FallbackValue=False}">
+          <TextBlock Classes="md-h3" HorizontalAlignment="Center" Text="Could not open this document" />
+          <TextBlock Classes="md-body"
+                     TextAlignment="Center"
+                     Foreground="{DynamicResource TextSecondaryBrush}"
+                     Text="{Binding SelectedTab.LoadError}" />
+          <Button Classes="start-action" HorizontalAlignment="Center"
+                  Content="Try again" Command="{Binding ReloadCommand}" />
+        </StackPanel>
+
+        <TextBlock Classes="md-caption"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Text="Loading…"
+                   IsVisible="{Binding SelectedTab.IsLoading, FallbackValue=False}" />
+
+        <!-- Find bar overlay (5.7): it does not reflow the document -->
+        <Border Classes="find-bar"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="0,0,24,0"
+                IsVisible="{Binding IsFindBarVisible}">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <TextBox Classes="find-input"
+                     Watermark="Find in document"
+                     Text="{Binding Find.Query, Mode=TwoWay}" />
+
+            <TextBlock Classes="status"
+                       MinWidth="72"
+                       Margin="4,0"
+                       Text="{Binding Find.MatchSummary}" />
+
+            <Button Classes="icon" Content="∧" Command="{Binding Find.PreviousMatchCommand}"
+                    ToolTip.Tip="Previous match (Shift+F3)" />
+            <Button Classes="icon" Content="∨" Command="{Binding Find.NextMatchCommand}"
+                    ToolTip.Tip="Next match (F3)" />
+
+            <Border Width="1" Background="{DynamicResource ShellBorderBrush}" Margin="4,2" />
+
+            <ToggleButton Classes="icon" Content="Aa" IsChecked="{Binding Find.MatchCase, Mode=TwoWay}"
+                          ToolTip.Tip="Match case" />
+            <ToggleButton Classes="icon" Content="ab" IsChecked="{Binding Find.WholeWord, Mode=TwoWay}"
+                          ToolTip.Tip="Whole word" />
+            <ToggleButton Classes="icon" Content=".*" IsChecked="{Binding Find.UseRegex, Mode=TwoWay}"
+                          ToolTip.Tip="Regular expression" />
+
+            <Button Classes="icon" Content="✕" FontSize="10"
+                    Command="{Binding CloseFindBarCommand}"
+                    ToolTip.Tip="Close (Esc)" />
+          </StackPanel>
+        </Border>
+
+        <!-- Quick-open palette (5.9 / 5.14) -->
+        <Border Classes="quick-open"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                Margin="0,64,0,0"
+                IsVisible="{Binding IsQuickOpenVisible}">
+          <StackPanel Spacing="2">
+
+            <TextBox Classes="quick-open-input"
+                     Watermark="Go to file…"
+                     Text="{Binding QuickOpen.Query, Mode=TwoWay}">
+              <TextBox.KeyBindings>
+                <KeyBinding Gesture="Enter" Command="{Binding AcceptQuickOpenCommand}" />
+              </TextBox.KeyBindings>
+            </TextBox>
+
+            <Grid ColumnDefinitions="*,Auto" Margin="4,8,4,0">
+              <TextBlock Grid.Column="0" Classes="sidebar-header"
+                         Text="{Binding QuickOpen.HeaderText}" />
+              <TextBlock Grid.Column="1" Classes="md-caption"
+                         Text="Enter to open · Esc to dismiss" />
+            </Grid>
+
+            <ListBox Classes="quick-open-results"
+                     ItemsSource="{Binding QuickOpen.Results}"
+                     SelectedItem="{Binding QuickOpen.SelectedResult, Mode=TwoWay}">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:QuickOpenResultViewModel">
+                  <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <StackPanel Grid.Column="0" Spacing="2">
+                      <TextBlock Classes="quick-open-title" Text="{Binding Title}" />
+                      <TextBlock Classes="quick-open-path" Text="{Binding Directory}" />
+                    </StackPanel>
+                    <Border Grid.Column="1" Classes="recent-badge"
+                            IsVisible="{Binding IsRecent}">
+                      <TextBlock Text="RECENT" />
+                    </Border>
+                  </Grid>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+
+            <TextBlock Classes="md-caption"
+                       Margin="10,10,10,6"
+                       IsVisible="{Binding !QuickOpen.HasResults}"
+                       Text="No matching file. Open a folder to build the index." />
+
+            <StackPanel Orientation="Horizontal" Spacing="6"
+                        HorizontalAlignment="Right" Margin="0,6,0,0">
+              <Button Classes="start-action" Content="Open"
+                      Command="{Binding AcceptQuickOpenCommand}" />
+              <Button Classes="start-action" Content="Cancel"
+                      Command="{Binding CloseQuickOpenCommand}" />
+            </StackPanel>
+
+          </StackPanel>
+        </Border>
+      </Panel>
+    </Grid>
+  </DockPanel>
+</Window>

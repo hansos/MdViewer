@@ -1,0 +1,22 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MdViewer.App.App"
+             RequestedThemeVariant="Default">
+
+  <!-- "Default" follows the OS preference (SPECIFICATION.md 5.11). -->
+
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="avares://MdViewer/Themes/Tokens.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
+
+  <Application.Styles>
+    <FluentTheme />
+    <StyleInclude Source="avares://MdViewer/Themes/ShellStyles.axaml" />
+    <StyleInclude Source="avares://MdViewer/Themes/MarkdownStyles.axaml" />
+  </Application.Styles>
+
+</Application>

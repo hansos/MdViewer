@@ -1,0 +1,306 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="MdViewer.App.Views.SampleDocumentView">
+
+  <!--
+    Hand-authored stand-in for rendered Markdown. See the code-behind comment.
+    Every colour, size and spacing value comes from Themes/Tokens.axaml, so
+    what is being evaluated here is the token set as much as the layout.
+  -->
+
+  <Border HorizontalAlignment="Stretch" Padding="48,36,48,80">
+    <StackPanel MaxWidth="{DynamicResource ContentMaxWidth}"
+                HorizontalAlignment="Center">
+
+      <!-- ==================== Front matter card (5.12) ==================== -->
+      <Expander Margin="0,0,0,28"
+                IsExpanded="False"
+                HorizontalAlignment="Stretch"
+                Background="{DynamicResource ShellChromeBrush}"
+                BorderBrush="{DynamicResource ContentBorderBrush}">
+        <Expander.Header>
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <TextBlock Classes="md-caption" Text="FRONT MATTER" VerticalAlignment="Center" />
+            <TextBlock Classes="md-caption"
+                       Text="title, author, date, tags"
+                       Opacity="0.7" VerticalAlignment="Center" />
+          </StackPanel>
+        </Expander.Header>
+        <Grid ColumnDefinitions="120,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="4,8">
+          <TextBlock Grid.Row="0" Grid.Column="0" Classes="md-caption" Text="title" Margin="0,0,0,6" />
+          <TextBlock Grid.Row="0" Grid.Column="1" Classes="md-table-text" Text="MdViewer — Specification" Margin="0,0,0,6" />
+          <TextBlock Grid.Row="1" Grid.Column="0" Classes="md-caption" Text="author" Margin="0,0,0,6" />
+          <TextBlock Grid.Row="1" Grid.Column="1" Classes="md-table-text" Text="Hans Olav Sorteberg" Margin="0,0,0,6" />
+          <TextBlock Grid.Row="2" Grid.Column="0" Classes="md-caption" Text="date" Margin="0,0,0,6" />
+          <TextBlock Grid.Row="2" Grid.Column="1" Classes="md-table-text" Text="2026-09-10" Margin="0,0,0,6" />
+          <TextBlock Grid.Row="3" Grid.Column="0" Classes="md-caption" Text="tags" />
+          <TextBlock Grid.Row="3" Grid.Column="1" Classes="md-table-text" Text="avalonia, markdown, desktop" />
+        </Grid>
+      </Expander>
+
+      <!-- ============================== H1 ============================== -->
+      <Border Classes="md-heading-rule">
+        <SelectableTextBlock Classes="md-h1" Text="Rendering pipeline" />
+      </Border>
+
+      <!-- ========================= Paragraph ========================= -->
+      <SelectableTextBlock Classes="md-body">
+        <SelectableTextBlock.Inlines>
+          <Run Text="This page is written by hand. No parser has run: it exists so the visual language can be judged before " />
+          <Run Text="MdViewer.Rendering"
+               FontFamily="{DynamicResource MonoFontFamily}"
+               FontSize="13.5"
+               Background="{DynamicResource CodeInlineBackgroundBrush}"
+               Foreground="{DynamicResource CodeInlineForegroundBrush}" />
+          <Run Text=" is written. Body copy sits on a " />
+          <Run Text="measured column" FontWeight="SemiBold" />
+          <Run Text=" of 900 px, because " />
+          <Run Text="long lines hurt reading" FontStyle="Italic" />
+          <Run Text=" — a setting will allow full width. Links look like " />
+          <Run Text="this one"
+               Foreground="{DynamicResource LinkBrush}"
+               TextDecorations="Underline" />
+          <Run Text=", and a link whose target is missing looks like " />
+          <Run Text="this one"
+               Foreground="{DynamicResource LinkBrokenBrush}" />
+          <Run Text=" instead, so a broken reference never masquerades as a working one." />
+        </SelectableTextBlock.Inlines>
+      </SelectableTextBlock>
+
+      <!-- ============================== H2 ============================== -->
+      <Border Classes="md-heading-rule">
+        <SelectableTextBlock Classes="md-h2" Text="Blocks" />
+      </Border>
+
+      <!-- =========================== Blockquote =========================== -->
+      <Border Classes="md-quote">
+        <SelectableTextBlock Classes="md-body"
+                             Margin="0,10,0,10"
+                             Text="A quote nests, carries its own foreground token, and keeps the left accent bar at every depth." />
+      </Border>
+
+      <!-- ============================ Callouts ============================ -->
+      <Border Classes="md-callout note">
+        <StackPanel>
+          <TextBlock Classes="md-callout-title"
+                     Foreground="{DynamicResource CalloutNoteAccentBrush}"
+                     Text="ⓘ  Note" />
+          <SelectableTextBlock Classes="md-body"
+                               Margin="0,0,0,8"
+                               Text="GitHub alerts and ::: containers both land on this renderer, so the two syntaxes look identical in the output." />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="md-callout warning">
+        <StackPanel>
+          <TextBlock Classes="md-callout-title"
+                     Foreground="{DynamicResource CalloutWarningAccentBrush}"
+                     Text="⚠  Warning" />
+          <SelectableTextBlock Classes="md-body"
+                               Margin="0,0,0,8"
+                               Text="Remote images are not fetched without consent, and raw HTML is escaped rather than rendered. Both are deliberate, and both are visible to the reader." />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="md-callout tip">
+        <StackPanel>
+          <TextBlock Classes="md-callout-title"
+                     Foreground="{DynamicResource CalloutTipAccentBrush}"
+                     Text="✓  Tip" />
+          <SelectableTextBlock Classes="md-body"
+                               Margin="0,0,0,8"
+                               Text="Press Ctrl+B to collapse the sidebar, Ctrl+F for the find bar, and the theme button in the top right to cycle System → Light → Dark." />
+        </StackPanel>
+      </Border>
+
+      <!-- ============================= H3 ============================= -->
+      <SelectableTextBlock Classes="md-h3" Text="Lists" />
+
+      <!-- Bullet list -->
+      <Grid ColumnDefinitions="24,*" RowDefinitions="Auto,Auto,Auto" Margin="0,0,0,16">
+        <TextBlock Grid.Row="0" Grid.Column="0" Classes="md-list-marker" Text="•" Margin="0,0,10,0" />
+        <SelectableTextBlock Grid.Row="0" Grid.Column="1" Classes="md-list-item"
+                             Text="Markers sit in their own column, so a wrapped item stays aligned under its first line instead of sliding back under the bullet." />
+        <TextBlock Grid.Row="1" Grid.Column="0" Classes="md-list-marker" Text="•" Margin="0,0,10,0" />
+        <SelectableTextBlock Grid.Row="1" Grid.Column="1" Classes="md-list-item"
+                             Text="Nesting adds a Grid per level." />
+        <TextBlock Grid.Row="2" Grid.Column="0" Classes="md-list-marker" Text="•" Margin="0,0,10,0" />
+        <SelectableTextBlock Grid.Row="2" Grid.Column="1" Classes="md-list-item"
+                             Text="Multi-paragraph items keep the marker on the first paragraph only." />
+      </Grid>
+
+      <!-- Ordered list -->
+      <Grid ColumnDefinitions="24,*" RowDefinitions="Auto,Auto,Auto" Margin="0,0,0,16">
+        <TextBlock Grid.Row="0" Grid.Column="0" Classes="md-list-marker" Text="1." Margin="0,0,10,0" />
+        <SelectableTextBlock Grid.Row="0" Grid.Column="1" Classes="md-list-item" Text="Read and detect encoding." />
+        <TextBlock Grid.Row="1" Grid.Column="0" Classes="md-list-marker" Text="2." Margin="0,0,10,0" />
+        <SelectableTextBlock Grid.Row="1" Grid.Column="1" Classes="md-list-item" Text="Parse on a thread-pool thread." />
+        <TextBlock Grid.Row="2" Grid.Column="0" Classes="md-list-marker" Text="3." Margin="0,0,10,0" />
+        <SelectableTextBlock Grid.Row="2" Grid.Column="1" Classes="md-list-item" Text="Build visuals lazily on the UI thread." />
+      </Grid>
+
+      <!-- Task list -->
+      <Grid ColumnDefinitions="24,*" RowDefinitions="Auto,Auto,Auto" Margin="0,0,0,18">
+        <TextBlock Grid.Row="0" Grid.Column="0" Classes="md-list-marker" Text="☑" Margin="0,0,10,0"
+                   Foreground="{DynamicResource CalloutTipAccentBrush}" />
+        <SelectableTextBlock Grid.Row="0" Grid.Column="1" Classes="md-list-item" Text="Theme tokens defined" />
+        <TextBlock Grid.Row="1" Grid.Column="0" Classes="md-list-marker" Text="☑" Margin="0,0,10,0"
+                   Foreground="{DynamicResource CalloutTipAccentBrush}" />
+        <SelectableTextBlock Grid.Row="1" Grid.Column="1" Classes="md-list-item" Text="Shell laid out" />
+        <TextBlock Grid.Row="2" Grid.Column="0" Classes="md-list-marker" Text="☐" Margin="0,0,10,0" />
+        <SelectableTextBlock Grid.Row="2" Grid.Column="1" Classes="md-list-item"
+                             Text="Block renderers implemented (M2) — checkboxes are non-interactive in a read-only viewer" />
+      </Grid>
+
+      <!-- ============================ Code block ============================ -->
+      <SelectableTextBlock Classes="md-h3" Text="Code" />
+
+      <Border Classes="md-code-block">
+        <StackPanel>
+          <Border Classes="md-code-header">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Grid.Column="0" Classes="md-code-lang" Text="csharp" />
+              <Button Grid.Column="1" Classes="icon" Padding="6,2" FontSize="11"
+                      Content="Copy"
+                      ToolTip.Tip="Copies the raw source, not the highlighted text" />
+            </Grid>
+          </Border>
+
+          <Grid ColumnDefinitions="Auto,*" Margin="0,10,14,12">
+            <!-- Line numbers, off by default; shown here to be evaluated -->
+            <TextBlock Grid.Column="0" Classes="md-line-number" Margin="14,0,14,0">
+              <Run Text="1" /><LineBreak />
+              <Run Text="2" /><LineBreak />
+              <Run Text="3" /><LineBreak />
+              <Run Text="4" /><LineBreak />
+              <Run Text="5" /><LineBreak />
+              <Run Text="6" /><LineBreak />
+              <Run Text="7" />
+            </TextBlock>
+
+            <SelectableTextBlock Grid.Column="1" Classes="md-code">
+              <SelectableTextBlock.Inlines>
+                <Run Text="public interface " Foreground="{DynamicResource SyntaxKeywordBrush}" />
+                <Run Text="IBlockRenderer" Foreground="{DynamicResource SyntaxTypeBrush}" />
+                <LineBreak />
+                <Run Text="{}{" Foreground="{DynamicResource SyntaxOperatorBrush}" />
+                <LineBreak />
+                <Run Text="    // Resolved through a registry, never switched on type" Foreground="{DynamicResource SyntaxCommentBrush}" />
+                <LineBreak />
+                <Run Text="    bool " Foreground="{DynamicResource SyntaxKeywordBrush}" />
+                <Run Text="CanRender" Foreground="{DynamicResource SyntaxFunctionBrush}" />
+                <Run Text="(Block block);" Foreground="{DynamicResource SyntaxOperatorBrush}" />
+                <LineBreak />
+                <LineBreak />
+                <Run Text="    Control " Foreground="{DynamicResource SyntaxTypeBrush}" />
+                <Run Text="Render" Foreground="{DynamicResource SyntaxFunctionBrush}" />
+                <Run Text="(Block block, RenderContext context);" Foreground="{DynamicResource SyntaxOperatorBrush}" />
+                <LineBreak />
+                <Run Text="}" Foreground="{DynamicResource SyntaxOperatorBrush}" />
+              </SelectableTextBlock.Inlines>
+            </SelectableTextBlock>
+          </Grid>
+        </StackPanel>
+      </Border>
+
+      <SelectableTextBlock Classes="md-body">
+        <SelectableTextBlock.Inlines>
+          <Run Text="The colours above are placeholders standing in for TextMate scopes. In M3 they come from a real grammar via " />
+          <Run Text="TextMateSharp"
+               FontFamily="{DynamicResource MonoFontFamily}"
+               FontSize="13.5"
+               Background="{DynamicResource CodeInlineBackgroundBrush}"
+               Foreground="{DynamicResource CodeInlineForegroundBrush}" />
+          <Run Text=", tokenized off the UI thread, and each scope bucket maps to one of these seven tokens." />
+        </SelectableTextBlock.Inlines>
+      </SelectableTextBlock>
+
+      <!-- ============================== Table ============================== -->
+      <SelectableTextBlock Classes="md-h3" Text="Tables" />
+
+      <Border Classes="md-table">
+        <Grid ColumnDefinitions="1.4*,2.6*,0.9*" RowDefinitions="Auto,Auto,Auto,Auto">
+
+          <!-- Header row -->
+          <Border Grid.Row="0" Grid.Column="0" Classes="md-table-cell md-table-header">
+            <TextBlock Classes="md-table-text header" Text="Package" />
+          </Border>
+          <Border Grid.Row="0" Grid.Column="1" Classes="md-table-cell md-table-header">
+            <TextBlock Classes="md-table-text header" Text="Role" />
+          </Border>
+          <Border Grid.Row="0" Grid.Column="2" Classes="md-table-cell md-table-header" BorderThickness="0,0,0,1">
+            <TextBlock Classes="md-table-text header" Text="Version" TextAlignment="Right" />
+          </Border>
+
+          <Border Grid.Row="1" Grid.Column="0" Classes="md-table-cell">
+            <TextBlock Classes="md-table-text" Text="Avalonia" />
+          </Border>
+          <Border Grid.Row="1" Grid.Column="1" Classes="md-table-cell">
+            <TextBlock Classes="md-table-text" Text="UI framework, targets .NET 10" />
+          </Border>
+          <Border Grid.Row="1" Grid.Column="2" Classes="md-table-cell" BorderThickness="0,0,0,1">
+            <TextBlock Classes="md-table-text" Text="12.1.2" TextAlignment="Right" />
+          </Border>
+
+          <Border Grid.Row="2" Grid.Column="0" Classes="md-table-cell" Background="{DynamicResource TableRowAltBackgroundBrush}">
+            <TextBlock Classes="md-table-text" Text="Markdig" />
+          </Border>
+          <Border Grid.Row="2" Grid.Column="1" Classes="md-table-cell" Background="{DynamicResource TableRowAltBackgroundBrush}">
+            <TextBlock Classes="md-table-text" Text="Parser — source spans on every node" />
+          </Border>
+          <Border Grid.Row="2" Grid.Column="2" Classes="md-table-cell" BorderThickness="0,0,0,1" Background="{DynamicResource TableRowAltBackgroundBrush}">
+            <TextBlock Classes="md-table-text" Text="1.3.2" TextAlignment="Right" />
+          </Border>
+
+          <Border Grid.Row="3" Grid.Column="0" Classes="md-table-cell" BorderThickness="0,0,1,0">
+            <TextBlock Classes="md-table-text" Text="TextMateSharp" />
+          </Border>
+          <Border Grid.Row="3" Grid.Column="1" Classes="md-table-cell" BorderThickness="0,0,1,0">
+            <TextBlock Classes="md-table-text" Text="Grammars and themes for code blocks" />
+          </Border>
+          <Border Grid.Row="3" Grid.Column="2" Classes="md-table-cell" BorderThickness="0">
+            <TextBlock Classes="md-table-text" Text="2.0.4" TextAlignment="Right" />
+          </Border>
+        </Grid>
+      </Border>
+
+      <!-- ========================= Thematic break ========================= -->
+      <Border Classes="md-rule" />
+
+      <!-- ========================= Image placeholder ========================= -->
+      <SelectableTextBlock Classes="md-h3" Text="Images" />
+
+      <Border Background="{DynamicResource CodeBlockBackgroundBrush}"
+              BorderBrush="{DynamicResource CodeBlockBorderBrush}"
+              BorderThickness="1"
+              CornerRadius="6"
+              Height="150"
+              Margin="0,0,0,6">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="6">
+          <TextBlock Classes="md-caption" HorizontalAlignment="Center"
+                     Text="Remote image not loaded" />
+          <TextBlock Classes="md-caption" HorizontalAlignment="Center" Opacity="0.75"
+                     Text="alt: rendering pipeline diagram" />
+          <Button Classes="icon" HorizontalAlignment="Center" Padding="10,4" FontSize="12"
+                  Content="Load images for this document" />
+        </StackPanel>
+      </Border>
+      <TextBlock Classes="md-caption" Margin="0,0,0,24"
+                 Text="A Markdown file should not phone home when you open it, so remote images are opt-in per document." />
+
+      <!-- ============================= Footnote ============================= -->
+      <Border Classes="md-rule" />
+      <SelectableTextBlock Classes="md-caption" Margin="0,0,0,4">
+        <SelectableTextBlock.Inlines>
+          <Run Text="1. " Foreground="{DynamicResource LinkBrush}" />
+          <Run Text="Footnotes render at the end of the document with a back-link to their reference. " />
+          <Run Text="↩" Foreground="{DynamicResource LinkBrush}" />
+        </SelectableTextBlock.Inlines>
+      </SelectableTextBlock>
+
+    </StackPanel>
+  </Border>
+</UserControl>

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    MdViewer.Core deliberately has NO Avalonia reference.
+    Everything here must be unit-testable without a UI thread.
+    See SPECIFICATION.md section 3.
+  -->
+
+  <ItemGroup>
+    <PackageReference Include="Markdig" Version="$(MarkdigVersion)" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="$(CommunityToolkitMvvmVersion)" />
+  </ItemGroup>
+
+</Project>

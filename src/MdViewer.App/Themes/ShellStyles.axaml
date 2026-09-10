@@ -1,0 +1,408 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Application chrome: tab strip, sidebar, toolbars, status bar. -->
+
+  <!-- ============================= Icon button ============================= -->
+
+  <Style Selector="Button.icon">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="6" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="13" />
+  </Style>
+
+  <Style Selector="Button.icon:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource ShellHoverBrush}" />
+  </Style>
+
+  <Style Selector="Button.icon:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource ShellBorderBrush}" />
+  </Style>
+
+  <Style Selector="Button.icon Path">
+    <Setter Property="Fill" Value="{DynamicResource TextSecondaryBrush}" />
+  </Style>
+
+  <!-- Toggle variant, for sidebar / find / theme toggles -->
+
+  <Style Selector="ToggleButton.icon">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="6" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="13" />
+  </Style>
+
+  <Style Selector="ToggleButton.icon:checked /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource AccentSubtleBrush}" />
+  </Style>
+
+  <Style Selector="ToggleButton.icon:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource ShellHoverBrush}" />
+  </Style>
+
+  <!-- ============================== Tab strip ============================== -->
+
+  <Style Selector="ListBox.tab-strip">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <StackPanel Orientation="Horizontal" />
+      </ItemsPanelTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="ListBox.tab-strip ListBoxItem">
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="0,0,1,0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="CornerRadius" Value="6,6,0,0" />
+  </Style>
+
+  <Style Selector="ListBox.tab-strip ListBoxItem:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource ShellHoverBrush}" />
+  </Style>
+
+  <Style Selector="ListBox.tab-strip ListBoxItem:selected /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource ShellSelectedBrush}" />
+  </Style>
+
+  <Style Selector="ListBox.tab-strip ListBoxItem:selected:focus /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource ShellSelectedBrush}" />
+  </Style>
+
+  <Style Selector="ListBox.tab-strip ListBoxItem:selected:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource ShellSelectedBrush}" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).tab-title">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+  </Style>
+
+  <Style Selector="ListBoxItem:selected :is(TextBlock).tab-title">
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+  </Style>
+
+  <!-- Transient tabs (single-click preview, SPECIFICATION.md 5.9) are italic -->
+  <Style Selector=":is(TextBlock).tab-title.transient">
+    <Setter Property="FontStyle" Value="Italic" />
+  </Style>
+
+  <!-- ============================== Sidebar ============================== -->
+
+  <Style Selector=":is(TextBlock).sidebar-header">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="TreeView.sidebar">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="4,2,4,8" />
+
+    <!--
+      Fluent's scroll bars auto-hide, which means they are drawn OVER the
+      content instead of taking layout space. In a 260 px sidebar that puts the
+      bar straight through the end of every file name. Turning auto-hide off
+      makes the bar participate in layout, so the tree measures against the
+      space that is actually left.
+    -->
+    <Setter Property="ScrollViewer.AllowAutoHide" Value="False" />
+
+    <!--
+      Horizontal scrolling off: in a narrow sidebar a long or deeply nested
+      name should ellipsize in place, not slide the whole tree sideways.
+    -->
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+  </Style>
+
+  <!--
+    The attached setter above only reaches the template's ScrollViewer if the
+    control template forwards it. This selector sets it on the ScrollViewer
+    itself, so the behaviour does not depend on that.
+  -->
+  <Style Selector="TreeView.sidebar /template/ ScrollViewer">
+    <Setter Property="AllowAutoHide" Value="False" />
+    <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+  </Style>
+
+  <Style Selector="TreeView.sidebar TreeViewItem">
+    <Setter Property="MinHeight" Value="0" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).tree-text">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+
+    <!--
+      Insurance: if a build still overlays the bar, this keeps the last few
+      characters clear of it rather than under it.
+    -->
+    <Setter Property="Margin" Value="0,0,6,0" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).tree-text.dim">
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+  </Style>
+
+  <!-- ============================== Find bar ============================== -->
+
+  <Style Selector="Border.find-bar">
+    <Setter Property="Background" Value="{DynamicResource ShellChromeBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ShellBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="0,0,6,6" />
+    <Setter Property="Padding" Value="8,6" />
+    <Setter Property="BoxShadow" Value="0 4 14 0 #22000000" />
+  </Style>
+
+  <Style Selector="TextBox.find-input">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="MinHeight" Value="26" />
+    <Setter Property="Padding" Value="8,3" />
+    <Setter Property="Width" Value="240" />
+  </Style>
+
+  <!-- ============================= Status bar ============================= -->
+
+  <Style Selector=":is(TextBlock).status">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="11.5" />
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="Button.status">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="8,2" />
+    <Setter Property="CornerRadius" Value="3" />
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="11.5" />
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+  </Style>
+
+  <Style Selector="Button.status:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource ShellHoverBrush}" />
+  </Style>
+
+  <!-- ===================== Start view / recent documents ===================== -->
+
+  <Style Selector=":is(TextBlock).start-title">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="28" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource HeadingBrush}" />
+  </Style>
+
+  <Style Selector="Button.recent-card">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ContentBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MediumCornerRadius}" />
+    <Setter Property="Padding" Value="16,12" />
+    <Setter Property="Margin" Value="0,0,0,8" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+
+  <Style Selector="Button.recent-card:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource ShellHoverBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+  </Style>
+
+  <Style Selector="Button.recent-card:disabled">
+    <Setter Property="Opacity" Value="0.5" />
+    <Setter Property="Cursor" Value="Arrow" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).recent-title">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="14.5" />
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).recent-path">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="11.5" />
+    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).recent-age">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="11.5" />
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+  </Style>
+
+  <Style Selector="Button.start-action">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ContentBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}" />
+    <Setter Property="Padding" Value="12,6" />
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+  </Style>
+
+  <Style Selector="Button.start-action:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource ShellHoverBrush}" />
+  </Style>
+
+  <!-- ============================== Quick open ============================== -->
+
+  <Style Selector="Border.quick-open">
+    <Setter Property="Background" Value="{DynamicResource ShellChromeBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ShellBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MediumCornerRadius}" />
+    <Setter Property="Padding" Value="10" />
+    <Setter Property="Width" Value="560" />
+    <Setter Property="BoxShadow" Value="0 12 32 0 #33000000" />
+  </Style>
+
+  <Style Selector="TextBox.quick-open-input">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="15" />
+    <Setter Property="MinHeight" Value="34" />
+    <Setter Property="Padding" Value="10,5" />
+  </Style>
+
+  <Style Selector="ListBox.quick-open-results">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0,6,0,0" />
+    <Setter Property="MaxHeight" Value="320" />
+    <Setter Property="ScrollViewer.AllowAutoHide" Value="False" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+  </Style>
+
+  <!-- Same overlay problem as the sidebar tree; same fix. -->
+  <Style Selector="ListBox.quick-open-results /template/ ScrollViewer">
+    <Setter Property="AllowAutoHide" Value="False" />
+    <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+  </Style>
+
+  <Style Selector="ListBox.quick-open-results ListBoxItem">
+    <Setter Property="Padding" Value="10,7" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).quick-open-title">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="13.5" />
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).quick-open-path">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+  </Style>
+
+  <Style Selector="Border.recent-badge">
+    <Setter Property="Background" Value="{DynamicResource AccentSubtleBrush}" />
+    <Setter Property="CornerRadius" Value="3" />
+    <Setter Property="Padding" Value="5,1" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="Border.recent-badge :is(TextBlock)">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="10" />
+    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+  </Style>
+
+  <!-- ==================== Segmented control (view mode) ==================== -->
+
+  <Style Selector="Border.segmented">
+    <Setter Property="BorderBrush" Value="{DynamicResource ShellBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <!--
+    A RadioButton with the bullet stripped: the pair reads as one control with
+    two states, which is what a mode switch is. Using RadioButtons rather than
+    two ToggleButtons keeps the mutual exclusion in the control rather than in
+    the view model.
+  -->
+  <Style Selector="RadioButton.segment">
+    <Setter Property="Padding" Value="10,2" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="11.5" />
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="PART_Segment"
+                Background="{TemplateBinding Background}"
+                Padding="{TemplateBinding Padding}">
+          <ContentPresenter Content="{TemplateBinding Content}"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="RadioButton.segment:pointerover /template/ Border#PART_Segment">
+    <Setter Property="Background" Value="{DynamicResource ShellHoverBrush}" />
+  </Style>
+
+  <Style Selector="RadioButton.segment:checked /template/ Border#PART_Segment">
+    <Setter Property="Background" Value="{DynamicResource AccentSubtleBrush}" />
+  </Style>
+
+  <Style Selector="RadioButton.segment:checked">
+    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <!-- ========================= Source (raw) view ========================= -->
+
+  <Style Selector="Border.source-gutter">
+    <Setter Property="Background" Value="{DynamicResource CodeBlockHeaderBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource CodeBlockBorderBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,1,0" />
+    <Setter Property="Padding" Value="14,20,10,20" />
+    <Setter Property="MinWidth" Value="52" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).source-body">
+    <Setter Property="Padding" Value="16,20,32,60" />
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+  </Style>
+
+</Styles>

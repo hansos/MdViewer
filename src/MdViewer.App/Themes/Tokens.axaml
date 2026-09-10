@@ -1,0 +1,200 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!--
+    Semantic theme tokens (SPECIFICATION.md 5.11).
+
+    Every renderer and every shell control consumes these keys and never a
+    literal colour. Adding a theme means adding one dictionary below, not
+    touching a renderer. Contrast targets: 4.5:1 body text, 3:1 large text
+    and UI borders, in both variants (SPECIFICATION.md 6.3).
+  -->
+
+  <ResourceDictionary.ThemeDictionaries>
+
+    <!-- ================================ LIGHT ================================ -->
+    <ResourceDictionary x:Key="Light">
+
+      <!-- Shell surfaces -->
+      <Color x:Key="ShellBackgroundColor">#F3F4F6</Color>
+      <Color x:Key="ShellChromeColor">#EAECF0</Color>
+      <Color x:Key="ShellBorderColor">#DDE1E6</Color>
+      <Color x:Key="ShellHoverColor">#E1E4E9</Color>
+      <Color x:Key="ShellSelectedColor">#FFFFFF</Color>
+
+      <SolidColorBrush x:Key="ShellBackgroundBrush" Color="#F3F4F6" />
+      <SolidColorBrush x:Key="ShellChromeBrush" Color="#EAECF0" />
+      <SolidColorBrush x:Key="ShellBorderBrush" Color="#DDE1E6" />
+      <SolidColorBrush x:Key="ShellHoverBrush" Color="#E1E4E9" />
+      <SolidColorBrush x:Key="ShellSelectedBrush" Color="#FFFFFF" />
+
+      <!-- Content surface: the page the document sits on -->
+      <SolidColorBrush x:Key="ContentBackgroundBrush" Color="#FFFFFF" />
+      <SolidColorBrush x:Key="ContentBorderBrush" Color="#E5E8EC" />
+
+      <!-- Text -->
+      <SolidColorBrush x:Key="TextPrimaryBrush" Color="#1A1D21" />
+      <SolidColorBrush x:Key="TextSecondaryBrush" Color="#5C636E" />
+      <SolidColorBrush x:Key="TextMutedBrush" Color="#868D97" />
+      <SolidColorBrush x:Key="TextInvertedBrush" Color="#FFFFFF" />
+
+      <!-- Accent -->
+      <SolidColorBrush x:Key="AccentBrush" Color="#2563C9" />
+      <SolidColorBrush x:Key="AccentSubtleBrush" Color="#E8F0FD" />
+
+      <!-- Markdown: headings -->
+      <SolidColorBrush x:Key="HeadingBrush" Color="#0F1114" />
+      <SolidColorBrush x:Key="HeadingRuleBrush" Color="#E5E8EC" />
+      <SolidColorBrush x:Key="AnchorGlyphBrush" Color="#A6ADB6" />
+
+      <!-- Markdown: links -->
+      <SolidColorBrush x:Key="LinkBrush" Color="#0B5ED0" />
+      <SolidColorBrush x:Key="LinkHoverBrush" Color="#0847A3" />
+      <SolidColorBrush x:Key="LinkBrokenBrush" Color="#9AA1AB" />
+
+      <!-- Markdown: code -->
+      <SolidColorBrush x:Key="CodeInlineBackgroundBrush" Color="#F0F2F5" />
+      <SolidColorBrush x:Key="CodeInlineForegroundBrush" Color="#B2295E" />
+      <SolidColorBrush x:Key="CodeBlockBackgroundBrush" Color="#F7F8FA" />
+      <SolidColorBrush x:Key="CodeBlockBorderBrush" Color="#E3E7EC" />
+      <SolidColorBrush x:Key="CodeBlockHeaderBrush" Color="#EFF1F4" />
+      <SolidColorBrush x:Key="CodeLineNumberBrush" Color="#AAB1BA" />
+
+      <!-- Syntax colours (TextMate scope buckets, SPECIFICATION.md 5.3) -->
+      <SolidColorBrush x:Key="SyntaxKeywordBrush" Color="#A626A4" />
+      <SolidColorBrush x:Key="SyntaxTypeBrush" Color="#C18401" />
+      <SolidColorBrush x:Key="SyntaxStringBrush" Color="#4B8B3B" />
+      <SolidColorBrush x:Key="SyntaxNumberBrush" Color="#B76B01" />
+      <SolidColorBrush x:Key="SyntaxCommentBrush" Color="#8B939E" />
+      <SolidColorBrush x:Key="SyntaxFunctionBrush" Color="#3D74D0" />
+      <SolidColorBrush x:Key="SyntaxOperatorBrush" Color="#4C5560" />
+
+      <!-- Markdown: quotes -->
+      <SolidColorBrush x:Key="QuoteAccentBrush" Color="#CFD5DC" />
+      <SolidColorBrush x:Key="QuoteForegroundBrush" Color="#4E5661" />
+
+      <!-- Markdown: tables -->
+      <SolidColorBrush x:Key="TableBorderBrush" Color="#DFE3E8" />
+      <SolidColorBrush x:Key="TableHeaderBackgroundBrush" Color="#F4F6F8" />
+      <SolidColorBrush x:Key="TableRowAltBackgroundBrush" Color="#FAFBFC" />
+
+      <!-- Markdown: callouts (5.1) -->
+      <SolidColorBrush x:Key="CalloutNoteAccentBrush" Color="#2563C9" />
+      <SolidColorBrush x:Key="CalloutNoteBackgroundBrush" Color="#EDF3FD" />
+      <SolidColorBrush x:Key="CalloutTipAccentBrush" Color="#1F8A4C" />
+      <SolidColorBrush x:Key="CalloutTipBackgroundBrush" Color="#ECF7F0" />
+      <SolidColorBrush x:Key="CalloutWarningAccentBrush" Color="#B5730B" />
+      <SolidColorBrush x:Key="CalloutWarningBackgroundBrush" Color="#FDF5E7" />
+      <SolidColorBrush x:Key="CalloutDangerAccentBrush" Color="#C0392B" />
+      <SolidColorBrush x:Key="CalloutDangerBackgroundBrush" Color="#FCEEEC" />
+
+      <!-- Find (5.7) -->
+      <SolidColorBrush x:Key="FindMatchBrush" Color="#FDE68A" />
+      <SolidColorBrush x:Key="FindCurrentMatchBrush" Color="#F59E0B" />
+      <SolidColorBrush x:Key="FindCurrentMatchBorderBrush" Color="#B45309" />
+
+      <!-- Selection -->
+      <SolidColorBrush x:Key="SelectionBrush" Color="#B9D4F7" />
+
+    </ResourceDictionary>
+
+    <!-- ================================= DARK ================================= -->
+    <ResourceDictionary x:Key="Dark">
+
+      <Color x:Key="ShellBackgroundColor">#16181D</Color>
+      <Color x:Key="ShellChromeColor">#1C1F25</Color>
+      <Color x:Key="ShellBorderColor">#2B3038</Color>
+      <Color x:Key="ShellHoverColor">#262A31</Color>
+      <Color x:Key="ShellSelectedColor">#22262D</Color>
+
+      <SolidColorBrush x:Key="ShellBackgroundBrush" Color="#16181D" />
+      <SolidColorBrush x:Key="ShellChromeBrush" Color="#1C1F25" />
+      <SolidColorBrush x:Key="ShellBorderBrush" Color="#2B3038" />
+      <SolidColorBrush x:Key="ShellHoverBrush" Color="#262A31" />
+      <SolidColorBrush x:Key="ShellSelectedBrush" Color="#22262D" />
+
+      <SolidColorBrush x:Key="ContentBackgroundBrush" Color="#1A1D22" />
+      <SolidColorBrush x:Key="ContentBorderBrush" Color="#2B3038" />
+
+      <SolidColorBrush x:Key="TextPrimaryBrush" Color="#E3E7EC" />
+      <SolidColorBrush x:Key="TextSecondaryBrush" Color="#9AA3AF" />
+      <SolidColorBrush x:Key="TextMutedBrush" Color="#767F8B" />
+      <SolidColorBrush x:Key="TextInvertedBrush" Color="#14161A" />
+
+      <SolidColorBrush x:Key="AccentBrush" Color="#5B9BF0" />
+      <SolidColorBrush x:Key="AccentSubtleBrush" Color="#1E2A3D" />
+
+      <SolidColorBrush x:Key="HeadingBrush" Color="#F1F4F8" />
+      <SolidColorBrush x:Key="HeadingRuleBrush" Color="#2B3038" />
+      <SolidColorBrush x:Key="AnchorGlyphBrush" Color="#5F6874" />
+
+      <SolidColorBrush x:Key="LinkBrush" Color="#6FADF7" />
+      <SolidColorBrush x:Key="LinkHoverBrush" Color="#93C4FA" />
+      <SolidColorBrush x:Key="LinkBrokenBrush" Color="#6B7480" />
+
+      <SolidColorBrush x:Key="CodeInlineBackgroundBrush" Color="#23272E" />
+      <SolidColorBrush x:Key="CodeInlineForegroundBrush" Color="#F096B8" />
+      <SolidColorBrush x:Key="CodeBlockBackgroundBrush" Color="#1E2127" />
+      <SolidColorBrush x:Key="CodeBlockBorderBrush" Color="#2B3038" />
+      <SolidColorBrush x:Key="CodeBlockHeaderBrush" Color="#23272E" />
+      <SolidColorBrush x:Key="CodeLineNumberBrush" Color="#5A626D" />
+
+      <SolidColorBrush x:Key="SyntaxKeywordBrush" Color="#C792EA" />
+      <SolidColorBrush x:Key="SyntaxTypeBrush" Color="#E5C07B" />
+      <SolidColorBrush x:Key="SyntaxStringBrush" Color="#98C379" />
+      <SolidColorBrush x:Key="SyntaxNumberBrush" Color="#D19A66" />
+      <SolidColorBrush x:Key="SyntaxCommentBrush" Color="#7A828E" />
+      <SolidColorBrush x:Key="SyntaxFunctionBrush" Color="#61AFEF" />
+      <SolidColorBrush x:Key="SyntaxOperatorBrush" Color="#ABB2BF" />
+
+      <SolidColorBrush x:Key="QuoteAccentBrush" Color="#3B434F" />
+      <SolidColorBrush x:Key="QuoteForegroundBrush" Color="#A7B0BC" />
+
+      <SolidColorBrush x:Key="TableBorderBrush" Color="#2F353E" />
+      <SolidColorBrush x:Key="TableHeaderBackgroundBrush" Color="#23272E" />
+      <SolidColorBrush x:Key="TableRowAltBackgroundBrush" Color="#1E2127" />
+
+      <SolidColorBrush x:Key="CalloutNoteAccentBrush" Color="#5B9BF0" />
+      <SolidColorBrush x:Key="CalloutNoteBackgroundBrush" Color="#1B2635" />
+      <SolidColorBrush x:Key="CalloutTipAccentBrush" Color="#4FBF7B" />
+      <SolidColorBrush x:Key="CalloutTipBackgroundBrush" Color="#17281F" />
+      <SolidColorBrush x:Key="CalloutWarningAccentBrush" Color="#E0A33C" />
+      <SolidColorBrush x:Key="CalloutWarningBackgroundBrush" Color="#2A2319" />
+      <SolidColorBrush x:Key="CalloutDangerAccentBrush" Color="#EF6B5C" />
+      <SolidColorBrush x:Key="CalloutDangerBackgroundBrush" Color="#2C1D1B" />
+
+      <SolidColorBrush x:Key="FindMatchBrush" Color="#5C4A17" />
+      <SolidColorBrush x:Key="FindCurrentMatchBrush" Color="#B0821F" />
+      <SolidColorBrush x:Key="FindCurrentMatchBorderBrush" Color="#E0A33C" />
+
+      <SolidColorBrush x:Key="SelectionBrush" Color="#2E4A73" />
+
+    </ResourceDictionary>
+
+  </ResourceDictionary.ThemeDictionaries>
+
+  <!-- ===================== Variant-independent metrics ===================== -->
+
+  <!-- Typography (5.11). Body and mono families are settings-driven at runtime. -->
+  <FontFamily x:Key="BodyFontFamily">Inter, Segoe UI, Ubuntu, Noto Sans, sans-serif</FontFamily>
+  <FontFamily x:Key="MonoFontFamily">Cascadia Mono, Consolas, JetBrains Mono, DejaVu Sans Mono, monospace</FontFamily>
+
+  <x:Double x:Key="BodyFontSize">15</x:Double>
+  <x:Double x:Key="BodyLineHeight">25</x:Double>
+  <x:Double x:Key="CodeFontSize">13.5</x:Double>
+  <x:Double x:Key="SmallFontSize">12</x:Double>
+
+  <x:Double x:Key="H1FontSize">30</x:Double>
+  <x:Double x:Key="H2FontSize">23</x:Double>
+  <x:Double x:Key="H3FontSize">19</x:Double>
+  <x:Double x:Key="H4FontSize">16</x:Double>
+  <x:Double x:Key="H5FontSize">15</x:Double>
+  <x:Double x:Key="H6FontSize">14</x:Double>
+
+  <!-- Reading measure. Long lines hurt reading; a setting allows full width. -->
+  <x:Double x:Key="ContentMaxWidth">900</x:Double>
+
+  <CornerRadius x:Key="SmallCornerRadius">4</CornerRadius>
+  <CornerRadius x:Key="MediumCornerRadius">6</CornerRadius>
+
+</ResourceDictionary>

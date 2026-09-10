@@ -1,0 +1,92 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:MdViewer.App.ViewModels"
+             mc:Ignorable="d"
+             x:Class="MdViewer.App.Views.StartView"
+             x:DataType="vm:MainWindowViewModel">
+
+  <!--
+    Start view (SPECIFICATION.md 5.14).
+
+    Shown only when no tabs are open. This is where the recent list belongs:
+    it is exactly the moment the user needs it, the screen is free, and it
+    costs no permanent chrome while reading. Once tabs are open, the tab strip
+    already is the recent list, and Ctrl+P covers the rest.
+  -->
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel MaxWidth="620"
+                HorizontalAlignment="Center"
+                Margin="40,72,40,48">
+
+      <TextBlock Classes="start-title" Text="MdViewer" />
+      <TextBlock Classes="md-caption"
+                 Margin="0,4,0,40"
+                 Text="No document open." />
+
+      <TextBlock Classes="sidebar-header" Text="RECENT" Margin="2,0,0,10"
+                 IsVisible="{Binding HasRecentDocuments}" />
+
+      <ItemsControl ItemsSource="{Binding RecentDocuments}"
+                    IsVisible="{Binding HasRecentDocuments}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:RecentDocumentViewModel">
+
+            <Button Classes="recent-card"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    IsEnabled="{Binding Exists}"
+                    ToolTip.Tip="{Binding FullPath}"
+                    Command="{Binding $parent[UserControl].((vm:MainWindowViewModel)DataContext).OpenRecentCommand}"
+                    CommandParameter="{Binding}">
+              <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                <StackPanel Grid.Column="0" Spacing="3">
+                  <TextBlock Classes="recent-title" Text="{Binding Title}" />
+                  <TextBlock Classes="recent-path" Text="{Binding Directory}" />
+                </StackPanel>
+                <TextBlock Grid.Column="1"
+                           Classes="recent-age"
+                           VerticalAlignment="Center"
+                           Text="{Binding StatusText}" />
+              </Grid>
+            </Button>
+
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+      <TextBlock Classes="md-caption"
+                 Margin="2,10,0,0"
+                 TextWrapping="Wrap"
+                 IsVisible="{Binding HasRecentDocuments}"
+                 Text="An entry whose file has been moved or deleted is shown as unavailable rather than quietly dropped. Existence is checked here, at display time — startup never waits on the file system." />
+
+      <!-- First run, or a session with nothing opened yet -->
+      <StackPanel Spacing="6" IsVisible="{Binding !HasRecentDocuments}">
+        <TextBlock Classes="md-body"
+                   TextWrapping="Wrap"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
+                   Text="Nothing opened yet. Open a file, or open a folder to browse a workspace in the sidebar." />
+        <TextBlock Classes="md-caption"
+                   TextWrapping="Wrap"
+                   Text="The five most recent documents will appear here. They are remembered for this session; persisting them across launches lands with session restore in M6." />
+      </StackPanel>
+
+      <!-- Actions -->
+      <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,36,0,0">
+        <Button Classes="start-action"
+                Content="Open file…   Ctrl+O"
+                Command="{Binding OpenFilesCommand}" />
+        <Button Classes="start-action"
+                Content="Open folder…"
+                Command="{Binding OpenFolderCommand}" />
+        <Button Classes="start-action"
+                Content="Quick open   Ctrl+P"
+                Command="{Binding ShowQuickOpenCommand}" />
+      </StackPanel>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

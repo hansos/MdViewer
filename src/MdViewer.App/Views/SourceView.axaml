@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:MdViewer.App.ViewModels"
+             mc:Ignorable="d"
+             x:Class="MdViewer.App.Views.SourceView"
+             x:DataType="vm:MainWindowViewModel">
+
+  <!--
+    Raw Markdown source, read-only (SPECIFICATION.md 5.15).
+
+    The gutter sits OUTSIDE the scroll viewer and is translated vertically to
+    follow it, so line numbers stay put when a long line scrolls the text
+    sideways. Inside the viewer they would slide off the left edge, which is
+    exactly when you most want to know which line you are on.
+  -->
+
+  <Grid ColumnDefinitions="Auto,*" Background="{DynamicResource CodeBlockBackgroundBrush}">
+
+    <Border Grid.Column="0"
+            Classes="source-gutter"
+            ClipToBounds="True">
+      <TextBlock x:Name="Gutter"
+                 Classes="md-line-number"
+                 Text="{Binding SelectedTab.LineNumberColumn}" />
+    </Border>
+
+    <ScrollViewer Grid.Column="1"
+                  x:Name="Scroller"
+                  HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto"
+                  AllowAutoHide="False">
+      <SelectableTextBlock x:Name="SourceText"
+                           Classes="md-code source-body"
+                           TextWrapping="NoWrap"
+                           Text="{Binding SelectedTab.SourceText}" />
+    </ScrollViewer>
+  </Grid>
+</UserControl>

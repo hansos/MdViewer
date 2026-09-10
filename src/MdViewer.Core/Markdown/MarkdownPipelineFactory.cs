@@ -1,0 +1,67 @@
+using Markdig;
+
+namespace MdViewer.Core.Markdown;
+
+/// <summary>
+/// Builds the one Markdig pipeline the whole application uses
+/// (SPECIFICATION.md 5.1).
+///
+/// The pipeline is built once and shared: it is stateless and safe to parse
+/// with from any thread. Extensions are listed explicitly rather than pulled in
+/// with <c>UseAdvancedExtensions()</c>, because the specification names what is
+/// on AND what is deliberately off, and a bundle would silently drift from that.
+/// </summary>
+public static class MarkdownPipelineFactory
+{
+    private static readonly Lazy<MarkdownPipeline> Shared = new(() => Build(), isThreadSafe: true);
+
+    /// <summary>The shared, immutable pipeline.</summary>
+    public static MarkdownPipeline Default => Shared.Value;
+
+    public static MarkdownPipeline Build(bool smartPunctuation = false)
+    {
+        var builder = new MarkdownPipelineBuilder()
+            // Tables
+            .UsePipeTables()
+            .UseGridTables()
+
+            // Lists and text
+            .UseTaskLists()
+            .UseEmphasisExtras()      // strikethrough, sub/sup, ins, mark
+            .UseDefinitionLists()
+            .UseAbbreviations()
+            .UseAutoLinks()
+            .UseFootnotes()
+
+            // Containers rendered as callouts
+            .UseCustomContainers()
+
+            // Metadata, parsed but not rendered as body content (5.12)
+            .UseYamlFrontMatter()
+
+            // Heading anchors. MdViewer computes its own slugs for navigation
+            // (see HeadingSlug) but this keeps Markdig's own link resolution
+            // consistent with them.
+            .UseAutoIdentifiers()
+
+            // Source positions on every node. Everything downstream — search,
+            // scroll restoration, the outline, and the v2 editor's scroll sync —
+            // works in source-offset space, so this is not optional.
+            .UsePreciseSourceLocation();
+
+        if (smartPunctuation)
+        {
+            builder = builder.UseSmartyPants();
+        }
+
+        // NOT enabled, deliberately (SPECIFICATION.md 5.1):
+        //   Bootstrap, Figures, JiraLinks, SelfPipeline, Globalization, Mathematics.
+        //
+        // GitHub alerts (> [!NOTE]) are not enabled yet either. They parse as
+        // ordinary block quotes today, which is what they are syntactically, so
+        // nothing is lost visually. Turning the extension on is a one-line
+        // change once the callout renderer lands in M3.
+
+        return builder.Build();
+    }
+}

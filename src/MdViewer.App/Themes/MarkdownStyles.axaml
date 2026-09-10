@@ -1,0 +1,303 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!--
+    Styles for rendered Markdown content.
+
+    These classes are what MdViewer.Rendering's block and inline renderers will
+    apply in M2/M3 (SPECIFICATION.md 5.2). Fixing them now means the renderers
+    are written against a visual language that has already been reviewed.
+
+    ":is(TextBlock)" is used throughout so the selectors also match
+    SelectableTextBlock, which is what carries real body copy.
+  -->
+
+  <!-- ============================== Headings ============================== -->
+
+  <Style Selector=":is(TextBlock).md-h1">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource H1FontSize}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource HeadingBrush}" />
+    <Setter Property="Margin" Value="0,4,0,10" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="LineHeight" Value="40" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).md-h2">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource H2FontSize}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource HeadingBrush}" />
+    <Setter Property="Margin" Value="0,30,0,8" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="LineHeight" Value="32" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).md-h3">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource H3FontSize}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource HeadingBrush}" />
+    <Setter Property="Margin" Value="0,24,0,6" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="LineHeight" Value="28" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).md-h4">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource H4FontSize}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource HeadingBrush}" />
+    <Setter Property="Margin" Value="0,20,0,6" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+
+  <!-- The hairline under H1/H2, applied to a Border wrapping the heading -->
+  <Style Selector="Border.md-heading-rule">
+    <Setter Property="BorderBrush" Value="{DynamicResource HeadingRuleBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+    <Setter Property="Padding" Value="0,0,0,8" />
+    <Setter Property="Margin" Value="0,0,0,4" />
+  </Style>
+
+  <!-- ============================== Body copy ============================== -->
+
+  <Style Selector=":is(TextBlock).md-body">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource BodyFontSize}" />
+    <Setter Property="LineHeight" Value="{DynamicResource BodyLineHeight}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="Margin" Value="0,0,0,16" />
+  </Style>
+
+  <!--
+    ":is(...)" matters here: real body copy is rendered as MarkdownTextBlock,
+    which derives from SelectableTextBlock, and an exact-type selector would
+    silently skip every paragraph in the document.
+  -->
+  <Style Selector=":is(SelectableTextBlock).md-body">
+    <Setter Property="SelectionBrush" Value="{DynamicResource SelectionBrush}" />
+  </Style>
+
+  <Style Selector=":is(SelectableTextBlock)">
+    <Setter Property="SelectionBrush" Value="{DynamicResource SelectionBrush}" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).md-caption">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource SmallFontSize}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+
+  <!-- ============================ Inline code ============================ -->
+
+  <Style Selector="Border.md-code-inline">
+    <Setter Property="Background" Value="{DynamicResource CodeInlineBackgroundBrush}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}" />
+    <Setter Property="Padding" Value="5,1" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).md-code-inline">
+    <Setter Property="FontFamily" Value="{DynamicResource MonoFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource CodeFontSize}" />
+    <Setter Property="Foreground" Value="{DynamicResource CodeInlineForegroundBrush}" />
+  </Style>
+
+  <!-- ============================= Code blocks ============================= -->
+
+  <Style Selector="Border.md-code-block">
+    <Setter Property="Background" Value="{DynamicResource CodeBlockBackgroundBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource CodeBlockBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MediumCornerRadius}" />
+    <Setter Property="Margin" Value="0,0,0,18" />
+    <Setter Property="ClipToBounds" Value="True" />
+  </Style>
+
+  <Style Selector="Border.md-code-header">
+    <Setter Property="Background" Value="{DynamicResource CodeBlockHeaderBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource CodeBlockBorderBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+    <Setter Property="Padding" Value="12,5" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).md-code">
+    <Setter Property="FontFamily" Value="{DynamicResource MonoFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource CodeFontSize}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="LineHeight" Value="21" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).md-code-lang">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).md-line-number">
+    <Setter Property="FontFamily" Value="{DynamicResource MonoFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource CodeFontSize}" />
+    <Setter Property="Foreground" Value="{DynamicResource CodeLineNumberBrush}" />
+    <Setter Property="LineHeight" Value="21" />
+    <Setter Property="TextAlignment" Value="Right" />
+  </Style>
+
+  <!-- =============================== Quotes =============================== -->
+
+  <Style Selector="Border.md-quote">
+    <Setter Property="BorderBrush" Value="{DynamicResource QuoteAccentBrush}" />
+    <Setter Property="BorderThickness" Value="3,0,0,0" />
+    <Setter Property="Padding" Value="16,2,0,2" />
+    <Setter Property="Margin" Value="0,0,0,18" />
+  </Style>
+
+  <Style Selector="Border.md-quote :is(TextBlock).md-body">
+    <Setter Property="Foreground" Value="{DynamicResource QuoteForegroundBrush}" />
+  </Style>
+
+  <!-- ============================== Callouts ============================== -->
+
+  <Style Selector="Border.md-callout">
+    <Setter Property="BorderThickness" Value="3,0,0,0" />
+    <Setter Property="CornerRadius" Value="0,4,4,0" />
+    <Setter Property="Padding" Value="14,12,14,4" />
+    <Setter Property="Margin" Value="0,0,0,18" />
+  </Style>
+
+  <Style Selector="Border.md-callout.note">
+    <Setter Property="BorderBrush" Value="{DynamicResource CalloutNoteAccentBrush}" />
+    <Setter Property="Background" Value="{DynamicResource CalloutNoteBackgroundBrush}" />
+  </Style>
+
+  <Style Selector="Border.md-callout.tip">
+    <Setter Property="BorderBrush" Value="{DynamicResource CalloutTipAccentBrush}" />
+    <Setter Property="Background" Value="{DynamicResource CalloutTipBackgroundBrush}" />
+  </Style>
+
+  <Style Selector="Border.md-callout.warning">
+    <Setter Property="BorderBrush" Value="{DynamicResource CalloutWarningAccentBrush}" />
+    <Setter Property="Background" Value="{DynamicResource CalloutWarningBackgroundBrush}" />
+  </Style>
+
+  <Style Selector="Border.md-callout.danger">
+    <Setter Property="BorderBrush" Value="{DynamicResource CalloutDangerAccentBrush}" />
+    <Setter Property="Background" Value="{DynamicResource CalloutDangerBackgroundBrush}" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).md-callout-title">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource BodyFontSize}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Margin" Value="0,0,0,6" />
+  </Style>
+
+  <!-- =============================== Tables =============================== -->
+
+  <Style Selector="Border.md-table">
+    <Setter Property="BorderBrush" Value="{DynamicResource TableBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MediumCornerRadius}" />
+    <Setter Property="Margin" Value="0,0,0,18" />
+    <Setter Property="ClipToBounds" Value="True" />
+  </Style>
+
+  <Style Selector="Border.md-table-header">
+    <Setter Property="Background" Value="{DynamicResource TableHeaderBackgroundBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource TableBorderBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+  </Style>
+
+  <Style Selector="Border.md-table-cell">
+    <Setter Property="Padding" Value="12,8" />
+    <Setter Property="BorderBrush" Value="{DynamicResource TableBorderBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,1,1" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).md-table-text">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="LineHeight" Value="20" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).md-table-text.header">
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource HeadingBrush}" />
+  </Style>
+
+  <!-- ================================ Lists ================================ -->
+
+  <Style Selector=":is(TextBlock).md-list-marker">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource BodyFontSize}" />
+    <Setter Property="LineHeight" Value="{DynamicResource BodyLineHeight}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    <Setter Property="TextAlignment" Value="Right" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).md-list-item">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource BodyFontSize}" />
+    <Setter Property="LineHeight" Value="{DynamicResource BodyLineHeight}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="Margin" Value="0,0,0,4" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).md-h5">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource H5FontSize}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource HeadingBrush}" />
+    <Setter Property="Margin" Value="0,18,0,4" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).md-h6">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource H6FontSize}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    <Setter Property="Margin" Value="0,16,0,4" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+
+  <!-- Checked task-list marker -->
+  <Style Selector=":is(TextBlock).md-list-marker.checked">
+    <Setter Property="Foreground" Value="{DynamicResource CalloutTipAccentBrush}" />
+  </Style>
+
+  <!-- Alternating table rows -->
+  <Style Selector="Border.md-table-cell.alt">
+    <Setter Property="Background" Value="{DynamicResource TableRowAltBackgroundBrush}" />
+  </Style>
+
+  <!-- Escaped raw HTML (SPECIFICATION.md 5.6) -->
+  <Style Selector="Border.md-html-block">
+    <Setter Property="Background" Value="{DynamicResource CodeBlockBackgroundBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource CodeBlockBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource SmallCornerRadius}" />
+    <Setter Property="Padding" Value="12,8" />
+    <Setter Property="Margin" Value="0,0,0,16" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).md-html-escaped">
+    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+
+  <!-- ============================ Thematic break ============================ -->
+
+  <Style Selector="Border.md-rule">
+    <Setter Property="Height" Value="1" />
+    <Setter Property="Background" Value="{DynamicResource HeadingRuleBrush}" />
+    <Setter Property="Margin" Value="0,14,0,28" />
+  </Style>
+
+</Styles>

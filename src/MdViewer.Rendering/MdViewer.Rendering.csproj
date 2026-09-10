@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    MdViewer.Rendering turns a parsed document into an Avalonia visual tree
+    (SPECIFICATION.md 5.2).
+
+    Renderers apply style CLASSES and never literal colours or sizes. The theme
+    tokens and the styles that consume them live in MdViewer.App, so a theme
+    change never requires touching a renderer, and this project needs no
+    resource dictionary of its own.
+  -->
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
+    <PackageReference Include="Markdig" Version="$(MarkdigVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MdViewer.Core\MdViewer.Core.csproj" />
+  </ItemGroup>
+
+</Project>
