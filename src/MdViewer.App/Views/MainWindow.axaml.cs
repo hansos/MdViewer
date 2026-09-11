@@ -62,6 +62,47 @@ public partial class MainWindow : Window
         }
 
         DataContextChanged += OnDataContextChanged;
+
+        AddHandler(KeyDownEvent, OnNavigationKeyDown, RoutingStrategies.Bubble);
+    }
+
+    // =========================================================== keyboard nav
+
+    /// <summary>
+    /// Reading-position hot keys. They drive whichever scroll host is on
+    /// screen, so preview and source behave identically. Text entry keeps
+    /// priority: while a text box has focus the keys mean caret movement.
+    /// </summary>
+    private void OnNavigationKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Handled) return;
+        if (Model?.SelectedTab is null) return;
+        if (e.KeyModifiers is not KeyModifiers.None) return;
+        if (FocusManager?.GetFocusedElement() is TextBox) return;
+
+        var scroller = Model.SelectedTab.ViewMode == DocumentViewMode.Source
+            ? SourceViewControl?.ScrollHost
+            : PreviewScroller;
+        if (scroller is null) return;
+
+        switch (e.Key)
+        {
+            case Key.Up: scroller.LineUp(); break;
+            case Key.Down: scroller.LineDown(); break;
+            case Key.PageUp: scroller.PageUp(); break;
+            case Key.PageDown: scroller.PageDown(); break;
+            case Key.Home:
+                scroller.Offset = new Vector(scroller.Offset.X, 0);
+                break;
+            case Key.End:
+                scroller.Offset = new Vector(
+                    scroller.Offset.X,
+                    Math.Max(0, scroller.Extent.Height - scroller.Viewport.Height));
+                break;
+            default: return;
+        }
+
+        e.Handled = true;
     }
 
     /// <summary>

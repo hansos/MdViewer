@@ -583,10 +583,8 @@ A block with Unicode and box drawing:
 └─────────────┴─────────────┘
 ```
 
-### 8.5 Mermaid — renders as a code block for now
+### 8.5 Mermaid
 
-Diagram rendering is not implemented, so this must appear as an ordinary
-highlighted code block and never as a broken image.
 
 ```mermaid
 flowchart LR

@@ -49,6 +49,12 @@ public partial class SourceView : UserControl
         set => SetValue(ZoomFactorProperty, value);
     }
 
+    /// <summary>
+    /// The scroll host of the source text, exposed so the window can drive it
+    /// from the keyboard without duplicating the view's internal layout.
+    /// </summary>
+    public ScrollViewer? ScrollHost => SourceScroller;
+
     private ScrollViewer? SourceScroller => this.FindControl<ScrollViewer>("Scroller");
 
     private ScrollViewer? GutterScrollHost => this.FindControl<ScrollViewer>("GutterScroller");

@@ -563,6 +563,7 @@ Trailing whitespace on this line:
 ```
 
 A block containing characters that look like markup:
+zzz
 
 ```text
 # Not a heading
@@ -572,6 +573,7 @@ A block containing characters that look like markup:
 **not bold**  <div>not html</div>
 ```
 
+sss
 A block with Unicode and box drawing:
 
 ```text
