@@ -1,5 +1,5 @@
 # KT MD Viewer
-aa
+
 KT MD Viewer is a cross-platform Markdown viewer for Windows and Linux, built on Avalonia UI.
 
 See [docs/SPECIFICATION.md](docs/SPECIFICATION.md) for the full specification.
@@ -104,9 +104,8 @@ That is what makes the v2 split-pane editor an addition rather than a rewrite.
 has no class support: those bind to theme tokens dynamically via `Themed`, so a
 theme switch still repaints without re-parsing.
 
-## Housekeeping
+## How this is built
 
-`src/MdViewer.App/SampleData.cs` is superseded and can be deleted — everything it
-supplied now comes from real files. `Views/SampleDocumentView.axaml` is no longer
-shown; it is kept as the hand-authored visual reference the block renderers are
-checked against.
+AI assistance is used intensively throughout this project — design, implementation,
+tests and documentation. All of it is reviewed by me before it lands, and the
+specification and architecture decisions are mine.
