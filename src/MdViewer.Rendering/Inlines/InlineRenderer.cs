@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Media;
+using Markdig.Extensions.Mathematics;
 using Markdig.Syntax;
 using Markdig.Extensions.Footnotes;
 using Markdig.Extensions.TaskLists;
@@ -9,6 +10,7 @@ using System.Text;
 using MarkdigInline = Markdig.Syntax.Inlines.Inline;
 using MdViewer.Core.Markdown;
 using MdViewer.Rendering.Images;
+using MdViewer.Rendering.Mathematics;
 
 namespace MdViewer.Rendering.Inlines;
 
@@ -79,6 +81,32 @@ public sealed class InlineRenderer
                     context);
 
                 position += text.Length;
+                break;
+            }
+
+            case MathInline math:
+            {
+                var expression = math.Content.ToString();
+                if (expression.Length == 0) break;
+
+                sink.Add(new InlineUIContainer(MathTypesetter.CreateInline(expression))
+                {
+                    BaselineAlignment = BaselineAlignment.Baseline
+                });
+
+                // Body text pins LineHeight and a text line clips anything
+                // taller, which would slice the top off a fraction or a root.
+                // A local value lets the line grow to the formula instead.
+                target.LineHeight = double.NaN;
+
+                // Inline math hangs below the baseline so it sits centred on
+                // the line (see MathInlineHost); the text block has to let that
+                // overhang show instead of cutting it off at its own edge.
+                target.ClipToBounds = false;
+
+                // An embedded object occupies a single position in the text
+                // flow, which keeps link ranges around it aligned.
+                position += 1;
                 break;
             }
 

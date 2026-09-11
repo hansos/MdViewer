@@ -17,6 +17,7 @@
     <TextMateSharpVersion>2.0.4</TextMateSharpVersion>
     <MermaiderVersion>0.12.2</MermaiderVersion>
     <SvgControlsSkiaAvaloniaVersion>12.0.0.17</SvgControlsSkiaAvaloniaVersion>
+    <CSharpMathAvaloniaVersion>12.0.0</CSharpMathAvaloniaVersion>
   </PropertyGroup>
 
 </Project>

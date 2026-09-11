@@ -32,6 +32,7 @@ public static class MarkdownPipelineFactory
             .UseAbbreviations()
             .UseAutoLinks()
             .UseFootnotes()
+            .UseMathematics()
 
             // Containers and GitHub alerts rendered as callouts
             .UseCustomContainers()
@@ -56,7 +57,7 @@ public static class MarkdownPipelineFactory
         }
 
         // NOT enabled, deliberately (SPECIFICATION.md 5.1):
-        //   Bootstrap, Figures, JiraLinks, SelfPipeline, Globalization, Mathematics.
+        //   Bootstrap, Figures, JiraLinks, SelfPipeline, Globalization.
 
         return builder.Build();
     }

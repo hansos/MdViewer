@@ -292,6 +292,23 @@
     <Setter Property="TextWrapping" Value="Wrap" />
   </Style>
 
+  <!-- ============================ Mathematics ============================ -->
+
+  <!-- The frame around a display equation; the formula itself is laid out by
+       CSharpMath and carries no styleable text properties. -->
+  <Style Selector="Border.md-math">
+    <Setter Property="Margin" Value="0,4,0,20" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+  </Style>
+
+  <!-- Shown only when CSharpMath cannot parse the expression. -->
+  <Style Selector=":is(TextBlock).md-math-fallback">
+    <Setter Property="FontFamily" Value="{DynamicResource MonoFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource CodeFontSize}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+
   <!-- ================================ Images ================================ -->
 
   <Style Selector="Border.md-image-block">

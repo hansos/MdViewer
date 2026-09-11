@@ -1,4 +1,5 @@
 using System.Text;
+using Markdig.Extensions.Mathematics;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 
@@ -78,6 +79,10 @@ public static class MarkdownText
 
                 case CodeInline code:
                     builder.Append(code.Content);
+                    break;
+
+                case MathInline math:
+                    builder.Append(LatexUnicode.Convert(math.Content.ToString()));
                     break;
 
                 case LineBreakInline:

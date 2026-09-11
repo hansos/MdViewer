@@ -582,7 +582,6 @@ A block with Unicode and box drawing:
 
 ### 8.5 Mermaid
 
-
 ```mermaid
 flowchart LR
     A[Read file] --> B[Detect encoding]

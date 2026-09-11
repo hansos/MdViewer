@@ -18,6 +18,7 @@ public sealed class BlockRendererRegistry
         .Add(new HeadingBlockRenderer())
         .Add(new ImageBlockRenderer())
         .Add(new ParagraphBlockRenderer())
+        .Add(new MathBlockRenderer())
         .Add(new DiagramBlockRenderer())
         .Add(new CodeBlockRenderer())
         .Add(new TableBlockRenderer())

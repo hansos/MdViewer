@@ -17,6 +17,15 @@
     <PackageReference Include="Svg.Controls.Skia.Avalonia" Version="$(SvgControlsSkiaAvaloniaVersion)" />
 
     <!--
+      LaTeX typesetting (SPECIFICATION.md 5.1 mathematics). CSharpMath is a
+      managed TeX layout engine: it lays out real math boxes — stacked
+      fractions, limits above and below an operator, correctly scaled scripts —
+      which Unicode substitution cannot express. This is the Avalonia 12 fork;
+      it bundles CSharpMath and CSharpMath.Rendering and needs no Skia of its own.
+    -->
+    <PackageReference Include="Sylinko.CSharpMath.Avalonia" Version="$(CSharpMathAvaloniaVersion)" />
+
+    <!--
       Syntax highlighting (SPECIFICATION.md 5.3). TextMateSharp is the engine;
       TextMateSharp.Grammars carries the bundled language grammars. Only the
       grammars are used: colours come from the theme tokens, never from a
