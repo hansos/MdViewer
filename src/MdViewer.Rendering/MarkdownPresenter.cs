@@ -27,6 +27,14 @@ public class MarkdownPresenter : Decorator
     public static readonly StyledProperty<bool> AllowRemoteImagesProperty =
         AvaloniaProperty.Register<MarkdownPresenter, bool>(nameof(AllowRemoteImages), false);
 
+    public static readonly StyledProperty<IReadOnlyList<FindMatchOccurrence>> FindMatchesProperty =
+        AvaloniaProperty.Register<MarkdownPresenter, IReadOnlyList<FindMatchOccurrence>>(
+            nameof(FindMatches),
+            Array.Empty<FindMatchOccurrence>());
+
+    public static readonly StyledProperty<int> CurrentFindMatchProperty =
+        AvaloniaProperty.Register<MarkdownPresenter, int>(nameof(CurrentFindMatch), 0);
+
     private readonly MarkdownRenderer _renderer = new();
 
     public MarkdownPresenter()
@@ -65,6 +73,18 @@ public class MarkdownPresenter : Decorator
         set => SetValue(AllowRemoteImagesProperty, value);
     }
 
+    public IReadOnlyList<FindMatchOccurrence> FindMatches
+    {
+        get => GetValue(FindMatchesProperty);
+        set => SetValue(FindMatchesProperty, value);
+    }
+
+    public int CurrentFindMatch
+    {
+        get => GetValue(CurrentFindMatchProperty);
+        set => SetValue(CurrentFindMatchProperty, value);
+    }
+
     /// <summary>
     /// Source spans for the currently rendered document. The shell uses this to
     /// scroll to a heading, restore a reading position by offset, and — from M5 —
@@ -93,7 +113,8 @@ public class MarkdownPresenter : Decorator
 
         if (change.Property == DocumentProperty
             || change.Property == ContentMaxWidthProperty
-            || change.Property == AllowRemoteImagesProperty)
+            || change.Property == AllowRemoteImagesProperty
+            || change.Property == FindMatchesProperty)
         {
             Rebuild();
         }
@@ -180,7 +201,9 @@ public class MarkdownPresenter : Decorator
             url => LinkActivated?.Invoke(url),
             allowRemoteImages: AllowRemoteImages,
             onLoadRemoteImagesRequested: () => RemoteImagesRequested?.Invoke(),
-            reducedMode: document.ByteLength > DocumentLoader.ReducedModeThresholdBytes);
+            reducedMode: document.ByteLength > DocumentLoader.ReducedModeThresholdBytes,
+            findMatches: FindMatches,
+            currentFindMatch: CurrentFindMatch);
 
         var body = _renderer.RenderDocument(document.Ast, context);
         body.MaxWidth = ContentMaxWidth;

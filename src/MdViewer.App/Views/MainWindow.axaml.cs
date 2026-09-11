@@ -240,6 +240,25 @@ public partial class MainWindow : Window
         {
             SyncTreeSelectionWithSelectedTab();
         }
+        else if (e.PropertyName == nameof(MainWindowViewModel.IsFindBarVisible)
+                 && _boundModel?.IsFindBarVisible == true)
+        {
+            FocusFindInput();
+        }
+    }
+
+    private void FocusFindInput()
+    {
+        Dispatcher.UIThread.Post(
+            () =>
+            {
+                var input = this.FindControl<TextBox>("FindInput");
+                if (input is null) return;
+
+                input.Focus();
+                input.SelectAll();
+            },
+            DispatcherPriority.Input);
     }
 
     /// <summary>

@@ -19,6 +19,8 @@
     <KeyBinding Gesture="Ctrl+O" Command="{Binding OpenFilesCommand}" />
     <KeyBinding Gesture="Ctrl+K" Command="{Binding OpenFolderCommand}" />
     <KeyBinding Gesture="Ctrl+F" Command="{Binding ToggleFindBarCommand}" />
+    <KeyBinding Gesture="F3" Command="{Binding Find.NextMatchCommand}" />
+    <KeyBinding Gesture="Shift+F3" Command="{Binding Find.PreviousMatchCommand}" />
     <KeyBinding Gesture="Ctrl+P" Command="{Binding ShowQuickOpenCommand}" />
     <KeyBinding Gesture="Ctrl+Home" Command="{Binding ShowStartPageCommand}" />
     <KeyBinding Gesture="Escape" Command="{Binding DismissOverlaysCommand}" />
@@ -323,6 +325,7 @@
           <rendering:MarkdownPresenter x:Name="Presenter"
                                        Document="{Binding SelectedTab.Document}"
                                        AllowRemoteImages="{Binding SelectedTab.AllowRemoteImages, FallbackValue=False}"
+                                       FindMatches="{Binding Find.Matches}"
                                         ZoomFactor="{Binding SelectedTab.Zoom, FallbackValue=1.0}"
                                        ContentMaxWidth="{Binding Settings.EffectiveContentMaxWidth}" />
         </ScrollViewer>
@@ -368,9 +371,15 @@
                 Margin="0,0,24,0"
                 IsVisible="{Binding IsFindBarVisible}">
           <StackPanel Orientation="Horizontal" Spacing="6">
-            <TextBox Classes="find-input"
+            <TextBox x:Name="FindInput"
+                     Classes="find-input"
                      Watermark="Find in document"
-                     Text="{Binding Find.Query, Mode=TwoWay}" />
+                     Text="{Binding Find.Query, Mode=TwoWay}">
+              <TextBox.KeyBindings>
+                <KeyBinding Gesture="Enter" Command="{Binding Find.NextMatchCommand}" />
+                <KeyBinding Gesture="Shift+Enter" Command="{Binding Find.PreviousMatchCommand}" />
+              </TextBox.KeyBindings>
+            </TextBox>
 
             <TextBlock Classes="status"
                        MinWidth="72"

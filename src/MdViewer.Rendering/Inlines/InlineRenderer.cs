@@ -66,7 +66,13 @@ public sealed class InlineRenderer
             {
                 var text = literal.Content.ToString();
                 if (text.Length == 0) break;
-                sink.Add(new Run(text));
+
+                AppendTextWithFindHighlights(
+                    sink,
+                    text,
+                    literal.Span.Start,
+                    context);
+
                 position += text.Length;
                 break;
             }
@@ -76,11 +82,18 @@ public sealed class InlineRenderer
                 var text = code.Content ?? string.Empty;
                 if (text.Length == 0) break;
 
-                var run = new Run(text);
-                run.Apply(TextElement.FontFamilyProperty, Themed.Keys.MonoFontFamily);
-                run.Apply(TextElement.ForegroundProperty, Themed.Keys.CodeInlineForeground);
-                run.Apply(TextElement.BackgroundProperty, Themed.Keys.CodeInlineBackground);
-                sink.Add(run);
+                AppendTextWithFindHighlights(
+                    sink,
+                    text,
+                    code.Span.Start,
+                    context,
+                    run =>
+                    {
+                        run.Apply(TextElement.FontFamilyProperty, Themed.Keys.MonoFontFamily);
+                        run.Apply(TextElement.ForegroundProperty, Themed.Keys.CodeInlineForeground);
+                        run.Apply(TextElement.BackgroundProperty, Themed.Keys.CodeInlineBackground);
+                    });
+
                 position += text.Length;
                 break;
             }
@@ -245,6 +258,114 @@ public sealed class InlineRenderer
         }
 
         return inlines;
+    }
+
+    private static void AppendTextWithFindHighlights(
+        InlineCollection sink,
+        string text,
+        int sourceStart,
+        RenderContext context,
+        Action<Run>? configure = null)
+    {
+        var matches = context.FindMatches;
+        if (matches.Count == 0 || sourceStart < 0)
+        {
+            AddRun(sink, text, 0, text.Length, configure, highlighted: false);
+            return;
+        }
+
+        var sourceEnd = sourceStart + text.Length;
+        var cursor = 0;
+        var startIndex = FindFirstPotentialMatchIndex(matches, sourceStart);
+
+        for (var i = startIndex; i < matches.Count; i++)
+        {
+            var match = matches[i];
+            var matchStart = match.Start;
+            var matchEnd = match.Start + match.Length;
+
+            if (matchStart >= sourceEnd) break;
+
+            var localStart = Math.Max(matchStart, sourceStart) - sourceStart;
+            var localEnd = Math.Min(matchEnd, sourceEnd) - sourceStart;
+
+            if (localStart > cursor)
+            {
+                AddRun(
+                    sink,
+                    text,
+                    cursor,
+                    localStart - cursor,
+                    configure,
+                    highlighted: false);
+            }
+
+            if (localEnd > localStart)
+            {
+                AddRun(
+                    sink,
+                    text,
+                    localStart,
+                    localEnd - localStart,
+                    configure,
+                    highlighted: true);
+            }
+
+            cursor = Math.Max(cursor, localEnd);
+        }
+
+        if (cursor < text.Length)
+        {
+            AddRun(sink, text, cursor, text.Length - cursor, configure, highlighted: false);
+        }
+    }
+
+    private static int FindFirstPotentialMatchIndex(IReadOnlyList<FindMatchOccurrence> matches, int sourceStart)
+    {
+        var low = 0;
+        var high = matches.Count - 1;
+        var result = matches.Count;
+
+        while (low <= high)
+        {
+            var mid = low + ((high - low) / 2);
+            var end = matches[mid].Start + matches[mid].Length;
+
+            if (end > sourceStart)
+            {
+                result = mid;
+                high = mid - 1;
+            }
+            else
+            {
+                low = mid + 1;
+            }
+        }
+
+        return result;
+    }
+
+    private static void AddRun(
+        InlineCollection sink,
+        string text,
+        int start,
+        int length,
+        Action<Run>? configure,
+        bool highlighted)
+    {
+        if (length <= 0) return;
+
+        var run = new Run(text.Substring(start, length));
+        configure?.Invoke(run);
+
+        if (highlighted)
+        {
+            run.Apply(
+                TextElement.BackgroundProperty,
+                Themed.Keys.FindMatch);
+        }
+
+        sink.Add(run);
     }
 
     private static InlineCollection EnsureInlines(Span span)

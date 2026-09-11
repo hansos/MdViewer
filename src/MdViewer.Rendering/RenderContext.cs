@@ -15,7 +15,9 @@ public sealed class RenderContext
         Action<string> onLinkActivated,
         bool allowRemoteImages = false,
         Action? onLoadRemoteImagesRequested = null,
-        bool reducedMode = false)
+        bool reducedMode = false,
+        IReadOnlyList<FindMatchOccurrence>? findMatches = null,
+        int currentFindMatch = 0)
     {
         Renderer = renderer;
         BaseDirectory = baseDirectory;
@@ -24,6 +26,8 @@ public sealed class RenderContext
         AllowRemoteImages = allowRemoteImages;
         OnLoadRemoteImagesRequested = onLoadRemoteImagesRequested;
         ReducedMode = reducedMode;
+        FindMatches = findMatches ?? Array.Empty<FindMatchOccurrence>();
+        CurrentFindMatch = currentFindMatch;
     }
 
     /// <summary>Used by container blocks to render their children.</summary>
@@ -60,6 +64,12 @@ public sealed class RenderContext
     /// </summary>
     public bool ReducedMode { get; }
 
+    /// <summary>Find matches in source-offset space for the current document.</summary>
+    public IReadOnlyList<FindMatchOccurrence> FindMatches { get; }
+
+    /// <summary>The 1-based index of the active find match, or 0 when none.</summary>
+    public int CurrentFindMatch { get; }
+
     /// <summary>Nesting depth, so quotes and lists can style by level.</summary>
     public int Depth { get; private init; }
 
@@ -70,7 +80,9 @@ public sealed class RenderContext
         OnLinkActivated,
         AllowRemoteImages,
         OnLoadRemoteImagesRequested,
-        ReducedMode)
+        ReducedMode,
+        FindMatches,
+        CurrentFindMatch)
     {
         Depth = Depth + 1
     };

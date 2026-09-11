@@ -37,6 +37,7 @@ internal static class Themed
         public const string CodeInlineBackground = "CodeInlineBackgroundBrush";
         public const string CodeInlineForeground = "CodeInlineForegroundBrush";
         public const string FindMatch = "FindMatchBrush";
+        public const string FindCurrentMatch = "FindCurrentMatchBrush";
         public const string MonoFontFamily = "MonoFontFamily";
         public const string CodeFontSize = "CodeFontSize";
 

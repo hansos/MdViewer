@@ -129,6 +129,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         Find = new FindViewModel();
+        Find.MatchSelected += OnFindMatchSelected;
         Settings = new SettingsViewModel();
         QuickOpen = new QuickOpenViewModel(Array.Empty<QuickOpenResultViewModel>(), Array.Empty<QuickOpenResultViewModel>());
 
@@ -545,6 +546,11 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 tab.SetError(result.ErrorMessage ?? "The document could not be opened.");
             }
+
+            if (ReferenceEquals(tab, SelectedTab))
+            {
+                SyncFindSearchText();
+            }
         }
         catch (OperationCanceledException)
         {
@@ -919,6 +925,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     partial void OnSelectedTabChanged(DocumentTabViewModel? value)
     {
+        SyncFindSearchText();
+
         if (value is not null)
         {
             IsStartPageRequested = false;
@@ -1022,6 +1030,22 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         IsFindBarVisible = false;
         Find.Query = string.Empty;
+    }
+
+    private void OnFindMatchSelected(int sourceOffset)
+    {
+        if (RestoreScrollOffset is not null)
+        {
+            RestoreScrollOffset(sourceOffset);
+            return;
+        }
+
+        ScrollToOffsetRequested?.Invoke(sourceOffset);
+    }
+
+    private void SyncFindSearchText()
+    {
+        Find.SetSearchText(SelectedTab?.SourceText ?? string.Empty);
     }
 
     // ==================================================== file associations
