@@ -15,7 +15,9 @@ internal sealed class SyntaxHighlighter
     private readonly Registry _registry;
     private readonly TextMateGrammarCatalog _catalog;
     private readonly Dictionary<string, IGrammar?> _grammarCache = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> _faultedScopes = new(StringComparer.OrdinalIgnoreCase);
     private readonly object _sync = new();
+    private readonly object _tokenizeSync = new();
 
     public SyntaxHighlighter()
     {
@@ -28,30 +30,46 @@ internal sealed class SyntaxHighlighter
     {
         if (string.IsNullOrEmpty(code)) return Array.Empty<HighlightSegment>();
 
-        var grammar = ResolveGrammar(infoString);
-        if (grammar is null) return null;
-
-        return TokenizeWithGrammar(code, grammar);
-    }
-
-    private IGrammar? ResolveGrammar(string infoString)
-    {
         foreach (var scope in _catalog.ResolveScopeCandidates(infoString))
         {
             var grammar = GetOrLoadGrammar(scope);
-            if (grammar is not null)
+            if (grammar is null) continue;
+
+            IReadOnlyList<HighlightSegment>? segments;
+            lock (_tokenizeSync)
             {
-                return grammar;
+                segments = TokenizeWithGrammar(code, grammar);
             }
+
+            if (segments is not null)
+            {
+                return segments;
+            }
+
+            MarkScopeFaulted(scope);
         }
 
         return null;
+    }
+
+    private void MarkScopeFaulted(string scope)
+    {
+        lock (_sync)
+        {
+            _faultedScopes.Add(scope);
+            _grammarCache[scope] = null;
+        }
     }
 
     private IGrammar? GetOrLoadGrammar(string scope)
     {
         lock (_sync)
         {
+            if (_faultedScopes.Contains(scope))
+            {
+                return null;
+            }
+
             if (_grammarCache.TryGetValue(scope, out var cached))
             {
                 return cached;
@@ -72,7 +90,7 @@ internal sealed class SyntaxHighlighter
         }
     }
 
-    private static IReadOnlyList<HighlightSegment> TokenizeWithGrammar(string code, IGrammar grammar)
+    private static IReadOnlyList<HighlightSegment>? TokenizeWithGrammar(string code, IGrammar grammar)
     {
         var segments = new List<HighlightSegment>();
         var lines = code.Split('\n');
@@ -91,20 +109,24 @@ internal sealed class SyntaxHighlighter
             }
             catch
             {
-                return segments.Count == 0
-                    ? [new HighlightSegment(code, null)]
-                    : segments;
+                return null;
             }
 
             if (result is null)
             {
-                return segments.Count == 0
-                    ? [new HighlightSegment(code, null)]
-                    : segments;
+                return null;
             }
 
             state = result.RuleStack ?? state;
-            AppendLineSegments(line, result.Tokens, segments);
+
+            try
+            {
+                AppendLineSegments(line, result.Tokens, segments);
+            }
+            catch
+            {
+                return null;
+            }
 
             if (i < lines.Length - 1)
             {

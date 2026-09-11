@@ -288,6 +288,22 @@
     <Setter Property="Background" Value="Transparent" />
   </Style>
 
+  <!-- ============================== Loading popup ============================== -->
+
+  <Style Selector="Border.loading-scrim">
+    <Setter Property="Background" Value="#66000000" />
+  </Style>
+
+  <Style Selector="Border.loading-card">
+    <Setter Property="Background" Value="{DynamicResource ShellChromeBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ShellBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MediumCornerRadius}" />
+    <Setter Property="Padding" Value="24,20" />
+    <Setter Property="MaxWidth" Value="320" />
+    <Setter Property="BoxShadow" Value="0 12 32 0 #33000000" />
+  </Style>
+
   <!-- ============================== Quick open ============================== -->
 
   <Style Selector="Border.quick-open">

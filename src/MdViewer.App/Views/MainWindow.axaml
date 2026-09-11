@@ -351,12 +351,6 @@
                   Content="Try again" Command="{Binding ReloadCommand}" />
         </StackPanel>
 
-        <TextBlock Classes="md-caption"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   Text="Loading…"
-                   IsVisible="{Binding SelectedTab.IsLoading, FallbackValue=False}" />
-
         <!--
           The start view and its recent documents (5.14). It is the empty state
           when no tabs are open, and is also reachable from Home at any time, in
@@ -469,6 +463,26 @@
 
         <!-- About page: fills the pane, same pattern as settings -->
         <views:AboutView IsVisible="{Binding IsAboutVisible}" />
+
+        <!-- Wait popup while a document is loading: blocks the pane until done -->
+        <Border Classes="loading-scrim"
+                IsVisible="{Binding SelectedTab.IsLoading, FallbackValue=False}">
+          <Border Classes="loading-card"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center">
+            <StackPanel Spacing="12">
+              <TextBlock Classes="md-body"
+                         HorizontalAlignment="Center"
+                         Text="Loading document…" />
+              <TextBlock Classes="md-caption"
+                         HorizontalAlignment="Center"
+                         TextTrimming="CharacterEllipsis"
+                         Foreground="{DynamicResource TextSecondaryBrush}"
+                         Text="{Binding SelectedTab.Title}" />
+              <ProgressBar IsIndeterminate="True" Width="220" />
+            </StackPanel>
+          </Border>
+        </Border>
       </Panel>
     </Grid>
   </DockPanel>

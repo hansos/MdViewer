@@ -50,7 +50,7 @@ internal sealed class TextMateGrammarCatalog
 
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        if (seen.Add(info))
+        if (LooksLikeScopeName(info) && seen.Add(info))
         {
             yield return info;
         }
@@ -98,5 +98,10 @@ internal sealed class TextMateGrammarCatalog
 
         var trimmed = value.Trim();
         return trimmed.StartsWith('.') ? trimmed : $".{trimmed}";
+    }
+
+    private static bool LooksLikeScopeName(string value)
+    {
+        return value.Contains('.') && !value.StartsWith('.');
     }
 }

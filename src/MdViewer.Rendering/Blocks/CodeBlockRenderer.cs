@@ -95,10 +95,16 @@ public sealed class CodeBlockRenderer : IBlockRenderer
 
         _ = Task.Run(() =>
         {
-            var segments = Highlighter.Tokenize(sourceText, language);
-            if (segments is null || segments.Count == 0) return;
+            try
+            {
+                var segments = Highlighter.Tokenize(sourceText, language);
+                if (segments is null || segments.Count == 0) return;
 
-            Dispatcher.UIThread.Post(() => ApplySegments(body, sourceText, segments), DispatcherPriority.Background);
+                Dispatcher.UIThread.Post(() => ApplySegments(body, sourceText, segments), DispatcherPriority.Background);
+            }
+            catch
+            {
+            }
         });
     }
 
