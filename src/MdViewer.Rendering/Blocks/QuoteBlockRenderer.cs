@@ -6,9 +6,8 @@ namespace MdViewer.Rendering.Blocks;
 /// <summary>
 /// Block quotes, nesting to any depth (SPECIFICATION.md 5.2).
 ///
-/// GitHub alerts (<c>&gt; [!NOTE]</c>) arrive here too until the alert
-/// extension and the callout renderer land in M3 — they are block quotes
-/// syntactically, so nothing is lost in the meantime.
+/// GitHub alerts are block quotes syntactically, but they are claimed earlier
+/// by <see cref="CalloutBlockRenderer" /> and never reach here.
 /// </summary>
 public sealed class QuoteBlockRenderer : IBlockRenderer
 {

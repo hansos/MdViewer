@@ -33,8 +33,9 @@ public static class MarkdownPipelineFactory
             .UseAutoLinks()
             .UseFootnotes()
 
-            // Containers rendered as callouts
+            // Containers and GitHub alerts rendered as callouts
             .UseCustomContainers()
+            .UseAlertBlocks()
 
             // Metadata, parsed but not rendered as body content (5.12)
             .UseYamlFrontMatter()
@@ -56,11 +57,6 @@ public static class MarkdownPipelineFactory
 
         // NOT enabled, deliberately (SPECIFICATION.md 5.1):
         //   Bootstrap, Figures, JiraLinks, SelfPipeline, Globalization, Mathematics.
-        //
-        // GitHub alerts (> [!NOTE]) are not enabled yet either. They parse as
-        // ordinary block quotes today, which is what they are syntactically, so
-        // nothing is lost visually. Turning the extension on is a one-line
-        // change once the callout renderer lands in M3.
 
         return builder.Build();
     }

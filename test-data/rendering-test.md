@@ -410,10 +410,7 @@ A loose list:
 > > > 
 > > > > Level four
 
-### 7.2 GitHub alerts — NOT ENABLED
-
-The alert extension is not switched on, so these must render as ordinary block
-quotes with the marker visible as literal text, not vanish.
+### 7.2 GitHub alerts
 
 > [!NOTE]
 > Useful information the user should know.
