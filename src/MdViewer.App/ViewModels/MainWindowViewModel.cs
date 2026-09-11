@@ -336,6 +336,9 @@ public partial class MainWindowViewModel : ViewModelBase
         IsSidebarVisible = _session.IsSidebarVisible;
         ApplyViewState?.Invoke(_session);
 
+        // Tabs are created first and the active one is selected before any file
+        // is read, so the loading popup (bound to SelectedTab.IsLoading) is
+        // visible during the startup load just like it is for a later open.
         foreach (var saved in _session.Tabs)
         {
             if (string.IsNullOrEmpty(saved.Path) || !File.Exists(saved.Path)) continue;
@@ -344,14 +347,19 @@ public partial class MainWindowViewModel : ViewModelBase
             tab.ViewMode = saved.ViewMode;
             tab.Zoom = saved.Zoom <= 0 ? 1.0 : saved.Zoom;
             tab.ScrollOffset = saved.ScrollOffset;
-
-            await LoadIntoAsync(tab, tab.FullPath).ConfigureAwait(true);
         }
 
         if (Tabs.Count == 0) return;
 
         var index = _session.ActiveTabIndex;
         SelectedTab = index >= 0 && index < Tabs.Count ? Tabs[index] : Tabs[0];
+
+        // The selected tab loads first: it is the one the reader is waiting for.
+        var ordered = Tabs.OrderByDescending(t => ReferenceEquals(t, SelectedTab)).ToList();
+        foreach (var tab in ordered)
+        {
+            await LoadIntoAsync(tab, tab.FullPath).ConfigureAwait(true);
+        }
 
         if (SelectedTab.ScrollOffset > 0)
         {
