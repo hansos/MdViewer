@@ -125,6 +125,13 @@
       <CheckBox Content="Show front matter"
                 IsChecked="{Binding Settings.ShowFrontMatter, Mode=TwoWay}" />
 
+      <!-- ==================== File watching ==================== -->
+      <TextBlock Classes="md-h4" Text="File watching" Margin="0,16,0,0" />
+      <Border Classes="md-heading-rule" Margin="0,0,0,8" />
+
+      <CheckBox Content="Watch open files for external changes"
+                IsChecked="{Binding Settings.EnableFileWatching, Mode=TwoWay}" />
+
       <!-- ======================== Startup ======================= -->
       <TextBlock Classes="md-h4" Text="Startup" Margin="0,16,0,0" />
       <Border Classes="md-heading-rule" Margin="0,0,0,8" />

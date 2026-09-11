@@ -75,6 +75,16 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private bool _showFrontMatter;
 
+    // ======================================================== file watching
+
+    private bool _enableFileWatching = true;
+
+    public bool EnableFileWatching
+    {
+        get => _enableFileWatching;
+        set => SetProperty(ref _enableFileWatching, value);
+    }
+
     // =============================================================== startup
 
     [ObservableProperty]
@@ -124,6 +134,7 @@ public partial class SettingsViewModel : ViewModelBase
 
         ShowLineNumbersInRawView = settings.ShowLineNumbersInRawView;
         ShowFrontMatter = settings.ShowFrontMatter;
+        EnableFileWatching = settings.EnableFileWatching;
 
         ReopenPreviousFolder = settings.ReopenPreviousFolder;
     }
@@ -153,6 +164,7 @@ public partial class SettingsViewModel : ViewModelBase
 
         settings.ShowLineNumbersInRawView = ShowLineNumbersInRawView;
         settings.ShowFrontMatter = ShowFrontMatter;
+        settings.EnableFileWatching = EnableFileWatching;
 
         settings.ReopenPreviousFolder = ReopenPreviousFolder;
     }

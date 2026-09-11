@@ -54,6 +54,10 @@ public sealed class AppSettings
 
     public bool ShowFrontMatter { get; set; }
 
+    // ======================================================== file watching
+
+    public bool EnableFileWatching { get; set; } = true;
+
     // =============================================================== startup
 
     public bool ReopenPreviousFolder { get; set; } = true;

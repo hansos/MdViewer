@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Reflection;
 using Avalonia;
 using Avalonia.Styling;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MdViewer.App.Services;
@@ -26,12 +27,19 @@ public partial class MainWindowViewModel : ViewModelBase
     /// </summary>
     private const int CollapsedRecentCount = 5;
     private static readonly string HelpPagePath = Path.Combine(AppContext.BaseDirectory, "Help", "help-page.md");
+    private static readonly StringComparer PathComparer = OperatingSystem.IsWindows()
+        ? StringComparer.OrdinalIgnoreCase
+        : StringComparer.Ordinal;
 
     private readonly DocumentLoader _loader = new();
     private readonly WorkspaceScanner _scanner = new();
     private readonly RecentDocumentList _recent = new();
     private readonly SettingsStore _settingsStore = new();
     private readonly SessionStore _sessionStore = new();
+    private readonly Dictionary<string, FileSystemWatcher> _fileWatchers = new(PathComparer);
+    private readonly Dictionary<string, CancellationTokenSource> _pendingWatchedReloads = new(PathComparer);
+
+    private const int WatchedReloadDebounceMs = 350;
 
     private AppSettings _settings = new();
     private SessionState _session = new();
@@ -239,6 +247,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void OnTabsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
+        RebuildFileWatchers();
+        PrunePendingWatchedReloads();
         OnPropertyChanged(nameof(HasNoTabs));
         OnPropertyChanged(nameof(IsStartPageVisible));
         OnPropertyChanged(nameof(CanLeaveStartPage));
@@ -374,6 +384,11 @@ public partial class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(IsSidebarPresent));
             OnPropertyChanged(nameof(CanToggleSidebar));
             ToggleSidebarCommand.NotifyCanExecuteChanged();
+        }
+
+        if (e.PropertyName == nameof(SettingsViewModel.EnableFileWatching))
+        {
+            RebuildFileWatchers();
         }
 
         ApplySettings();
@@ -540,6 +555,7 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 tab.SetDocument(result.Document);
                 tab.Title = Path.GetFileName(path);
+                tab.IsModifiedOnDisk = false;
                 RecordRecent(result.Document);
             }
             else
@@ -612,6 +628,192 @@ public partial class MainWindowViewModel : ViewModelBase
         OnPropertyChanged(nameof(HasWorkspace));
         RefreshQuickOpenSources();
         RequestSave();
+    }
+
+    private void RebuildFileWatchers()
+    {
+        if (!Settings.EnableFileWatching)
+        {
+            ClearModifiedOnDiskFlags();
+            CancelPendingWatchedReloads();
+
+            foreach (var watcher in _fileWatchers.Values)
+            {
+                DisposeWatcher(watcher);
+            }
+
+            _fileWatchers.Clear();
+            return;
+        }
+
+        var requiredDirectories = Tabs
+            .Select(tab => Path.GetDirectoryName(tab.FullPath))
+            .Where(path => !string.IsNullOrWhiteSpace(path))
+            .Select(path => Path.GetFullPath(path!))
+            .Distinct(PathComparer)
+            .ToList();
+
+        foreach (var directory in _fileWatchers.Keys.Except(requiredDirectories, PathComparer).ToList())
+        {
+            DisposeWatcher(_fileWatchers[directory]);
+            _fileWatchers.Remove(directory);
+        }
+
+        foreach (var directory in requiredDirectories)
+        {
+            if (_fileWatchers.ContainsKey(directory)) continue;
+
+            var watcher = CreateWatcher(directory);
+            if (watcher is not null)
+            {
+                _fileWatchers[directory] = watcher;
+            }
+        }
+    }
+
+    private FileSystemWatcher? CreateWatcher(string directory)
+    {
+        try
+        {
+            var watcher = new FileSystemWatcher(directory)
+            {
+                NotifyFilter = NotifyFilters.FileName
+                    | NotifyFilters.LastWrite
+                    | NotifyFilters.CreationTime
+                    | NotifyFilters.Size,
+                IncludeSubdirectories = false,
+                EnableRaisingEvents = true,
+            };
+
+            watcher.Changed += OnWatchedFileChanged;
+            watcher.Created += OnWatchedFileChanged;
+            watcher.Deleted += OnWatchedFileChanged;
+            watcher.Renamed += OnWatchedFileRenamed;
+
+            return watcher;
+        }
+        catch (Exception ex) when (ex is ArgumentException or IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
+    }
+
+    private void DisposeWatcher(FileSystemWatcher watcher)
+    {
+        watcher.EnableRaisingEvents = false;
+        watcher.Changed -= OnWatchedFileChanged;
+        watcher.Created -= OnWatchedFileChanged;
+        watcher.Deleted -= OnWatchedFileChanged;
+        watcher.Renamed -= OnWatchedFileRenamed;
+        watcher.Dispose();
+    }
+
+    private void OnWatchedFileChanged(object sender, FileSystemEventArgs e) =>
+        MarkModifiedOnDiskFromWatch(e.FullPath);
+
+    private void OnWatchedFileRenamed(object sender, RenamedEventArgs e)
+    {
+        MarkModifiedOnDiskFromWatch(e.OldFullPath);
+        MarkModifiedOnDiskFromWatch(e.FullPath);
+    }
+
+    private void MarkModifiedOnDiskFromWatch(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return;
+
+        Dispatcher.UIThread.Post(() => HandleWatchedFileChange(path));
+    }
+
+    private void HandleWatchedFileChange(string path)
+    {
+        if (!Settings.EnableFileWatching) return;
+
+        var fullPath = Path.GetFullPath(path);
+        var tab = Tabs.FirstOrDefault(t => PathsEqual(t.FullPath, fullPath));
+        if (tab is null) return;
+
+        tab.IsModifiedOnDisk = true;
+        QueueWatchedReload(fullPath);
+    }
+
+    private void QueueWatchedReload(string fullPath)
+    {
+        if (_pendingWatchedReloads.TryGetValue(fullPath, out var existing))
+        {
+            existing.Cancel();
+        }
+
+        var cancellation = new CancellationTokenSource();
+        _pendingWatchedReloads[fullPath] = cancellation;
+        _ = ReloadWatchedTabAsync(fullPath, cancellation);
+    }
+
+    private async Task ReloadWatchedTabAsync(string fullPath, CancellationTokenSource cancellation)
+    {
+        try
+        {
+            await Task.Delay(WatchedReloadDebounceMs, cancellation.Token).ConfigureAwait(true);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        if (!_pendingWatchedReloads.TryGetValue(fullPath, out var current) || current != cancellation)
+        {
+            return;
+        }
+
+        _pendingWatchedReloads.Remove(fullPath);
+
+        if (!Settings.EnableFileWatching) return;
+
+        var tab = Tabs.FirstOrDefault(t => PathsEqual(t.FullPath, fullPath));
+        if (tab is null) return;
+
+        var shouldRestoreOffset = ReferenceEquals(tab, SelectedTab);
+        var offset = tab.ScrollOffset;
+
+        if (shouldRestoreOffset && CaptureScrollOffset is not null)
+        {
+            offset = CaptureScrollOffset();
+            tab.ScrollOffset = offset;
+        }
+
+        await LoadIntoAsync(tab, tab.FullPath).ConfigureAwait(true);
+
+        if (shouldRestoreOffset && ReferenceEquals(tab, SelectedTab))
+        {
+            RestoreScrollOffset?.Invoke(offset);
+        }
+    }
+
+    private void ClearModifiedOnDiskFlags()
+    {
+        foreach (var tab in Tabs)
+        {
+            tab.IsModifiedOnDisk = false;
+        }
+    }
+
+    private void PrunePendingWatchedReloads()
+    {
+        var openPaths = Tabs.Select(t => t.FullPath).ToHashSet(PathComparer);
+        foreach (var item in _pendingWatchedReloads.Where(kvp => !openPaths.Contains(kvp.Key)).ToList())
+        {
+            item.Value.Cancel();
+            _pendingWatchedReloads.Remove(item.Key);
+        }
+    }
+
+    private void CancelPendingWatchedReloads()
+    {
+        foreach (var cancellation in _pendingWatchedReloads.Values)
+        {
+            cancellation.Cancel();
+        }
+
+        _pendingWatchedReloads.Clear();
     }
 
     /// <summary>Opens the item in its own tab; directories toggle expansion.</summary>

@@ -35,8 +35,8 @@ public partial class DocumentTabViewModel : ViewModelBase
     private bool _isLoading;
 
     /// <summary>
-    /// Set when the file has changed on disk and the app is in "notify only"
-    /// mode; shown as a dot on the tab (SPECIFICATION.md 5.10).
+    /// Set when the file has changed on disk; shown as a dot on the tab
+    /// (SPECIFICATION.md 5.10).
     /// </summary>
     [ObservableProperty]
     private bool _isModifiedOnDisk;
