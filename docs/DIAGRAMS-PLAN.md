@@ -23,16 +23,16 @@ That cost is avoidable. **Mermaider** parses Mermaid's DSL and runs its own Sugi
 layout entirely in managed C#, emitting sanitized SVG. No browser, no DOM, no JS
 runtime, no child process.
 
-| | §5.5 as written (`mmdc`) | This plan (Mermaider) |
-|---|---|---|
-| Runtime dependency | Node + Puppeteer + Chromium (~300 MB), user-installed | None — a NuGet reference |
-| Render latency | 2–10 s process launch | 12–71 µs in-process |
-| Works out of the box | No | Yes |
-| Render call | Async, cancellable, placeholder UI | Synchronous, inside `IBlockRenderer.Render` |
-| Theme change | Re-render via external process | Re-render at ~25 µs |
-| Cache | 200 MB on-disk LRU, hashed key | Small in-memory dictionary, or none |
-| Attack surface | Untrusted process output, timeouts, sandbox flags | Always-on SVG allowlist sanitizer |
-| Platform parity | Chromium-on-Linux is the weak spot | Identical managed code both platforms |
+|                      | §5.5 as written (`mmdc`)                              | This plan (Mermaider)                       |
+| -------------------- | ----------------------------------------------------- | ------------------------------------------- |
+| Runtime dependency   | Node + Puppeteer + Chromium (~300 MB), user-installed | None — a NuGet reference                    |
+| Render latency       | 2–10 s process launch                                 | 12–71 µs in-process                         |
+| Works out of the box | No                                                    | Yes                                         |
+| Render call          | Async, cancellable, placeholder UI                    | Synchronous, inside `IBlockRenderer.Render` |
+| Theme change         | Re-render via external process                        | Re-render at ~25 µs                         |
+| Cache                | 200 MB on-disk LRU, hashed key                        | Small in-memory dictionary, or none         |
+| Attack surface       | Untrusted process output, timeouts, sandbox flags     | Always-on SVG allowlist sanitizer           |
+| Platform parity      | Chromium-on-Linux is the weak spot                    | Identical managed code both platforms       |
 
 The disk cache, the timeout, the sandbox, the availability probe, the settings page and
 the async placeholder state all disappear. What remains is roughly one afternoon of
@@ -40,10 +40,10 @@ plumbing plus a theming pass.
 
 ### 1.1 The dependencies
 
-| Package | Version | Role | License |
-|---|---|---|---|
-| `Mermaider` | 0.12.2 (2026-08-11) | Mermaid DSL → SVG, pure managed, `net10.0`, Native-AOT clean | MIT |
-| `Svg.Controls.Skia.Avalonia` | 12.0.0.13 (2026-06-15) | SVG → Avalonia visual | MIT |
+| Package                      | Version                | Role                                                         | License |
+| ---------------------------- | ---------------------- | ------------------------------------------------------------ | ------- |
+| `Mermaider`                  | 0.12.2 (2026-08-11)    | Mermaid DSL → SVG, pure managed, `net10.0`, Native-AOT clean | MIT     |
+| `Svg.Controls.Skia.Avalonia` | 12.0.0.13 (2026-06-15) | SVG → Avalonia visual                                        | MIT     |
 
 `Mermaider` pulls `Sugiyama` and `Microsoft.Extensions.ObjectPool`.
 `Svg.Controls.Skia.Avalonia` pulls `Avalonia.Skia ≥ 12.0.0` and `Svg.Skia ≥ 5.1.1`.
@@ -224,11 +224,11 @@ each one must not trigger its own render. Post a single re-render to the dispatc
 
 Add to both `Light` and `Dark` in `Themes/Tokens.axaml`:
 
-| Key | Light | Dark | Purpose |
-|---|---|---|---|
-| `DiagramSurfaceBrush` | `#F7F8FA` | `#22262D` | Node fills |
-| `DiagramBorderBrush` | `#D5DAE1` | `#3A414B` | Node strokes |
-| `DiagramLineBrush` | `#8B939E` | `#767F8B` | Edges, arrowheads |
+| Key                   | Light     | Dark      | Purpose           |
+| --------------------- | --------- | --------- | ----------------- |
+| `DiagramSurfaceBrush` | `#F7F8FA` | `#22262D` | Node fills        |
+| `DiagramBorderBrush`  | `#D5DAE1` | `#3A414B` | Node strokes      |
+| `DiagramLineBrush`    | `#8B939E` | `#767F8B` | Edges, arrowheads |
 
 Reusing `CodeBlockBackgroundBrush` would work today and hurt later — diagram surfaces
 and code surfaces want to diverge (a diagram node needs more contrast against the page
@@ -319,9 +319,10 @@ flattener is deleted and nothing else changes. If Svg.Skia mishandles something 
 text metrics, `text-anchor`, dominant-baseline — the fallback is a hand-written
 SVG→Avalonia `Geometry` mapper over the subset Mermaider's sanitizer guarantees
 (`path`, `rect`, `line`, `polygon`, `polyline`, `circle`, `ellipse`, `text`, `g`
+
 + transforms). That is roughly 700 lines and is SPECIFICATION.md §2.2 option 3 — far
-cheaper against Mermaider's small, sanitized, `foreignObject`-free output than it would
-have been against real mermaid.js SVG.
+  cheaper against Mermaider's small, sanitized, `foreignObject`-free output than it would
+  have been against real mermaid.js SVG.
 
 ### 4.4 Caching
 
@@ -363,14 +364,14 @@ accessibility we do not have.
 
 Every rung stays readable. No rung throws.
 
-| Condition | Result |
-|---|---|
-| Renders | The diagram, with chrome |
-| Parse failure / unsupported syntax | Code block + `md-caption` line: *"Diagram could not be rendered: {message}"* |
-| Unknown fence language | `CanRender` returns false; `CodeBlockRenderer` handles it, unchanged |
-| Source over 100 KB | Code block + *"Diagram too large to render."* |
-| Reduced mode (doc > 5 MB, §5.10) | Code block + a *"Render diagrams"* button |
-| Renderer throws | `MarkdownRenderer.RenderBlock`'s existing guard produces the error card (§6.4) |
+| Condition                          | Result                                                                         |
+| ---------------------------------- | ------------------------------------------------------------------------------ |
+| Renders                            | The diagram, with chrome                                                       |
+| Parse failure / unsupported syntax | Code block + `md-caption` line: *"Diagram could not be rendered: {message}"*   |
+| Unknown fence language             | `CanRender` returns false; `CodeBlockRenderer` handles it, unchanged           |
+| Source over 100 KB                 | Code block + *"Diagram too large to render."*                                  |
+| Reduced mode (doc > 5 MB, §5.10)   | Code block + a *"Render diagrams"* button                                      |
+| Renderer throws                    | `MarkdownRenderer.RenderBlock`'s existing guard produces the error card (§6.4) |
 
 `ReducedMode` is already on `RenderContext`, and the consent button reuses the
 `OnLoadRemoteImagesRequested` pattern from `MarkdownImages` — a per-document opt-in
@@ -431,17 +432,17 @@ There is **no `tests/` directory in the repository yet**, though SPECIFICATION.m
 `tests/MdViewer.Rendering.Tests`, but that is a real decision with its own cost — worth
 naming rather than smuggling in.
 
-| Test | Kind |
-|---|---|
-| `SvgThemeFlattener` resolves `var()`, nested `var()`, fallbacks, and `rem` | Unit |
-| Flattened output contains no `var(` and no `rem` | Unit |
-| `DiagramRendererRegistry` claims `mermaid` and declines `csharp`, `python`, `""` | Unit |
-| Malformed diagram source returns `Failed`, never throws | Unit |
-| `DiagramPalette` maps every token to a `RenderOptions` field | Unit |
-| One golden SVG per stable diagram type | Snapshot |
-| `DiagramBlockRenderer` registers a source span | Headless Avalonia |
-| Theme variant change re-renders exactly once for seven brush changes | Headless Avalonia |
-| 1 MB document containing 50 diagrams still meets the §6.1 open target | Benchmark |
+| Test                                                                             | Kind              |
+| -------------------------------------------------------------------------------- | ----------------- |
+| `SvgThemeFlattener` resolves `var()`, nested `var()`, fallbacks, and `rem`       | Unit              |
+| Flattened output contains no `var(` and no `rem`                                 | Unit              |
+| `DiagramRendererRegistry` claims `mermaid` and declines `csharp`, `python`, `""` | Unit              |
+| Malformed diagram source returns `Failed`, never throws                          | Unit              |
+| `DiagramPalette` maps every token to a `RenderOptions` field                     | Unit              |
+| One golden SVG per stable diagram type                                           | Snapshot          |
+| `DiagramBlockRenderer` registers a source span                                   | Headless Avalonia |
+| Theme variant change re-renders exactly once for seven brush changes             | Headless Avalonia |
+| 1 MB document containing 50 diagrams still meets the §6.1 open target            | Benchmark         |
 
 Golden SVG snapshots are worth the maintenance here specifically because Mermaider is
 young: they turn an upstream fidelity regression into a failing test instead of a bug

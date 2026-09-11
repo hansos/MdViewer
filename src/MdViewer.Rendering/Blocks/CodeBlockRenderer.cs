@@ -3,6 +3,8 @@ using Avalonia.Controls.Documents;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input.Platform;
 using Avalonia.Layout;
+using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using Markdig.Syntax;
 using MdViewer.Rendering.Highlighting;
@@ -39,7 +41,8 @@ public sealed class CodeBlockRenderer : IBlockRenderer
     {
         var code = (CodeBlock)block;
         var text = ExtractText(code);
-        var language = (code as FencedCodeBlock)?.Info?.Trim() ?? string.Empty;
+        var info = (code as FencedCodeBlock)?.Info?.Trim() ?? string.Empty;
+        var language = ExtractLanguage(info);
 
         var body = new SelectableTextBlock { Text = text };
         body.Classes.Add("md-code");
@@ -175,6 +178,14 @@ public sealed class CodeBlockRenderer : IBlockRenderer
         var header = new Border { Child = grid };
         header.Classes.Add("md-code-header");
         return header;
+    }
+
+    private static string ExtractLanguage(string info)
+    {
+        if (string.IsNullOrWhiteSpace(info)) return string.Empty;
+
+        var separator = info.IndexOfAny([' ', '\t', '{']);
+        return separator < 0 ? info : info[..separator];
     }
 
     private static string ExtractText(CodeBlock code)

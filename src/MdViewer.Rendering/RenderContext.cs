@@ -16,6 +16,11 @@ public sealed class RenderContext
         bool allowRemoteImages = false,
         Action? onLoadRemoteImagesRequested = null,
         bool reducedMode = false,
+        string diagramTheme = "default",
+        double diagramDpi = 96d,
+        double diagramFontSize = 15d,
+        string? diagramBodyFontFamily = null,
+        string? diagramMonoFontFamily = null,
         IReadOnlyList<FindMatchOccurrence>? findMatches = null,
         int currentFindMatch = 0)
     {
@@ -26,6 +31,11 @@ public sealed class RenderContext
         AllowRemoteImages = allowRemoteImages;
         OnLoadRemoteImagesRequested = onLoadRemoteImagesRequested;
         ReducedMode = reducedMode;
+        DiagramTheme = string.IsNullOrWhiteSpace(diagramTheme) ? "default" : diagramTheme.Trim();
+        DiagramDpi = diagramDpi <= 0 ? 96d : diagramDpi;
+        DiagramFontSize = diagramFontSize <= 0 ? 15d : diagramFontSize;
+        DiagramBodyFontFamily = string.IsNullOrWhiteSpace(diagramBodyFontFamily) ? null : diagramBodyFontFamily.Trim();
+        DiagramMonoFontFamily = string.IsNullOrWhiteSpace(diagramMonoFontFamily) ? null : diagramMonoFontFamily.Trim();
         FindMatches = findMatches ?? Array.Empty<FindMatchOccurrence>();
         CurrentFindMatch = currentFindMatch;
     }
@@ -64,6 +74,21 @@ public sealed class RenderContext
     /// </summary>
     public bool ReducedMode { get; }
 
+    /// <summary>Theme key used by optional diagram renderers.</summary>
+    public string DiagramTheme { get; }
+
+    /// <summary>DPI value used by raster diagram renderers.</summary>
+    public double DiagramDpi { get; }
+
+    /// <summary>Base font size passed to diagram renderers.</summary>
+    public double DiagramFontSize { get; }
+
+    /// <summary>Body font family for diagram labels.</summary>
+    public string? DiagramBodyFontFamily { get; }
+
+    /// <summary>Monospace font family for diagram code-like text.</summary>
+    public string? DiagramMonoFontFamily { get; }
+
     /// <summary>Find matches in source-offset space for the current document.</summary>
     public IReadOnlyList<FindMatchOccurrence> FindMatches { get; }
 
@@ -81,6 +106,11 @@ public sealed class RenderContext
         AllowRemoteImages,
         OnLoadRemoteImagesRequested,
         ReducedMode,
+        DiagramTheme,
+        DiagramDpi,
+        DiagramFontSize,
+        DiagramBodyFontFamily,
+        DiagramMonoFontFamily,
         FindMatches,
         CurrentFindMatch)
     {

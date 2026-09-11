@@ -60,6 +60,11 @@
       <SolidColorBrush x:Key="CodeBlockHeaderBrush" Color="#EFF1F4" />
       <SolidColorBrush x:Key="CodeLineNumberBrush" Color="#AAB1BA" />
 
+      <!-- Markdown: diagrams -->
+      <SolidColorBrush x:Key="DiagramSurfaceBrush" Color="#F7F8FA" />
+      <SolidColorBrush x:Key="DiagramBorderBrush" Color="#D5DAE1" />
+      <SolidColorBrush x:Key="DiagramLineBrush" Color="#8B939E" />
+
       <!-- Syntax colours (TextMate scope buckets, SPECIFICATION.md 5.3) -->
       <SolidColorBrush x:Key="SyntaxKeywordBrush" Color="#A626A4" />
       <SolidColorBrush x:Key="SyntaxTypeBrush" Color="#C18401" />
@@ -138,6 +143,11 @@
       <SolidColorBrush x:Key="CodeBlockBorderBrush" Color="#2B3038" />
       <SolidColorBrush x:Key="CodeBlockHeaderBrush" Color="#23272E" />
       <SolidColorBrush x:Key="CodeLineNumberBrush" Color="#5A626D" />
+
+      <!-- Markdown: diagrams -->
+      <SolidColorBrush x:Key="DiagramSurfaceBrush" Color="#22262D" />
+      <SolidColorBrush x:Key="DiagramBorderBrush" Color="#3A414B" />
+      <SolidColorBrush x:Key="DiagramLineBrush" Color="#767F8B" />
 
       <SolidColorBrush x:Key="SyntaxKeywordBrush" Color="#C792EA" />
       <SolidColorBrush x:Key="SyntaxTypeBrush" Color="#E5C07B" />

@@ -2,12 +2,12 @@
 
 A cross-platform Markdown viewer for Windows and Linux, built on Avalonia UI.
 
-| | |
-|---|---|
-| **Status** | Draft v0.1 |
-| **Date** | 2026-09-10 |
-| **Target platforms** | Windows 10/11 (x64, ARM64), Linux (x64, ARM64) |
-| **Scope of v1** | Read-only viewer; architecture prepared for an editor in v2 |
+|                      |                                                             |
+| -------------------- | ----------------------------------------------------------- |
+| **Status**           | Draft v0.1                                                  |
+| **Date**             | 2026-09-10                                                  |
+| **Target platforms** | Windows 10/11 (x64, ARM64), Linux (x64, ARM64)              |
+| **Scope of v1**      | Read-only viewer; architecture prepared for an editor in v2 |
 
 ---
 
@@ -39,18 +39,18 @@ KT MD Viewer is a fast, native desktop application for reading Markdown document
 
 This is the foundational decision, so it is recorded with its alternatives.
 
-| Criterion | Native Avalonia visual tree | Markdig → HTML → WebView |
-|---|---|---|
-| Linux reliability | Full control; one rendering path (Skia) on both platforms | Depends on WebKitGTK version present on the user's distro; a known source of blank panes and crash reports |
-| Deployment size | No extra runtime | Pulls in a browser engine or depends on a system one |
-| Startup cost | Milliseconds | Browser process spin-up, typically 200–600 ms |
-| Theming | Avalonia styles; theme switching is instant and shares the app's resources | Separate CSS layer to keep in sync with app theme |
-| Text selection across blocks | Must be built (see §5.7) — real work | Free |
-| Tables, nested structures | Must be built — real work | Free |
-| Raw HTML in Markdown | Not supported; degrade to escaped text | Free, and a security liability |
-| Accessibility | Avalonia's automation peers; Linux AT-SPI2 support since Avalonia 12 | Browser accessibility tree, isolated from the app's |
-| Debuggability | Standard .NET debugging | Two runtimes, IPC boundary |
-| Scroll sync for a future editor | Direct: every visual knows its source offset | Requires JS interop plumbing |
+| Criterion                       | Native Avalonia visual tree                                                | Markdig → HTML → WebView                                                                                   |
+| ------------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Linux reliability               | Full control; one rendering path (Skia) on both platforms                  | Depends on WebKitGTK version present on the user's distro; a known source of blank panes and crash reports |
+| Deployment size                 | No extra runtime                                                           | Pulls in a browser engine or depends on a system one                                                       |
+| Startup cost                    | Milliseconds                                                               | Browser process spin-up, typically 200–600 ms                                                              |
+| Theming                         | Avalonia styles; theme switching is instant and shares the app's resources | Separate CSS layer to keep in sync with app theme                                                          |
+| Text selection across blocks    | Must be built (see §5.7) — real work                                       | Free                                                                                                       |
+| Tables, nested structures       | Must be built — real work                                                  | Free                                                                                                       |
+| Raw HTML in Markdown            | Not supported; degrade to escaped text                                     | Free, and a security liability                                                                             |
+| Accessibility                   | Avalonia's automation peers; Linux AT-SPI2 support since Avalonia 12       | Browser accessibility tree, isolated from the app's                                                        |
+| Debuggability                   | Standard .NET debugging                                                    | Two runtimes, IPC boundary                                                                                 |
+| Scroll sync for a future editor | Direct: every visual knows its source offset                               | Requires JS interop plumbing                                                                               |
 
 **Decision: native.** The two genuine advantages of the WebView path — free text selection and free table layout — are one-time engineering costs that we pay once and control forever. The disadvantages of the WebView path are recurring and largely outside our control, and the worst of them lands on Linux, which is half our target.
 
@@ -60,17 +60,17 @@ This is the foundational decision, so it is recorded with its alternatives.
 
 Versions verified against NuGet on 2026-09-10.
 
-| Package | Version | Role |
-|---|---|---|
-| `Avalonia` | 12.1.2 | UI framework. Targets .NET 10, SkiaSharp 3. |
-| `Avalonia.Desktop` | 12.1.2 | Windows/X11/Wayland backends |
-| `Avalonia.Themes.Fluent` | 12.1.2 | Base theme |
-| `Markdig` | 1.3.2 | Markdown parser → AST |
-| `TextMateSharp` | 2.0.4 | TextMate grammars + themes for code highlighting |
-| `TextMateSharp.Grammars` | 2.0.4 | Bundled grammar set |
-| `CommunityToolkit.Mvvm` | 8.4.2 | Observable objects, commands, messaging |
-| `Microsoft.Extensions.DependencyInjection` | 10.x | Composition root |
-| `Microsoft.Extensions.Logging` | 10.x | Diagnostics |
+| Package                                    | Version | Role                                             |
+| ------------------------------------------ | ------- | ------------------------------------------------ |
+| `Avalonia`                                 | 12.1.2  | UI framework. Targets .NET 10, SkiaSharp 3.      |
+| `Avalonia.Desktop`                         | 12.1.2  | Windows/X11/Wayland backends                     |
+| `Avalonia.Themes.Fluent`                   | 12.1.2  | Base theme                                       |
+| `Markdig`                                  | 1.3.2   | Markdown parser → AST                            |
+| `TextMateSharp`                            | 2.0.4   | TextMate grammars + themes for code highlighting |
+| `TextMateSharp.Grammars`                   | 2.0.4   | Bundled grammar set                              |
+| `CommunityToolkit.Mvvm`                    | 8.4.2   | Observable objects, commands, messaging          |
+| `Microsoft.Extensions.DependencyInjection` | 10.x    | Composition root                                 |
+| `Microsoft.Extensions.Logging`             | 10.x    | Diagnostics                                      |
 
 **Target framework:** `net10.0`. Avalonia 12 dropped `netstandard2.0` from most projects and targets .NET 10.
 
@@ -163,37 +163,37 @@ The `Core` / `Rendering` split is what makes the v2 editor tractable: the editor
 
 ### 4.3 Opening documents
 
-| Route | Behavior |
-|---|---|
-| `File → Open` (`Ctrl+O`) | Storage provider file picker, filtered to `.md`, `.markdown`, `.mdown`, `.mkd`, `.mdx`, `.txt` |
-| `File → Open Folder` (`Ctrl+K Ctrl+O`) | Sets the workspace root for the file tree; does not open any document |
-| Command line | `mdviewer file1.md file2.md` — each argument becomes a tab. Relative paths resolve against the invocation CWD. |
-| Drag and drop | Files onto the window open as tabs; a folder sets the workspace root |
-| OS file association | Registered as a handler for `.md` on both platforms; opening a second file while running raises the existing window and adds a tab (single-instance, §7.3) |
-| Internal link | A relative link to another Markdown file opens in a new tab (§5.6) |
+| Route                                  | Behavior                                                                                                                                                   |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `File → Open` (`Ctrl+O`)               | Storage provider file picker, filtered to `.md`, `.markdown`, `.mdown`, `.mkd`, `.mdx`, `.txt`                                                             |
+| `File → Open Folder` (`Ctrl+K Ctrl+O`) | Sets the workspace root for the file tree; does not open any document                                                                                      |
+| Command line                           | `mdviewer file1.md file2.md` — each argument becomes a tab. Relative paths resolve against the invocation CWD.                                             |
+| Drag and drop                          | Files onto the window open as tabs; a folder sets the workspace root                                                                                       |
+| OS file association                    | Registered as a handler for `.md` on both platforms; opening a second file while running raises the existing window and adds a tab (single-instance, §7.3) |
+| Internal link                          | A relative link to another Markdown file opens in a new tab (§5.6)                                                                                         |
 
 ### 4.4 Keyboard map
 
 Reading is a keyboard activity. The full map is normative.
 
-| Key | Action |
-|---|---|
-| `Ctrl+O` / `Ctrl+W` / `Ctrl+Shift+T` | Open / close tab / reopen closed tab |
-| `Ctrl+F` / `F3` / `Shift+F3` | Find / next match / previous match |
-| `Ctrl+B` | Toggle sidebar |
-| `Ctrl+Shift+O` | Focus outline, type to filter headings |
-| `Ctrl+P` | Quick-open; opens onto the recent documents before anything is typed (§5.14) |
-| `Ctrl+Shift+W` | Close all tabs, revealing the start view |
-| `Ctrl+=` / `Ctrl+-` / `Ctrl+0` | Zoom in / out / reset (per-tab, §5.11) |
-| `Ctrl+E` | Toggle preview / raw source (§5.15) |
-| `Ctrl+R` / `F5` | Reload the current document from disk |
-| `Alt+←` / `Alt+→` | Navigate back / forward within a tab's link history |
-| `Space` / `Shift+Space` | Page down / up |
-| `Home` / `End` | Document start / end |
-| `Ctrl+A` / `Ctrl+C` | Select all / copy selection as Markdown source (§5.7) |
-| `Ctrl+,` | Settings |
-| `F11` | Full screen |
-| `Ctrl+Shift+P` | Command palette |
+| Key                                  | Action                                                                       |
+| ------------------------------------ | ---------------------------------------------------------------------------- |
+| `Ctrl+O` / `Ctrl+W` / `Ctrl+Shift+T` | Open / close tab / reopen closed tab                                         |
+| `Ctrl+F` / `F3` / `Shift+F3`         | Find / next match / previous match                                           |
+| `Ctrl+B`                             | Toggle sidebar                                                               |
+| `Ctrl+Shift+O`                       | Focus outline, type to filter headings                                       |
+| `Ctrl+P`                             | Quick-open; opens onto the recent documents before anything is typed (§5.14) |
+| `Ctrl+Shift+W`                       | Close all tabs, revealing the start view                                     |
+| `Ctrl+=` / `Ctrl+-` / `Ctrl+0`       | Zoom in / out / reset (per-tab, §5.11)                                       |
+| `Ctrl+E`                             | Toggle preview / raw source (§5.15)                                          |
+| `Ctrl+R` / `F5`                      | Reload the current document from disk                                        |
+| `Alt+←` / `Alt+→`                    | Navigate back / forward within a tab's link history                          |
+| `Space` / `Shift+Space`              | Page down / up                                                               |
+| `Home` / `End`                       | Document start / end                                                         |
+| `Ctrl+A` / `Ctrl+C`                  | Select all / copy selection as Markdown source (§5.7)                        |
+| `Ctrl+,`                             | Settings                                                                     |
+| `F11`                                | Full screen                                                                  |
+| `Ctrl+Shift+P`                       | Command palette                                                              |
 
 ---
 
@@ -262,20 +262,20 @@ public interface IBlockRenderer
 
 **Block coverage for v1:**
 
-| Markdig block | Rendered as |
-|---|---|
-| `HeadingBlock` | `SelectableTextBlock`, size/weight per level, with an anchor target and a hover-revealed link icon |
-| `ParagraphBlock` | `SelectableTextBlock` with inline content |
-| `FencedCodeBlock` / `CodeBlock` | Code block control (§5.3) |
-| `QuoteBlock` | `Border` with a left accent bar, recursively rendered children; nests |
-| `ListBlock` / `ListItemBlock` | `Grid` per item (marker column + content column), so multi-line items align; nests |
-| Task list items | Checkbox glyph, non-interactive in v1 (read-only) |
-| `Table` | Custom table control (§5.4) |
-| `ThematicBreakBlock` | `Separator` |
-| `FootnoteGroup` | Rendered at document end with back-links |
-| `CustomContainer` / alerts | Callout `Border` with icon, title, accent color |
-| `HtmlBlock` | See §5.6 |
-| `LinkReferenceDefinitionGroup` | Not rendered (definitions only) |
+| Markdig block                   | Rendered as                                                                                        |
+| ------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `HeadingBlock`                  | `SelectableTextBlock`, size/weight per level, with an anchor target and a hover-revealed link icon |
+| `ParagraphBlock`                | `SelectableTextBlock` with inline content                                                          |
+| `FencedCodeBlock` / `CodeBlock` | Code block control (§5.3)                                                                          |
+| `QuoteBlock`                    | `Border` with a left accent bar, recursively rendered children; nests                              |
+| `ListBlock` / `ListItemBlock`   | `Grid` per item (marker column + content column), so multi-line items align; nests                 |
+| Task list items                 | Checkbox glyph, non-interactive in v1 (read-only)                                                  |
+| `Table`                         | Custom table control (§5.4)                                                                        |
+| `ThematicBreakBlock`            | `Separator`                                                                                        |
+| `FootnoteGroup`                 | Rendered at document end with back-links                                                           |
+| `CustomContainer` / alerts      | Callout `Border` with icon, title, accent color                                                    |
+| `HtmlBlock`                     | See §5.6                                                                                           |
+| `LinkReferenceDefinitionGroup`  | Not rendered (definitions only)                                                                    |
 
 ### 5.3 Code blocks and syntax highlighting
 
@@ -327,16 +327,16 @@ public interface IDiagramRenderer
 
 **Link classification and behavior:**
 
-| Link target | Behavior |
-|---|---|
-| `#anchor` | Smooth-scroll to the heading with that auto-identifier, within the current tab; pushes onto the tab's history |
-| Relative path to a Markdown file | Opens in a **new tab**, resolved against the current document's directory. `Ctrl+click` opens in the background. |
-| Relative path with `#anchor` | Opens the file and scrolls to the anchor |
-| Relative path to a non-Markdown file | Opens with the OS default handler, after a confirmation dialog naming the file |
-| `http://` / `https://` | Opens in the system browser. Confirmation prompt is off by default, on for links whose display text differs from the target host (a phishing-shape mismatch). |
-| `mailto:` | System mail handler |
-| `file://` | Treated as an absolute local path, subject to the rules above |
-| Other schemes | Blocked, with a one-line explanation on click |
+| Link target                          | Behavior                                                                                                                                                      |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `#anchor`                            | Smooth-scroll to the heading with that auto-identifier, within the current tab; pushes onto the tab's history                                                 |
+| Relative path to a Markdown file     | Opens in a **new tab**, resolved against the current document's directory. `Ctrl+click` opens in the background.                                              |
+| Relative path with `#anchor`         | Opens the file and scrolls to the anchor                                                                                                                      |
+| Relative path to a non-Markdown file | Opens with the OS default handler, after a confirmation dialog naming the file                                                                                |
+| `http://` / `https://`               | Opens in the system browser. Confirmation prompt is off by default, on for links whose display text differs from the target host (a phishing-shape mismatch). |
+| `mailto:`                            | System mail handler                                                                                                                                           |
+| `file://`                            | Treated as an absolute local path, subject to the rules above                                                                                                 |
+| Other schemes                        | Blocked, with a one-line explanation on click                                                                                                                 |
 
 **Link history** is per tab, back/forward via `Alt+←` / `Alt+→` and mouse side buttons.
 
@@ -504,17 +504,17 @@ in the shell.
 
 Measured on a 2020-class laptop (4 cores, SATA SSD), Release build, warm file cache.
 
-| Scenario | Target |
-|---|---|
-| Cold start to first paint | < 1000 ms |
-| Warm start to first paint | < 400 ms |
-| Open a 100 KB document (parse + first screen) | < 200 ms |
-| Open a 1 MB document | < 1200 ms |
-| Scroll a 1 MB document | 60 fps sustained, no frame over 32 ms |
-| Find in a 1 MB document | < 100 ms after debounce |
-| Tab switch | < 50 ms |
-| Theme switch | < 200 ms, no re-parse |
-| Idle memory, 5 documents of ~100 KB open | < 250 MB working set |
+| Scenario                                      | Target                                |
+| --------------------------------------------- | ------------------------------------- |
+| Cold start to first paint                     | < 1000 ms                             |
+| Warm start to first paint                     | < 400 ms                              |
+| Open a 100 KB document (parse + first screen) | < 200 ms                              |
+| Open a 1 MB document                          | < 1200 ms                             |
+| Scroll a 1 MB document                        | 60 fps sustained, no frame over 32 ms |
+| Find in a 1 MB document                       | < 100 ms after debounce               |
+| Tab switch                                    | < 50 ms                               |
+| Theme switch                                  | < 200 ms, no re-parse                 |
+| Idle memory, 5 documents of ~100 KB open      | < 250 MB working set                  |
 
 These are requirements, not aspirations; §8 specifies the benchmarks that enforce them.
 
@@ -582,15 +582,15 @@ Both platforms use a single-instance model: a second launch passes its arguments
 
 ## 8. Testing Strategy
 
-| Layer | Approach |
-|---|---|
-| **Core** | Standard unit tests: pipeline configuration, outline extraction, search, offset mapping, encoding detection, session serialization round-trips. |
-| **Rendering** | Headless Avalonia. For each sample document, render and assert on the resulting visual tree's structure (types, text, source spans) — structural golden files, which are diffable and stable, rather than pixel comparisons. |
-| **Visual** | A small set of pixel-golden screenshots for the theme tokens and table layout specifically, tolerant to small deltas, run on both platforms in CI. These catch theme regressions that structural tests cannot. |
-| **Performance** | BenchmarkDotNet for parse and render throughput; an automated scroll test measuring frame times against §6.1. Regressions over 10% fail the build. |
-| **Accessibility** | Automated contrast-ratio checks over both theme dictionaries; automation-peer assertions for each block type; a manual screen-reader pass (NVDA on Windows, Orca on Linux) before each release. |
-| **Integration** | File watching under realistic editor write patterns (atomic rename, truncate-and-write, rapid successive saves); single-instance argument passing; command-line handling. |
-| **Corpus** | `samples/` holds a torture-test set: CommonMark spec examples, deeply nested lists, wide and tall tables, very long lines, mixed RTL and CJK text, emoji, malformed Markdown, a 5 MB generated document, and documents exercising every extension in §5.1. Every sample must render without exception. |
+| Layer             | Approach                                                                                                                                                                                                                                                                                               |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Core**          | Standard unit tests: pipeline configuration, outline extraction, search, offset mapping, encoding detection, session serialization round-trips.                                                                                                                                                        |
+| **Rendering**     | Headless Avalonia. For each sample document, render and assert on the resulting visual tree's structure (types, text, source spans) — structural golden files, which are diffable and stable, rather than pixel comparisons.                                                                           |
+| **Visual**        | A small set of pixel-golden screenshots for the theme tokens and table layout specifically, tolerant to small deltas, run on both platforms in CI. These catch theme regressions that structural tests cannot.                                                                                         |
+| **Performance**   | BenchmarkDotNet for parse and render throughput; an automated scroll test measuring frame times against §6.1. Regressions over 10% fail the build.                                                                                                                                                     |
+| **Accessibility** | Automated contrast-ratio checks over both theme dictionaries; automation-peer assertions for each block type; a manual screen-reader pass (NVDA on Windows, Orca on Linux) before each release.                                                                                                        |
+| **Integration**   | File watching under realistic editor write patterns (atomic rename, truncate-and-write, rapid successive saves); single-instance argument passing; command-line handling.                                                                                                                              |
+| **Corpus**        | `samples/` holds a torture-test set: CommonMark spec examples, deeply nested lists, wide and tall tables, very long lines, mixed RTL and CJK text, emoji, malformed Markdown, a 5 MB generated document, and documents exercising every extension in §5.1. Every sample must render without exception. |
 
 CI runs the full matrix on Windows and Ubuntu.
 
@@ -600,16 +600,16 @@ CI runs the full matrix on Windows and Ubuntu.
 
 ### 9.1 v1 milestones
 
-| # | Milestone | Contents | Exit criterion |
-|---|---|---|---|
-| **M1** | Skeleton | Solution structure, DI, window shell, theme infrastructure, tab strip with placeholder content | Opens, tabs work, themes switch |
-| **M2** | Core rendering | Markdig pipeline, block and inline renderers for headings, paragraphs, lists, quotes, rules, links, images | CommonMark corpus renders without exception |
-| **M3** | Code and tables | TextMateSharp highlighting, code block chrome, table control with sizing and overflow | Torture-test tables and 20 languages render correctly |
-| **M4** | Navigation | Outline, anchors, link classification and handling, link history, quick-open | Full keyboard navigation of a multi-file document set |
-| **M5** | Selection and search | SelectionCoordinator, cross-block selection, copy-as-source, find bar, scrollbar markers | §5.7 fully met |
-| **M6** | Files and session | File tree, watcher, encoding detection, session restore, recent documents (§5.14), settings UI | Close and reopen restores exactly |
-| **M7** | Performance | Virtualization, height estimation, caches, benchmark suite | All §6.1 targets met |
-| **M8** | Polish and ship | Diagrams, front matter, accessibility pass, packaging for both platforms | Installable artifacts, accessibility pass clean |
+| #      | Milestone            | Contents                                                                                                   | Exit criterion                                        |
+| ------ | -------------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| **M1** | Skeleton             | Solution structure, DI, window shell, theme infrastructure, tab strip with placeholder content             | Opens, tabs work, themes switch                       |
+| **M2** | Core rendering       | Markdig pipeline, block and inline renderers for headings, paragraphs, lists, quotes, rules, links, images | CommonMark corpus renders without exception           |
+| **M3** | Code and tables      | TextMateSharp highlighting, code block chrome, table control with sizing and overflow                      | Torture-test tables and 20 languages render correctly |
+| **M4** | Navigation           | Outline, anchors, link classification and handling, link history, quick-open                               | Full keyboard navigation of a multi-file document set |
+| **M5** | Selection and search | SelectionCoordinator, cross-block selection, copy-as-source, find bar, scrollbar markers                   | §5.7 fully met                                        |
+| **M6** | Files and session    | File tree, watcher, encoding detection, session restore, recent documents (§5.14), settings UI             | Close and reopen restores exactly                     |
+| **M7** | Performance          | Virtualization, height estimation, caches, benchmark suite                                                 | All §6.1 targets met                                  |
+| **M8** | Polish and ship      | Diagrams, front matter, accessibility pass, packaging for both platforms                                   | Installable artifacts, accessibility pass clean       |
 
 Diagrams (§5.5) sit in M8 deliberately: they depend on an external tool and an unresolved package question, and nothing else depends on them.
 

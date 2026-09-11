@@ -1,4 +1,4 @@
-# Help page — keyboard map, Markdown dialect, and limits
+# Help - page keyboard map, Markdown dialect, and limits
 
 This help page is bundled with the app and rendered by the same Markdown pipeline as every other document.
 

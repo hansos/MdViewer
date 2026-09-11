@@ -15,6 +15,8 @@
     <CommunityToolkitMvvmVersion>8.4.2</CommunityToolkitMvvmVersion>
     <MarkdigVersion>1.3.2</MarkdigVersion>
     <TextMateSharpVersion>2.0.4</TextMateSharpVersion>
+    <MermaiderVersion>0.12.2</MermaiderVersion>
+    <SvgControlsSkiaAvaloniaVersion>12.0.0.17</SvgControlsSkiaAvaloniaVersion>
   </PropertyGroup>
 
 </Project>

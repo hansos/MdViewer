@@ -13,6 +13,8 @@
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
     <PackageReference Include="Markdig" Version="$(MarkdigVersion)" />
+    <PackageReference Include="Mermaider" Version="$(MermaiderVersion)" />
+    <PackageReference Include="Svg.Controls.Skia.Avalonia" Version="$(SvgControlsSkiaAvaloniaVersion)" />
 
     <!--
       Syntax highlighting (SPECIFICATION.md 5.3). TextMateSharp is the engine;

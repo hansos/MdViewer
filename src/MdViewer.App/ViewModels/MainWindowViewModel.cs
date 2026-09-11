@@ -1262,11 +1262,26 @@ public partial class MainWindowViewModel : ViewModelBase
     private void SetAsDefaultMarkdownApp() =>
         StatusMessage = FileAssociationService.Register();
 
+    /// <summary>
+    /// Sidebar visibility captured when focus mode was entered, so leaving focus
+    /// mode gives the user back the layout they had instead of a closed panel.
+    /// </summary>
+    private bool _sidebarVisibleBeforeFocusMode;
+
     [RelayCommand]
     private void ToggleFocusMode()
     {
         IsFocusMode = !IsFocusMode;
-        if (IsFocusMode) IsSidebarVisible = false;
+
+        if (IsFocusMode)
+        {
+            _sidebarVisibleBeforeFocusMode = IsSidebarVisible;
+            IsSidebarVisible = false;
+        }
+        else
+        {
+            IsSidebarVisible = _sidebarVisibleBeforeFocusMode;
+        }
     }
 
     // ============================================================ quick open

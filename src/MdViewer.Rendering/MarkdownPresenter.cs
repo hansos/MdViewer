@@ -114,7 +114,8 @@ public class MarkdownPresenter : Decorator
         if (change.Property == DocumentProperty
             || change.Property == ContentMaxWidthProperty
             || change.Property == AllowRemoteImagesProperty
-            || change.Property == FindMatchesProperty)
+            || change.Property == FindMatchesProperty
+            || string.Equals(change.Property.Name, "ActualThemeVariant", StringComparison.Ordinal))
         {
             Rebuild();
         }
@@ -202,6 +203,11 @@ public class MarkdownPresenter : Decorator
             allowRemoteImages: AllowRemoteImages,
             onLoadRemoteImagesRequested: () => RemoteImagesRequested?.Invoke(),
             reducedMode: document.ByteLength > DocumentLoader.ReducedModeThresholdBytes,
+            diagramTheme: ResolveDiagramTheme(),
+            diagramDpi: ResolveDiagramDpi(),
+            diagramFontSize: ResolveDiagramFontSize(),
+            diagramBodyFontFamily: ResolveDiagramBodyFontFamily(),
+            diagramMonoFontFamily: ResolveDiagramMonoFontFamily(),
             findMatches: FindMatches,
             currentFindMatch: CurrentFindMatch);
 
@@ -214,6 +220,74 @@ public class MarkdownPresenter : Decorator
             Padding = new Thickness(48, 36, 48, 80),
             Child = body
         };
+    }
+
+    private string ResolveDiagramTheme()
+    {
+        var variant = ActualThemeVariant;
+        if (variant == Avalonia.Styling.ThemeVariant.Dark) return "dark";
+        if (variant == Avalonia.Styling.ThemeVariant.Light) return "light";
+
+        var appVariant = Application.Current?.ActualThemeVariant;
+        if (appVariant == Avalonia.Styling.ThemeVariant.Dark) return "dark";
+        if (appVariant == Avalonia.Styling.ThemeVariant.Light) return "light";
+
+        return "default";
+    }
+
+    private double ResolveDiagramDpi()
+    {
+        var scale = TopLevel.GetTopLevel(this)?.RenderScaling ?? 1d;
+        if (scale <= 0) scale = 1d;
+        return 96d * scale;
+    }
+
+    private double ResolveDiagramFontSize()
+    {
+        if (TryGetResource("BodyFontSize", out var value) && value is double fontSize && fontSize > 0)
+        {
+            return fontSize;
+        }
+
+        return 15d;
+    }
+
+    private string? ResolveDiagramBodyFontFamily()
+    {
+        if (TryGetResource("BodyFontFamily", out var value))
+        {
+            return value?.ToString();
+        }
+
+        return null;
+    }
+
+    private string? ResolveDiagramMonoFontFamily()
+    {
+        if (TryGetResource("MonoFontFamily", out var value))
+        {
+            return value?.ToString();
+        }
+
+        if (TryGetResource("CodeFontFamily", out var fallback))
+        {
+            return fallback?.ToString();
+        }
+
+        return null;
+    }
+
+    private bool TryGetResource(string key, out object? value)
+    {
+        value = null;
+
+        if (Resources is not null && Resources.TryGetResource(key, ActualThemeVariant, out value))
+        {
+            return true;
+        }
+
+        var app = Application.Current;
+        return app is not null && app.Resources.TryGetResource(key, app.ActualThemeVariant, out value);
     }
 
     private void ApplyZoomResources() => ZoomTypography.Apply(this, ZoomFactor);
