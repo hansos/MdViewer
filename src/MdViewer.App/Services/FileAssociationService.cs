@@ -11,6 +11,7 @@ namespace MdViewer.App.Services;
 /// ProgID and "Open with" registration and then opens the Default apps page
 /// where the user makes the final choice.
 /// </summary>
+[Obsolete("Deferred to a later MdViewer release.")]
 public static class FileAssociationService
 {
     private const string ProgId = "Kveldstid.MdViewer.Markdown";
@@ -24,6 +25,7 @@ public static class FileAssociationService
     /// Registers the ProgID and asks Windows to show the default apps UI.
     /// Returns a status message describing the outcome.
     /// </summary>
+    [Obsolete("Deferred to a later MdViewer release.")]
     public static string Register()
     {
         if (!OperatingSystem.IsWindows())

@@ -1055,6 +1055,7 @@ public partial class MainWindowViewModel : ViewModelBase
     /// user confirms it as the default. Windows owns the final choice, so this
     /// can only prepare the registration.
     /// </summary>
+    [Obsolete("Deferred to a later MdViewer release.")]
     [RelayCommand]
     private void SetAsDefaultMarkdownApp() =>
         StatusMessage = FileAssociationService.Register();
