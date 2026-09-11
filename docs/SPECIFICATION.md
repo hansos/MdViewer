@@ -189,6 +189,8 @@ Reading is a keyboard activity. The full map is normative.
 | `Ctrl+R` / `F5`                      | Reload the current document from disk                                        |
 | `Alt+←` / `Alt+→`                    | Navigate back / forward within a tab's link history                          |
 | `Space` / `Shift+Space`              | Page down / up                                                               |
+| `↑` / `↓`                            | Scroll one line up / down                                                    |
+| `Page Up` / `Page Down`              | Page up / down                                                               |
 | `Home` / `End`                       | Document start / end                                                         |
 | `Ctrl+A` / `Ctrl+C`                  | Select all / copy selection as Markdown source (§5.7)                        |
 | `Ctrl+,`                             | Settings                                                                     |

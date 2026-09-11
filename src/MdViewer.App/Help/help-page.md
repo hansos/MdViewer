@@ -21,6 +21,9 @@ This help page is bundled with the app and rendered by the same Markdown pipelin
 | `Ctrl+Shift+F` | Toggle focus mode |
 | `Ctrl+,` | Open settings |
 | `Esc` | Dismiss overlays |
+| `Arrow Up` / `Arrow Down` | Scroll one line up / down |
+| `Page Up` / `Page Down` | Scroll one page up / down |
+| `Home` / `End` | Go to top / bottom of the document |
 
 ## Supported Markdown dialect (SPECIFICATION.md §5.1)
 
