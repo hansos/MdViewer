@@ -39,5 +39,19 @@ internal static class Themed
         public const string FindMatch = "FindMatchBrush";
         public const string MonoFontFamily = "MonoFontFamily";
         public const string CodeFontSize = "CodeFontSize";
+
+        /// <summary>
+        /// The seven syntax buckets every TextMate scope is folded into
+        /// (SPECIFICATION.md 5.3). Deliberately few: a reader needs code to be
+        /// legible, not a rainbow, and seven tokens can be contrast-checked in
+        /// both themes by hand.
+        /// </summary>
+        public const string SyntaxKeyword = "SyntaxKeywordBrush";
+        public const string SyntaxType = "SyntaxTypeBrush";
+        public const string SyntaxString = "SyntaxStringBrush";
+        public const string SyntaxNumber = "SyntaxNumberBrush";
+        public const string SyntaxComment = "SyntaxCommentBrush";
+        public const string SyntaxFunction = "SyntaxFunctionBrush";
+        public const string SyntaxOperator = "SyntaxOperatorBrush";
     }
 }

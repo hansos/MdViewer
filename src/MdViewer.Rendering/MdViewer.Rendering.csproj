@@ -13,6 +13,15 @@
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
     <PackageReference Include="Markdig" Version="$(MarkdigVersion)" />
+
+    <!--
+      Syntax highlighting (SPECIFICATION.md 5.3). TextMateSharp is the engine;
+      TextMateSharp.Grammars carries the bundled language grammars. Only the
+      grammars are used: colours come from the theme tokens, never from a
+      TextMate theme, so light/dark switching stays in one place.
+    -->
+    <PackageReference Include="TextMateSharp" Version="$(TextMateSharpVersion)" />
+    <PackageReference Include="TextMateSharp.Grammars" Version="$(TextMateSharpVersion)" />
   </ItemGroup>
 
   <ItemGroup>

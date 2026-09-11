@@ -14,6 +14,7 @@
     <AvaloniaVersion>12.1.2</AvaloniaVersion>
     <CommunityToolkitMvvmVersion>8.4.2</CommunityToolkitMvvmVersion>
     <MarkdigVersion>1.3.2</MarkdigVersion>
+    <TextMateSharpVersion>2.0.4</TextMateSharpVersion>
   </PropertyGroup>
 
 </Project>

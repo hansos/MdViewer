@@ -1,8 +1,11 @@
 using Avalonia.Controls;
+using Avalonia.Controls.Documents;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input.Platform;
 using Avalonia.Layout;
+using Avalonia.Threading;
 using Markdig.Syntax;
+using MdViewer.Rendering.Highlighting;
 
 namespace MdViewer.Rendering.Blocks;
 
@@ -15,6 +18,8 @@ namespace MdViewer.Rendering.Blocks;
 /// </summary>
 public sealed class CodeBlockRenderer : IBlockRenderer
 {
+    private static readonly SyntaxHighlighter Highlighter = new();
+
     /// <summary>
     /// Above this, the block renders as plain text with a notice rather than
     /// being tokenised. A single enormous generated block should not cost a
@@ -68,12 +73,68 @@ public sealed class CodeBlockRenderer : IBlockRenderer
             notice.Classes.Add("md-caption");
             stack.Children.Add(notice);
         }
+        else if (!context.ReducedMode)
+        {
+            TryHighlightAsync(body, text, language);
+        }
 
         var frame = new Border { Child = stack };
         frame.Classes.Add("md-code-block");
 
         context.SpanRegistrar.Register(frame, code.Span.Start, code.Span.Length);
         return frame;
+    }
+
+    private static void TryHighlightAsync(SelectableTextBlock body, string sourceText, string language)
+    {
+        if (string.IsNullOrWhiteSpace(sourceText)) return;
+        if (string.IsNullOrWhiteSpace(language)) return;
+
+        _ = Task.Run(() =>
+        {
+            var segments = Highlighter.Tokenize(sourceText, language);
+            if (segments is null || segments.Count == 0) return;
+
+            Dispatcher.UIThread.Post(() => ApplySegments(body, sourceText, segments), DispatcherPriority.Background);
+        });
+    }
+
+    private static void ApplySegments(
+        SelectableTextBlock body,
+        string sourceText,
+        IReadOnlyList<HighlightSegment> segments)
+    {
+        if (!string.Equals(body.Text, sourceText, StringComparison.Ordinal)) return;
+
+        body.Text = string.Empty;
+
+        var inlines = EnsureInlines(body);
+        inlines.Clear();
+
+        foreach (var segment in segments)
+        {
+            if (segment.Text.Length == 0) continue;
+
+            var run = new Run(segment.Text);
+            if (!string.IsNullOrEmpty(segment.TokenKey))
+            {
+                run.Apply(TextElement.ForegroundProperty, segment.TokenKey);
+            }
+
+            inlines.Add(run);
+        }
+    }
+
+    private static InlineCollection EnsureInlines(SelectableTextBlock target)
+    {
+        var inlines = target.Inlines;
+        if (inlines is null)
+        {
+            inlines = new InlineCollection();
+            target.Inlines = inlines;
+        }
+
+        return inlines;
     }
 
     private static Border BuildHeader(string language, string sourceText)
