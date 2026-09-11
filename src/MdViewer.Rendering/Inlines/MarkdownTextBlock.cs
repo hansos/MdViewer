@@ -21,13 +21,14 @@ public class MarkdownTextBlock : SelectableTextBlock
     private static readonly Cursor HandCursor = new(StandardCursorType.Hand);
 
     private readonly List<LinkRange> _links = new();
+    private string? _activeToolTipText;
 
     public Action<string>? LinkActivated { get; set; }
 
-    public void AddLinkRange(int start, int length, string url)
+    public void AddLinkRange(int start, int length, string url, string? toolTip = null)
     {
         if (length <= 0 || string.IsNullOrEmpty(url)) return;
-        _links.Add(new LinkRange(start, length, url));
+        _links.Add(new LinkRange(start, length, url, toolTip));
     }
 
     public bool HasLinks => _links.Count > 0;
@@ -42,20 +43,34 @@ public class MarkdownTextBlock : SelectableTextBlock
         // A drag that selected text is not a click.
         if (!string.IsNullOrEmpty(SelectedText)) return;
 
-        var url = FindLinkAt(e.GetPosition(this));
-        if (url is null) return;
+        var link = FindLinkAt(e.GetPosition(this));
+        if (link is null) return;
 
         e.Handled = true;
-        LinkActivated(url);
+        LinkActivated(link.Value.Url);
     }
 
     protected override void OnPointerMoved(PointerEventArgs e)
     {
         base.OnPointerMoved(e);
 
-        if (_links.Count == 0) return;
+        if (_links.Count == 0)
+        {
+            Cursor = null;
+            SetHoverToolTip(null);
+            return;
+        }
 
-        Cursor = FindLinkAt(e.GetPosition(this)) is null ? null : HandCursor;
+        var link = FindLinkAt(e.GetPosition(this));
+        Cursor = link is null ? null : HandCursor;
+        SetHoverToolTip(link?.ToolTip);
+    }
+
+    protected override void OnPointerExited(PointerEventArgs e)
+    {
+        base.OnPointerExited(e);
+        Cursor = null;
+        SetHoverToolTip(null);
     }
 
     /// <summary>
@@ -63,7 +78,7 @@ public class MarkdownTextBlock : SelectableTextBlock
     /// ever needs adapting to a newer Avalonia, it is three lines and nothing
     /// else in the renderer is affected.
     /// </summary>
-    private string? FindLinkAt(Point point)
+    private LinkRange? FindLinkAt(Point point)
     {
         var layout = TextLayout;
         if (layout is null) return null;
@@ -85,12 +100,21 @@ public class MarkdownTextBlock : SelectableTextBlock
         {
             if (index >= link.Start && index < link.Start + link.Length)
             {
-                return link.Url;
+                return link;
             }
         }
 
         return null;
     }
 
-    private readonly record struct LinkRange(int Start, int Length, string Url);
+    private void SetHoverToolTip(string? toolTip)
+    {
+        var normalized = string.IsNullOrWhiteSpace(toolTip) ? null : toolTip;
+        if (string.Equals(_activeToolTipText, normalized, StringComparison.Ordinal)) return;
+
+        _activeToolTipText = normalized;
+        ToolTip.SetTip(this, normalized);
+    }
+
+    private readonly record struct LinkRange(int Start, int Length, string Url, string? ToolTip);
 }

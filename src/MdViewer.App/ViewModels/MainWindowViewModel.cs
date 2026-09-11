@@ -40,6 +40,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly Dictionary<string, CancellationTokenSource> _pendingWatchedReloads = new(PathComparer);
 
     private const int WatchedReloadDebounceMs = 350;
+    private const string InternalSourceOffsetLinkPrefix = "mdv-source-offset:";
 
     private AppSettings _settings = new();
     private SessionState _session = new();
@@ -980,6 +981,19 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (string.IsNullOrWhiteSpace(url)) return;
 
+        if (TryParseInternalSourceOffsetLink(url, out var sourceOffset))
+        {
+            var tab = SelectedTab;
+            if (tab is not null)
+            {
+                tab.PushFootnoteReturnOffset(CaptureCurrentSourceOffset(tab));
+            }
+
+            StatusMessage = null;
+            ScrollToOffsetRequested?.Invoke(sourceOffset);
+            return;
+        }
+
         // In-document anchor
         if (url.StartsWith('#'))
         {
@@ -1043,6 +1057,17 @@ public partial class MainWindowViewModel : ViewModelBase
         StatusMessage = $"Opening non-Markdown files is not enabled yet: {Path.GetFileName(target)}";
     }
 
+    [RelayCommand]
+    private void ReturnFromFootnote()
+    {
+        var tab = SelectedTab;
+        if (tab is null) return;
+        if (!tab.TryPopFootnoteReturnOffset(out var sourceOffset)) return;
+
+        StatusMessage = null;
+        ScrollToOffsetRequested?.Invoke(sourceOffset);
+    }
+
     public void EnableRemoteImagesForSelectedTab()
     {
         var tab = SelectedTab;
@@ -1062,6 +1087,36 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             StatusMessage = $"Could not open the link: {ex.Message}";
         }
+    }
+
+    private static bool TryParseInternalSourceOffsetLink(string url, out int sourceOffset)
+    {
+        sourceOffset = 0;
+
+        if (!url.StartsWith(InternalSourceOffsetLinkPrefix, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        var value = url[InternalSourceOffsetLinkPrefix.Length..];
+        if (!int.TryParse(value, out sourceOffset) || sourceOffset < 0)
+        {
+            sourceOffset = 0;
+            return false;
+        }
+
+        return true;
+    }
+
+    private int CaptureCurrentSourceOffset(DocumentTabViewModel tab)
+    {
+        var liveOffset = CaptureScrollOffset?.Invoke();
+        if (liveOffset is >= 0)
+        {
+            return liveOffset.Value;
+        }
+
+        return tab.ScrollOffset;
     }
 
     partial void OnSelectedOutlineItemChanged(OutlineItemViewModel? value)

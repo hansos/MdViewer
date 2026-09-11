@@ -21,6 +21,7 @@ This help page is bundled with the app and rendered by the same Markdown pipelin
 | `Ctrl+Shift+F` | Toggle focus mode |
 | `Ctrl+,` | Open settings |
 | `Esc` | Dismiss overlays |
+| `Alt+Left` | Return from footnote to previous reading position |
 | `Arrow Up` / `Arrow Down` | Scroll one line up / down |
 | `Page Up` / `Page Down` | Scroll one page up / down |
 | `Home` / `End` | Go to top / bottom of the document |

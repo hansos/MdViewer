@@ -36,6 +36,7 @@
     <KeyBinding Gesture="Ctrl+Shift+F" Command="{Binding ToggleFocusModeCommand}" />
     <KeyBinding Gesture="Ctrl+OemComma" Command="{Binding ShowSettingsCommand}" />
     <KeyBinding Gesture="F1" Command="{Binding OpenHelpPageCommand}" />
+    <KeyBinding Gesture="Alt+Left" Command="{Binding ReturnFromFootnoteCommand}" />
   </Window.KeyBindings>
 
   <DockPanel LastChildFill="True">

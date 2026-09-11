@@ -1,9 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Media;
+using Markdig.Syntax;
 using Markdig.Extensions.Footnotes;
 using Markdig.Extensions.TaskLists;
 using Markdig.Syntax.Inlines;
+using System.Text;
 using MarkdigInline = Markdig.Syntax.Inlines.Inline;
 using MdViewer.Core.Markdown;
 using MdViewer.Rendering.Images;
@@ -20,6 +22,9 @@ namespace MdViewer.Rendering.Inlines;
 /// </summary>
 public sealed class InlineRenderer
 {
+    private const string SourceOffsetLinkPrefix = "mdv-source-offset:";
+    private const int FootnotePreviewMaxLength = 300;
+
     /// <summary>
     /// Fills <paramref name="target"/> with the rendered inlines and registers
     /// its link ranges.
@@ -160,6 +165,13 @@ public sealed class InlineRenderer
                 run.Apply(TextElement.ForegroundProperty, Themed.Keys.Link);
 
                 sink.Add(run);
+
+                if (TryBuildFootnoteSourceOffsetLink(footnoteLink, out var linkTarget))
+                {
+                    var footnotePreview = BuildFootnotePreviewText(footnoteLink);
+                    target.AddLinkRange(position, text.Length, linkTarget, footnotePreview);
+                }
+
                 position += text.Length;
                 break;
             }
@@ -435,5 +447,53 @@ public sealed class InlineRenderer
         }
 
         return footnoteLink.Index + 1;
+    }
+
+    private static bool TryBuildFootnoteSourceOffsetLink(FootnoteLink footnoteLink, out string linkTarget)
+    {
+        linkTarget = string.Empty;
+
+        if (footnoteLink.IsBackLink) return false;
+        if (footnoteLink.Footnote is null) return false;
+
+        var sourceOffset = footnoteLink.Footnote.Span.Start;
+        if (sourceOffset < 0) return false;
+
+        linkTarget = $"{SourceOffsetLinkPrefix}{sourceOffset}";
+        return true;
+    }
+
+    private static string? BuildFootnotePreviewText(FootnoteLink footnoteLink)
+    {
+        if (footnoteLink.IsBackLink) return null;
+        if (footnoteLink.Footnote is null) return null;
+
+        var builder = new StringBuilder();
+        foreach (var block in footnoteLink.Footnote.Descendants())
+        {
+            if (block is not LeafBlock { Inline: not null } leaf) continue;
+
+            AppendFootnotePreviewLine(builder, MarkdownText.ToPlainText(leaf.Inline));
+        }
+
+        var text = builder.ToString().Trim();
+        if (text.Length == 0) return null;
+
+        return text.Length <= FootnotePreviewMaxLength
+            ? text
+            : text[..FootnotePreviewMaxLength] + "…";
+    }
+
+    private static void AppendFootnotePreviewLine(StringBuilder builder, string line)
+    {
+        var trimmed = line.Trim();
+        if (trimmed.Length == 0) return;
+
+        if (builder.Length > 0)
+        {
+            builder.AppendLine();
+        }
+
+        builder.Append(trimmed);
     }
 }

@@ -11,6 +11,8 @@ namespace MdViewer.App.ViewModels;
 /// </summary>
 public partial class DocumentTabViewModel : ViewModelBase
 {
+    private readonly Stack<int> _footnoteReturnOffsets = new();
+
     [ObservableProperty]
     private string _title = string.Empty;
 
@@ -81,6 +83,8 @@ public partial class DocumentTabViewModel : ViewModelBase
 
     public bool HasDocument => Document is not null;
 
+    public bool HasFootnoteReturnTarget => _footnoteReturnOffsets.Count > 0;
+
     public bool HasError => !string.IsNullOrEmpty(LoadError);
 
     public bool IsEmpty => !HasDocument && !HasError && !IsLoading;
@@ -109,6 +113,7 @@ public partial class DocumentTabViewModel : ViewModelBase
     {
         LoadError = null;
         Document = document;
+        _footnoteReturnOffsets.Clear();
 
         LineIndex = new SourceLineIndex(document.SourceText);
         LineNumberColumn = LineIndex.BuildLineNumberColumn();
@@ -127,6 +132,7 @@ public partial class DocumentTabViewModel : ViewModelBase
     public void SetError(string message)
     {
         Document = null;
+        _footnoteReturnOffsets.Clear();
         LineIndex = null;
         LineNumberColumn = string.Empty;
         LoadError = message;
@@ -137,6 +143,24 @@ public partial class DocumentTabViewModel : ViewModelBase
     }
 
     partial void OnZoomChanged(double value) => OnPropertyChanged(nameof(ZoomDisplay));
+
+    public void PushFootnoteReturnOffset(int sourceOffset)
+    {
+        if (sourceOffset < 0) return;
+        _footnoteReturnOffsets.Push(sourceOffset);
+        OnPropertyChanged(nameof(HasFootnoteReturnTarget));
+    }
+
+    public bool TryPopFootnoteReturnOffset(out int sourceOffset)
+    {
+        var result = _footnoteReturnOffsets.TryPop(out sourceOffset);
+        if (result)
+        {
+            OnPropertyChanged(nameof(HasFootnoteReturnTarget));
+        }
+
+        return result;
+    }
 
     partial void OnIsLoadingChanged(bool value) => OnPropertyChanged(nameof(IsEmpty));
 
