@@ -1353,6 +1353,28 @@ public partial class MainWindowViewModel : ViewModelBase
     private void CloseQuickOpen() => IsQuickOpenVisible = false;
 
     [RelayCommand]
+    private void SelectPreviousQuickOpenResult()
+    {
+        if (!IsQuickOpenVisible)
+        {
+            return;
+        }
+
+        QuickOpen.SelectPreviousResult();
+    }
+
+    [RelayCommand]
+    private void SelectNextQuickOpenResult()
+    {
+        if (!IsQuickOpenVisible)
+        {
+            return;
+        }
+
+        QuickOpen.SelectNextResult();
+    }
+
+    [RelayCommand]
     private async Task AcceptQuickOpenAsync()
     {
         var result = QuickOpen.SelectedResult;

@@ -65,6 +65,35 @@ public partial class QuickOpenViewModel : ViewModelBase
         Refresh();
     }
 
+    public void SelectPreviousResult() => MoveSelection(-1);
+
+    public void SelectNextResult() => MoveSelection(1);
+
+    private void MoveSelection(int delta)
+    {
+        if (Results.Count == 0)
+        {
+            SelectedResult = null;
+            return;
+        }
+
+        if (SelectedResult is null)
+        {
+            SelectedResult = delta < 0 ? Results[^1] : Results[0];
+            return;
+        }
+
+        var index = Results.IndexOf(SelectedResult);
+        if (index < 0)
+        {
+            SelectedResult = delta < 0 ? Results[^1] : Results[0];
+            return;
+        }
+
+        var nextIndex = (index + delta + Results.Count) % Results.Count;
+        SelectedResult = Results[nextIndex];
+    }
+
     private void Refresh()
     {
         Results.Clear();

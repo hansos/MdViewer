@@ -286,6 +286,11 @@ public partial class MainWindow : Window
         {
             FocusFindInput();
         }
+        else if (e.PropertyName == nameof(MainWindowViewModel.IsQuickOpenVisible)
+                 && _boundModel?.IsQuickOpenVisible == true)
+        {
+            FocusQuickOpenInput();
+        }
     }
 
     private void FocusFindInput()
@@ -294,6 +299,20 @@ public partial class MainWindow : Window
             () =>
             {
                 var input = this.FindControl<TextBox>("FindInput");
+                if (input is null) return;
+
+                input.Focus();
+                input.SelectAll();
+            },
+            DispatcherPriority.Input);
+    }
+
+    private void FocusQuickOpenInput()
+    {
+        Dispatcher.UIThread.Post(
+            () =>
+            {
+                var input = this.FindControl<TextBox>("QuickOpenInput");
                 if (input is null) return;
 
                 input.Focus();

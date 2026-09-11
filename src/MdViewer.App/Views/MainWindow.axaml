@@ -410,9 +410,12 @@
           <StackPanel Spacing="2">
 
             <TextBox Classes="quick-open-input"
+                     x:Name="QuickOpenInput"
                      Watermark="Go to file…"
                      Text="{Binding QuickOpen.Query, Mode=TwoWay}">
               <TextBox.KeyBindings>
+                <KeyBinding Gesture="Up" Command="{Binding SelectPreviousQuickOpenResultCommand}" />
+                <KeyBinding Gesture="Down" Command="{Binding SelectNextQuickOpenResultCommand}" />
                 <KeyBinding Gesture="Enter" Command="{Binding AcceptQuickOpenCommand}" />
               </TextBox.KeyBindings>
             </TextBox>
