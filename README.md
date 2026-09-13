@@ -36,11 +36,8 @@ What is still deliberately absent, by milestone:
 
 | Missing                                                  | Arrives in         |
 | -------------------------------------------------------- | ------------------ |
-| GitHub alerts and `:::` containers as callouts           | M3                 |
 | Cross-block selection, copy-as-source                    | M5                 |
 | Virtualization — every block is realised eagerly         | M7                 |
-| Images, diagrams                                         | M6 / M8            |
-| Live zoom (the control updates the indicator only)       | M7                 |
 
 Raw HTML is escaped and shown dimmed rather than rendered, and remote images are
 not fetched. Both are deliberate — see SPECIFICATION.md 5.6 and 6.5.
