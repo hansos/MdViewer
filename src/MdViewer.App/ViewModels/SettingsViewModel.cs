@@ -34,6 +34,9 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private bool _showStatusBar = true;
 
+    [ObservableProperty]
+    private bool _hideBranchesWithoutMarkdownFiles;
+
     // ============================================================ typography
 
     [ObservableProperty]
@@ -144,6 +147,7 @@ public partial class SettingsViewModel : ViewModelBase
         ShowExplorerPanel = settings.ShowExplorerPanel;
         ShowOutlinePanel = settings.ShowOutlinePanel;
         ShowStatusBar = settings.ShowStatusBar;
+        HideBranchesWithoutMarkdownFiles = settings.HideBranchesWithoutMarkdownFiles;
 
         BodyFontFamily = settings.BodyFontFamily;
         BodyFontSize = settings.BodyFontSize;
@@ -178,6 +182,7 @@ public partial class SettingsViewModel : ViewModelBase
         settings.ShowExplorerPanel = ShowExplorerPanel;
         settings.ShowOutlinePanel = ShowOutlinePanel;
         settings.ShowStatusBar = ShowStatusBar;
+        settings.HideBranchesWithoutMarkdownFiles = HideBranchesWithoutMarkdownFiles;
 
         settings.BodyFontFamily = BodyFontFamily;
         settings.BodyFontSize = BodyFontSize;

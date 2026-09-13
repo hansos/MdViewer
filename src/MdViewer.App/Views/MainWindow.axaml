@@ -261,6 +261,10 @@
                   <ContextMenu>
                     <MenuItem Header="Åpne i valgt editor"
                               Click="OnOpenTreeItemInEditorClick" />
+                    <Separator />
+                    <MenuItem Header="Skjul grener uten .md-filer"
+                              ToggleType="CheckBox"
+                              IsChecked="{Binding Settings.HideBranchesWithoutMarkdownFiles, Mode=TwoWay}" />
                   </ContextMenu>
                 </TreeView.ContextMenu>
               </TreeView>

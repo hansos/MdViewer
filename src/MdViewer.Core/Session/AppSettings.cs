@@ -29,6 +29,8 @@ public sealed class AppSettings
 
     public bool ShowStatusBar { get; set; } = true;
 
+    public bool HideBranchesWithoutMarkdownFiles { get; set; }
+
     // ============================================================ typography
 
     /// <summary>A family name, or "Default" to keep the theme's font stack.</summary>

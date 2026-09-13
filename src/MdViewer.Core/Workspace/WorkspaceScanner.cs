@@ -23,6 +23,8 @@ public sealed class WorkspaceScanner
 
     public bool ShowHiddenEntries { get; init; }
 
+    public bool HideBranchesWithoutMarkdownFiles { get; init; }
+
     public static bool IsMarkdown(string path) =>
         MarkdownExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase);
 
@@ -55,6 +57,7 @@ public sealed class WorkspaceScanner
             foreach (var directory in entries.EnumerateDirectories().OrderBy(d => d.Name, StringComparer.OrdinalIgnoreCase))
             {
                 if (ShouldHide(directory.Name, directory.Attributes)) continue;
+                if (HideBranchesWithoutMarkdownFiles && !BranchContainsMarkdown(directory.FullName)) continue;
                 node.AddChild(new WorkspaceNode(directory.Name, directory.FullName, isDirectory: true));
             }
 
@@ -122,5 +125,39 @@ public sealed class WorkspaceScanner
 
         if (name.StartsWith('.')) return true;
         return attributes.HasFlag(FileAttributes.Hidden);
+    }
+
+    private bool BranchContainsMarkdown(string rootDirectory)
+    {
+        var pending = new Stack<string>();
+        pending.Push(rootDirectory);
+
+        while (pending.Count > 0)
+        {
+            var current = pending.Pop();
+
+            try
+            {
+                var directory = new DirectoryInfo(current);
+
+                foreach (var file in directory.EnumerateFiles())
+                {
+                    if (ShouldHide(file.Name, file.Attributes)) continue;
+                    if (IsMarkdown(file.Name)) return true;
+                }
+
+                foreach (var childDirectory in directory.EnumerateDirectories())
+                {
+                    if (ShouldHide(childDirectory.Name, childDirectory.Attributes)) continue;
+                    pending.Push(childDirectory.FullName);
+                }
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or DirectoryNotFoundException or IOException)
+            {
+                // Skip and continue scanning sibling branches.
+            }
+        }
+
+        return false;
     }
 }

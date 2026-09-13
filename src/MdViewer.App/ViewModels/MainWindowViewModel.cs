@@ -33,7 +33,7 @@ public partial class MainWindowViewModel : ViewModelBase
         : StringComparer.Ordinal;
 
     private DocumentLoader _loader = new();
-    private readonly WorkspaceScanner _scanner = new();
+    private WorkspaceScanner _scanner;
     private readonly RecentDocumentList _recent = new();
     private readonly SettingsStore _settingsStore = new();
     private readonly SessionStore _sessionStore = new();
@@ -153,6 +153,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Find = new FindViewModel();
         Find.MatchSelected += OnFindMatchSelected;
         Settings = new SettingsViewModel();
+        _scanner = CreateWorkspaceScanner();
         QuickOpen = new QuickOpenViewModel(Array.Empty<QuickOpenResultViewModel>(), Array.Empty<QuickOpenResultViewModel>());
 
         Tabs = new ObservableCollection<DocumentTabViewModel>();
@@ -415,6 +416,11 @@ public partial class MainWindowViewModel : ViewModelBase
         if (e.PropertyName == nameof(SettingsViewModel.EnableFileWatching))
         {
             RebuildFileWatchers();
+        }
+
+        if (e.PropertyName == nameof(SettingsViewModel.HideBranchesWithoutMarkdownFiles))
+        {
+            RebuildWorkspaceTree();
         }
 
         if (e.PropertyName == nameof(SettingsViewModel.SmartPunctuation))
@@ -833,6 +839,31 @@ public partial class MainWindowViewModel : ViewModelBase
 
     // ============================================================ workspace
 
+    private WorkspaceScanner CreateWorkspaceScanner() =>
+        new()
+        {
+            HideBranchesWithoutMarkdownFiles = Settings.HideBranchesWithoutMarkdownFiles
+        };
+
+    private void RebuildWorkspaceTree()
+    {
+        _scanner = CreateWorkspaceScanner();
+
+        if (!HasWorkspace || string.IsNullOrWhiteSpace(WorkspaceRoot))
+        {
+            WorkspaceRoots.Clear();
+            RefreshQuickOpenSources();
+            return;
+        }
+
+        var root = _scanner.CreateRoot(WorkspaceRoot!);
+        _scanner.Load(root);
+
+        WorkspaceRoots.Clear();
+        WorkspaceRoots.Add(new FileTreeItemViewModel(root, _scanner) { IsExpanded = true });
+        RefreshQuickOpenSources();
+    }
+
     public void SetWorkspace(string folder)
     {
         if (!Directory.Exists(folder)) return;
@@ -840,14 +871,9 @@ public partial class MainWindowViewModel : ViewModelBase
         WorkspaceRoot = Path.GetFullPath(folder);
         WorkspaceName = new DirectoryInfo(WorkspaceRoot).Name;
 
-        var root = _scanner.CreateRoot(WorkspaceRoot);
-        _scanner.Load(root);
-
-        WorkspaceRoots.Clear();
-        WorkspaceRoots.Add(new FileTreeItemViewModel(root, _scanner) { IsExpanded = true });
+        RebuildWorkspaceTree();
 
         OnPropertyChanged(nameof(HasWorkspace));
-        RefreshQuickOpenSources();
         RequestSave();
     }
 
