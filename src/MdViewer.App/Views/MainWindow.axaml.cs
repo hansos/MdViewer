@@ -490,8 +490,8 @@ public partial class MainWindow : Window
     // ============================================================== file tree
 
     /// <summary>
-    /// Selecting a tab highlights and focuses the matching entry in the file
-    /// tree, expanding the folders on the way down and scrolling it into view.
+    /// Selecting a tab highlights the matching entry in the file tree,
+    /// expanding the folders on the way down and scrolling it into view.
     /// </summary>
     private void SyncTreeSelectionWithSelectedTab()
     {
@@ -515,14 +515,13 @@ public partial class MainWindow : Window
         }
 
         // Containers for freshly expanded folders are only realised after the
-        // next layout pass, so focusing has to wait for it.
+        // next layout pass, so scrolling has to wait for it.
         Dispatcher.UIThread.Post(
             () =>
             {
                 if (tree.TreeContainerFromItem(item) is TreeViewItem container)
                 {
                     container.BringIntoView();
-                    container.Focus();
                 }
             },
             DispatcherPriority.Loaded);
