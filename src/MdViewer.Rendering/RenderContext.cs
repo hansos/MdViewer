@@ -22,7 +22,9 @@ public sealed class RenderContext
         string? diagramBodyFontFamily = null,
         string? diagramMonoFontFamily = null,
         IReadOnlyList<FindMatchOccurrence>? findMatches = null,
-        int currentFindMatch = 0)
+        int currentFindMatch = 0,
+        bool allowTaskListEditing = false,
+        Action<int, bool>? onTaskListToggled = null)
     {
         Renderer = renderer;
         BaseDirectory = baseDirectory;
@@ -38,6 +40,8 @@ public sealed class RenderContext
         DiagramMonoFontFamily = string.IsNullOrWhiteSpace(diagramMonoFontFamily) ? null : diagramMonoFontFamily.Trim();
         FindMatches = findMatches ?? Array.Empty<FindMatchOccurrence>();
         CurrentFindMatch = currentFindMatch;
+        AllowTaskListEditing = allowTaskListEditing;
+        OnTaskListToggled = onTaskListToggled;
     }
 
     /// <summary>Used by container blocks to render their children.</summary>
@@ -95,6 +99,18 @@ public sealed class RenderContext
     /// <summary>The 1-based index of the active find match, or 0 when none.</summary>
     public int CurrentFindMatch { get; }
 
+    /// <summary>
+    /// True when task list checkboxes are interactive. Opt-in, because ticking
+    /// one rewrites the marker in the file on disk (SPECIFICATION.md 5.2).
+    /// </summary>
+    public bool AllowTaskListEditing { get; }
+
+    /// <summary>
+    /// Raised with the source offset of the task list marker and its new state.
+    /// The shell owns the edit; the renderer only reports the gesture.
+    /// </summary>
+    public Action<int, bool>? OnTaskListToggled { get; }
+
     /// <summary>Nesting depth, so quotes and lists can style by level.</summary>
     public int Depth { get; private init; }
 
@@ -112,7 +128,9 @@ public sealed class RenderContext
         DiagramBodyFontFamily,
         DiagramMonoFontFamily,
         FindMatches,
-        CurrentFindMatch)
+        CurrentFindMatch,
+        AllowTaskListEditing,
+        OnTaskListToggled)
     {
         Depth = Depth + 1
     };

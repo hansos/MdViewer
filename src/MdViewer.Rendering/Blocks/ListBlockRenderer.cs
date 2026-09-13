@@ -59,7 +59,7 @@ public sealed class ListBlockRenderer : IBlockRenderer
             content.Children.Add(child);
         }
 
-        var marker = BuildMarker(list, item, ref ordinal);
+        var marker = BuildMarker(list, item, context, ref ordinal);
 
         Grid.SetColumn(marker, 0);
         Grid.SetColumn(content, 1);
@@ -82,14 +82,23 @@ public sealed class ListBlockRenderer : IBlockRenderer
         text.Classes.Add("md-list-item");
     }
 
-    private static Control BuildMarker(ListBlock list, ListItemBlock item, ref int ordinal)
+    private static Control BuildMarker(
+        ListBlock list,
+        ListItemBlock item,
+        RenderContext context,
+        ref int ordinal)
     {
-        var taskState = FindTaskState(item);
+        var task = FindTask(item);
+
+        if (task is not null && context.AllowTaskListEditing && context.OnTaskListToggled is not null)
+        {
+            return BuildEditableTaskMarker(task, context);
+        }
 
         string glyph;
-        if (taskState is not null)
+        if (task is not null)
         {
-            glyph = taskState.Value ? "☑" : "☐";   // ☑ / ☐
+            glyph = task.Checked ? "☑" : "☐";   // ☑ / ☐
         }
         else if (list.IsOrdered)
         {
@@ -110,22 +119,57 @@ public sealed class ListBlockRenderer : IBlockRenderer
         marker.Classes.Add("md-list-marker");
 
         // Checked task items get the accent; see MarkdownStyles.axaml.
-        if (taskState == true) marker.Classes.Add("checked");
+        if (task is { Checked: true }) marker.Classes.Add("checked");
 
         return marker;
+    }
+
+    /// <summary>
+    /// The interactive form of a task marker (SPECIFICATION.md 5.2). The source
+    /// offset of the marker travels with the control, so the shell can patch the
+    /// single character in the file without re-serialising the document.
+    /// </summary>
+    private static Control BuildEditableTaskMarker(TaskList task, RenderContext context)
+    {
+        var offset = task.Span.Start;
+        var onToggled = context.OnTaskListToggled!;
+        var suppress = false;
+
+        var box = new CheckBox
+        {
+            IsChecked = task.Checked,
+            MinWidth = 0,
+            MinHeight = 0,
+            Padding = new Thickness(0),
+            Margin = new Thickness(0, 0, 8, 0),
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
+        };
+
+        box.Classes.Add("md-task-check");
+
+        box.IsCheckedChanged += (_, _) =>
+        {
+            // The rebuild that follows the write re-creates this control, but
+            // guard anyway so a programmatic state change cannot re-enter.
+            if (suppress) return;
+            suppress = true;
+
+            onToggled(offset, box.IsChecked == true);
+        };
+
+        return box;
     }
 
     /// <summary>
     /// A task list marker is the first inline of the item's first paragraph.
     /// Returns null for an ordinary list item.
     /// </summary>
-    private static bool? FindTaskState(ListItemBlock item)
+    private static TaskList? FindTask(ListItemBlock item)
     {
         if (item.Count == 0) return null;
         if (item[0] is not ParagraphBlock { Inline: not null } paragraph) return null;
 
-        var first = paragraph.Inline.FirstChild;
-        return first is TaskList task ? task.Checked : null;
+        return paragraph.Inline.FirstChild as TaskList;
     }
 
     private static int ParseStart(string? orderedStart) =>

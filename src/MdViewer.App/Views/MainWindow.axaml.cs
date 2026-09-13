@@ -38,6 +38,7 @@ public partial class MainWindow : Window
         {
             presenter.LinkActivated = OnLinkActivated;
             presenter.RemoteImagesRequested = OnRemoteImagesRequested;
+            presenter.TaskListToggled = OnTaskListToggled;
         }
 
         var documentPane = this.FindControl<Panel>("DocumentPane");
@@ -478,6 +479,12 @@ public partial class MainWindow : Window
     private void OnRemoteImagesRequested()
     {
         Model?.EnableRemoteImagesForSelectedTab();
+    }
+
+    private void OnTaskListToggled(int sourceOffset, bool isChecked)
+    {
+        if (Model is null) return;
+        _ = Model.ToggleTaskAsync(sourceOffset, isChecked);
     }
 
     // ============================================================== file tree

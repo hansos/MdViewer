@@ -327,6 +327,7 @@
                                        Document="{Binding SelectedTab.Document}"
                                        AllowRemoteImages="{Binding SelectedTab.AllowRemoteImages, FallbackValue=False}"
                                        FindMatches="{Binding Find.Matches}"
+                                       AllowTaskListEditing="{Binding Settings.EnableTaskListEditing, FallbackValue=False}"
                                         ZoomFactor="{Binding SelectedTab.Zoom, FallbackValue=1.0}"
                                        ContentMaxWidth="{Binding Settings.EffectiveContentMaxWidth}" />
         </ScrollViewer>

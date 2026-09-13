@@ -76,6 +76,13 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private bool _smartPunctuation;
 
+    /// <summary>
+    /// Makes task list checkboxes clickable. Ticking one rewrites the marker in
+    /// the file on disk, so this is opt-in (SPECIFICATION.md 5.2).
+    /// </summary>
+    [ObservableProperty]
+    private bool _enableTaskListEditing;
+
     // ============================================================== raw view
 
     [ObservableProperty]
@@ -142,6 +149,7 @@ public partial class SettingsViewModel : ViewModelBase
         UseFullWidth = settings.UseFullWidth;
 
         SmartPunctuation = settings.SmartPunctuation;
+        EnableTaskListEditing = settings.EnableTaskListEditing;
 
         ShowLineNumbersInRawView = settings.ShowLineNumbersInRawView;
         ShowFrontMatter = settings.ShowFrontMatter;
@@ -174,6 +182,7 @@ public partial class SettingsViewModel : ViewModelBase
         settings.UseFullWidth = UseFullWidth;
 
         settings.SmartPunctuation = SmartPunctuation;
+        settings.EnableTaskListEditing = EnableTaskListEditing;
 
         settings.ShowLineNumbersInRawView = ShowLineNumbersInRawView;
         settings.ShowFrontMatter = ShowFrontMatter;

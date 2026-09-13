@@ -35,6 +35,9 @@ public class MarkdownPresenter : Decorator
     public static readonly StyledProperty<int> CurrentFindMatchProperty =
         AvaloniaProperty.Register<MarkdownPresenter, int>(nameof(CurrentFindMatch), 0);
 
+    public static readonly StyledProperty<bool> AllowTaskListEditingProperty =
+        AvaloniaProperty.Register<MarkdownPresenter, bool>(nameof(AllowTaskListEditing), false);
+
     private readonly MarkdownRenderer _renderer = new();
 
     public MarkdownPresenter()
@@ -86,6 +89,16 @@ public class MarkdownPresenter : Decorator
     }
 
     /// <summary>
+    /// When true, task list checkboxes are interactive. Opt-in, because toggling
+    /// one rewrites the marker in the file on disk (SPECIFICATION.md 5.2).
+    /// </summary>
+    public bool AllowTaskListEditing
+    {
+        get => GetValue(AllowTaskListEditingProperty);
+        set => SetValue(AllowTaskListEditingProperty, value);
+    }
+
+    /// <summary>
     /// Source spans for the currently rendered document. The shell uses this to
     /// scroll to a heading, restore a reading position by offset, and — from M5 —
     /// place find highlights.
@@ -101,6 +114,12 @@ public class MarkdownPresenter : Decorator
     /// </summary>
     public Action? RemoteImagesRequested { get; set; }
 
+    /// <summary>
+    /// Raised with the source offset of a task list marker and its new checked
+    /// state when the reader toggles it.
+    /// </summary>
+    public Action<int, bool>? TaskListToggled { get; set; }
+
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
@@ -114,6 +133,7 @@ public class MarkdownPresenter : Decorator
         if (change.Property == DocumentProperty
             || change.Property == ContentMaxWidthProperty
             || change.Property == AllowRemoteImagesProperty
+            || change.Property == AllowTaskListEditingProperty
             || change.Property == FindMatchesProperty
             || string.Equals(change.Property.Name, "ActualThemeVariant", StringComparison.Ordinal))
         {
@@ -209,7 +229,9 @@ public class MarkdownPresenter : Decorator
             diagramBodyFontFamily: ResolveDiagramBodyFontFamily(),
             diagramMonoFontFamily: ResolveDiagramMonoFontFamily(),
             findMatches: FindMatches,
-            currentFindMatch: CurrentFindMatch);
+            currentFindMatch: CurrentFindMatch,
+            allowTaskListEditing: AllowTaskListEditing,
+            onTaskListToggled: (offset, isChecked) => TaskListToggled?.Invoke(offset, isChecked));
 
         var body = _renderer.RenderDocument(document.Ast, context);
         body.MaxWidth = ContentMaxWidth;

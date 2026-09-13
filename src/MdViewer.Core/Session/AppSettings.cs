@@ -56,6 +56,12 @@ public sealed class AppSettings
     /// </summary>
     public bool SmartPunctuation { get; set; }
 
+    /// <summary>
+    /// Lets the reader tick task list checkboxes, which rewrites the marker in
+    /// the file on disk. Off by default: MdViewer is a reader unless asked.
+    /// </summary>
+    public bool EnableTaskListEditing { get; set; }
+
     // ============================================================== raw view
 
     public bool ShowLineNumbersInRawView { get; set; } = true;

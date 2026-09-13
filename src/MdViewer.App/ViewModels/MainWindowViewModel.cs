@@ -40,7 +40,19 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly Dictionary<string, FileSystemWatcher> _fileWatchers = new(PathComparer);
     private readonly Dictionary<string, CancellationTokenSource> _pendingWatchedReloads = new(PathComparer);
 
+    /// <summary>
+    /// When each file was last written by us, so the watcher can tell our own
+    /// task list edits apart from an external change.
+    /// </summary>
+    private readonly Dictionary<string, DateTime> _selfWrites = new(PathComparer);
+
     private const int WatchedReloadDebounceMs = 350;
+
+    /// <summary>
+    /// How long after our own write a watcher event is still assumed to be the
+    /// echo of it. Generous, because the notification can lag the write.
+    /// </summary>
+    private static readonly TimeSpan SelfWriteGrace = TimeSpan.FromSeconds(2);
     private const string InternalSourceOffsetLinkPrefix = "mdv-source-offset:";
 
     private AppSettings _settings = new();
@@ -632,6 +644,84 @@ public partial class MainWindowViewModel : ViewModelBase
         await LoadIntoAsync(SelectedTab, SelectedTab.FullPath).ConfigureAwait(true);
     }
 
+    // ============================================================ task lists
+
+    /// <summary>
+    /// Ticks or unticks a task list item and writes the change back to the file
+    /// (SPECIFICATION.md 5.2). Only the single marker character is replaced, so
+    /// everything else about the file — formatting, line endings, encoding —
+    /// survives untouched.
+    ///
+    /// Only reachable when the reader has opted in; MdViewer never writes to a
+    /// document otherwise.
+    /// </summary>
+    public async Task ToggleTaskAsync(int sourceOffset, bool isChecked)
+    {
+        if (!Settings.EnableTaskListEditing) return;
+
+        var tab = SelectedTab;
+        var document = tab?.Document;
+        if (tab is null || document is null || string.IsNullOrEmpty(tab.FullPath)) return;
+
+        if (!TryPatchTaskMarker(document.SourceText, sourceOffset, isChecked, out var updated))
+        {
+            StatusMessage = "The task could not be updated: the document no longer matches.";
+            return;
+        }
+
+        var offset = CaptureScrollOffset?.Invoke() ?? tab.ScrollOffset;
+
+        try
+        {
+            // The write is about to fire our own watcher; claim it first so the
+            // tab is not flagged as modified on disk by our own edit.
+            NoteSelfWrite(tab.FullPath);
+
+            await DocumentWriter.WriteAsync(tab.FullPath, updated, document.Encoding).ConfigureAwait(true);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            StatusMessage = $"The task could not be saved: {ex.Message}";
+
+            // Re-render from the unchanged source so the checkbox snaps back.
+            tab.SetDocument(document);
+            return;
+        }
+
+        tab.SetDocument(_loader.Parse(tab.FullPath, updated, document.Encoding));
+        tab.IsModifiedOnDisk = false;
+        tab.ScrollOffset = offset;
+        RestoreScrollOffset?.Invoke(offset);
+    }
+
+    /// <summary>
+    /// Replaces the state character of the <c>[ ]</c> marker at
+    /// <paramref name="sourceOffset"/>. Returns false when the text there is not
+    /// a task marker, which means the document moved under the rendered view and
+    /// writing would corrupt it.
+    /// </summary>
+    private static bool TryPatchTaskMarker(string source, int sourceOffset, bool isChecked, out string updated)
+    {
+        updated = source;
+
+        if (sourceOffset < 0 || sourceOffset + 2 >= source.Length) return false;
+        if (source[sourceOffset] != '[' || source[sourceOffset + 2] != ']') return false;
+
+        var state = source[sourceOffset + 1];
+        if (state is not (' ' or 'x' or 'X')) return false;
+
+        var replacement = isChecked ? 'x' : ' ';
+        if (state == replacement) return true;
+
+        updated = string.Create(source.Length, (source, sourceOffset, replacement), static (span, state) =>
+        {
+            state.source.AsSpan().CopyTo(span);
+            span[state.sourceOffset + 1] = state.replacement;
+        });
+
+        return true;
+    }
+
     [RelayCommand]
     private async Task OpenFilesAsync()
     {
@@ -772,11 +862,26 @@ public partial class MainWindowViewModel : ViewModelBase
         if (!Settings.EnableFileWatching) return;
 
         var fullPath = Path.GetFullPath(path);
+        if (IsOwnWrite(fullPath)) return;
+
         var tab = Tabs.FirstOrDefault(t => PathsEqual(t.FullPath, fullPath));
         if (tab is null) return;
 
         tab.IsModifiedOnDisk = true;
         QueueWatchedReload(fullPath);
+    }
+
+    private void NoteSelfWrite(string fullPath) =>
+        _selfWrites[Path.GetFullPath(fullPath)] = DateTime.UtcNow;
+
+    private bool IsOwnWrite(string fullPath)
+    {
+        if (!_selfWrites.TryGetValue(fullPath, out var written)) return false;
+
+        if (DateTime.UtcNow - written <= SelfWriteGrace) return true;
+
+        _selfWrites.Remove(fullPath);
+        return false;
     }
 
     private void QueueWatchedReload(string fullPath)

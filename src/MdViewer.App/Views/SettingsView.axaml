@@ -123,6 +123,10 @@
       <CheckBox Content="Smart punctuation (… – — “curly quotes”)"
                 IsChecked="{Binding Settings.SmartPunctuation, Mode=TwoWay}" />
 
+      <CheckBox Content="Allow ticking task list checkboxes (writes to the file)"
+                ToolTip.Tip="Clicking a task list checkbox rewrites the [ ] or [x] marker in the document on disk."
+                IsChecked="{Binding Settings.EnableTaskListEditing, Mode=TwoWay}" />
+
       <!-- ======================= Raw view ======================= -->
       <TextBlock Classes="md-h4" Text="Raw view" Margin="0,16,0,0" />
       <Border Classes="md-heading-rule" Margin="0,0,0,8" />
