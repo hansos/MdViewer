@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MdViewer.App.Services;
 using MdViewer.Core.Documents;
+using MdViewer.Core.Markdown;
 using MdViewer.Core.Outline;
 using MdViewer.Core.Session;
 using MdViewer.Core.Workspace;
@@ -31,7 +32,7 @@ public partial class MainWindowViewModel : ViewModelBase
         ? StringComparer.OrdinalIgnoreCase
         : StringComparer.Ordinal;
 
-    private readonly DocumentLoader _loader = new();
+    private DocumentLoader _loader = new();
     private readonly WorkspaceScanner _scanner = new();
     private readonly RecentDocumentList _recent = new();
     private readonly SettingsStore _settingsStore = new();
@@ -280,6 +281,7 @@ public partial class MainWindowViewModel : ViewModelBase
             _settings = _settingsStore.Load();
             Settings.LoadFrom(_settings);
             Settings.PropertyChanged += OnSettingsPropertyChanged;
+            ApplySmartPunctuation();
             ApplySettings();
 
             var paths = args
@@ -400,8 +402,40 @@ public partial class MainWindowViewModel : ViewModelBase
             RebuildFileWatchers();
         }
 
+        if (e.PropertyName == nameof(SettingsViewModel.SmartPunctuation))
+        {
+            ApplySmartPunctuation();
+        }
+
         ApplySettings();
         RequestSave();
+    }
+
+    /// <summary>
+    /// Smart punctuation is a parse-time option, so the pipeline is swapped and
+    /// every open document is re-parsed through it (SPECIFICATION.md 5.1).
+    /// </summary>
+    private void ApplySmartPunctuation()
+    {
+        _loader = new DocumentLoader(MarkdownPipelineFactory.For(Settings.SmartPunctuation));
+
+        if (_isRestoring) return;
+
+        _ = ReloadAllTabsAsync();
+    }
+
+    private async Task ReloadAllTabsAsync()
+    {
+        // The selected tab first: it is the one the reader is looking at.
+        var ordered = Tabs
+            .OrderByDescending(t => ReferenceEquals(t, SelectedTab))
+            .ToList();
+
+        foreach (var tab in ordered)
+        {
+            if (string.IsNullOrEmpty(tab.FullPath)) continue;
+            await LoadIntoAsync(tab, tab.FullPath).ConfigureAwait(true);
+        }
     }
 
     /// <summary>

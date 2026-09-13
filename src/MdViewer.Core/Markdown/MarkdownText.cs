@@ -1,5 +1,6 @@
 using System.Text;
 using Markdig.Extensions.Mathematics;
+using Markdig.Extensions.SmartyPants;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 
@@ -91,6 +92,10 @@ public static class MarkdownText
 
                 case HtmlEntityInline entity:
                     builder.Append(entity.Transcoded.ToString());
+                    break;
+
+                case SmartyPant pant:
+                    builder.Append(SmartPunctuation.ToText(pant));
                     break;
 
                 case AutolinkInline autolink:

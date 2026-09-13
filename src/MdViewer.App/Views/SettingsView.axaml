@@ -116,6 +116,13 @@
       <CheckBox Content="Use the full window width"
                 IsChecked="{Binding Settings.UseFullWidth, Mode=TwoWay}" />
 
+      <!-- ======================= Rendering ====================== -->
+      <TextBlock Classes="md-h4" Text="Rendering" Margin="0,16,0,0" />
+      <Border Classes="md-heading-rule" Margin="0,0,0,8" />
+
+      <CheckBox Content="Smart punctuation (… – — “curly quotes”)"
+                IsChecked="{Binding Settings.SmartPunctuation, Mode=TwoWay}" />
+
       <!-- ======================= Raw view ======================= -->
       <TextBlock Classes="md-h4" Text="Raw view" Margin="0,16,0,0" />
       <Border Classes="md-heading-rule" Margin="0,0,0,8" />

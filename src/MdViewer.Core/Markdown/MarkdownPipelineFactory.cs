@@ -15,8 +15,19 @@ public static class MarkdownPipelineFactory
 {
     private static readonly Lazy<MarkdownPipeline> Shared = new(() => Build(), isThreadSafe: true);
 
+    private static readonly Lazy<MarkdownPipeline> SharedSmart =
+        new(() => Build(smartPunctuation: true), isThreadSafe: true);
+
     /// <summary>The shared, immutable pipeline.</summary>
     public static MarkdownPipeline Default => Shared.Value;
+
+    /// <summary>
+    /// The shared pipeline for the requested smart-punctuation setting
+    /// (SPECIFICATION.md 5.1). Both variants are cached, so flipping the
+    /// setting back and forth never rebuilds a pipeline.
+    /// </summary>
+    public static MarkdownPipeline For(bool smartPunctuation) =>
+        smartPunctuation ? SharedSmart.Value : Shared.Value;
 
     public static MarkdownPipeline Build(bool smartPunctuation = false)
     {

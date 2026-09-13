@@ -67,6 +67,15 @@ public partial class SettingsViewModel : ViewModelBase
     public double EffectiveContentMaxWidth =>
         UseFullWidth ? double.PositiveInfinity : ContentMaxWidth;
 
+    // =============================================================== parsing
+
+    /// <summary>
+    /// Ellipses, en/em dashes and curly quotes (SPECIFICATION.md 5.1).
+    /// Changing this re-parses every open document.
+    /// </summary>
+    [ObservableProperty]
+    private bool _smartPunctuation;
+
     // ============================================================== raw view
 
     [ObservableProperty]
@@ -132,6 +141,8 @@ public partial class SettingsViewModel : ViewModelBase
         ContentMaxWidth = settings.ContentMaxWidth;
         UseFullWidth = settings.UseFullWidth;
 
+        SmartPunctuation = settings.SmartPunctuation;
+
         ShowLineNumbersInRawView = settings.ShowLineNumbersInRawView;
         ShowFrontMatter = settings.ShowFrontMatter;
         EnableFileWatching = settings.EnableFileWatching;
@@ -161,6 +172,8 @@ public partial class SettingsViewModel : ViewModelBase
         settings.LineHeight = LineHeight;
         settings.ContentMaxWidth = ContentMaxWidth;
         settings.UseFullWidth = UseFullWidth;
+
+        settings.SmartPunctuation = SmartPunctuation;
 
         settings.ShowLineNumbersInRawView = ShowLineNumbersInRawView;
         settings.ShowFrontMatter = ShowFrontMatter;

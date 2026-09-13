@@ -4,6 +4,7 @@ using Avalonia.Media;
 using Markdig.Extensions.Mathematics;
 using Markdig.Syntax;
 using Markdig.Extensions.Footnotes;
+using Markdig.Extensions.SmartyPants;
 using Markdig.Extensions.TaskLists;
 using Markdig.Syntax.Inlines;
 using System.Text;
@@ -231,6 +232,21 @@ public sealed class InlineRenderer
                     position += 1;
                 }
 
+                break;
+            }
+
+            case SmartyPant pant:
+            {
+                var text = SmartPunctuation.ToText(pant);
+                if (text.Length == 0) break;
+
+                AppendTextWithFindHighlights(
+                    sink,
+                    text,
+                    pant.Span.Start,
+                    context);
+
+                position += text.Length;
                 break;
             }
 

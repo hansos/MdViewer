@@ -48,6 +48,14 @@ public sealed class AppSettings
 
     public bool UseFullWidth { get; set; }
 
+    // ================================================================ parsing
+
+    /// <summary>
+    /// Renders ... as an ellipsis, -- and --- as dashes and straight quotes as
+    /// curly ones. Off by default (SPECIFICATION.md 5.1).
+    /// </summary>
+    public bool SmartPunctuation { get; set; }
+
     // ============================================================== raw view
 
     public bool ShowLineNumbersInRawView { get; set; } = true;
