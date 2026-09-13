@@ -219,7 +219,7 @@ The Markdig pipeline is configured with, and only with:
 - **Emphasis extras**, **smart punctuation** (configurable, default off)
 - **Auto-identifiers** on headings, so `#anchor` links work
 
-Explicitly not enabled: `Bootstrap`, `Figures`, `JiraLinks`, `SelfPipeline`, `Globalization`. Math is deferred (§9.2).
+Explicitly not enabled: `Bootstrap`, `JiraLinks`, `SelfPipeline`, `Globalization`. Math is deferred (§9.2).
 
 The pipeline is built once and shared; it is stateless and thread-safe for parsing.
 

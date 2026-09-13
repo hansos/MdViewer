@@ -889,7 +889,7 @@ A paragraph with an attribute block.
 
 :smile: :rocket: :+1:
 
-### 14.5 Figures — NOT ENABLED
+### 14.5 Figures
 
 ^^^
 ![A figure](assets/sample.png)

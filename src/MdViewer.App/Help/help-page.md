@@ -43,7 +43,7 @@ The app uses Markdig with an explicit extension set:
 - Auto-identifiers on headings (`#anchor` links)
 - Smart punctuation (setting-controlled)
 
-Deliberately not enabled in v1: Bootstrap, Figures, JiraLinks, SelfPipeline, Globalization, and math.
+Deliberately not enabled in v1: Bootstrap, JiraLinks, SelfPipeline, Globalization, and math.
 
 ## Deliberate limits
 

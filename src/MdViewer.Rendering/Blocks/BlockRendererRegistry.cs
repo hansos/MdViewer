@@ -24,6 +24,7 @@ public sealed class BlockRendererRegistry
         .Add(new TableBlockRenderer())
         .Add(new ListBlockRenderer())
         .Add(new FootnoteGroupRenderer())
+        .Add(new FigureBlockRenderer())
         .Add(new CalloutBlockRenderer())
         .Add(new QuoteBlockRenderer())
         .Add(new ThematicBreakRenderer())

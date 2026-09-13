@@ -159,7 +159,23 @@
     <Setter Property="Foreground" Value="{DynamicResource QuoteForegroundBrush}" />
   </Style>
 
+  <!-- ============================== Figures ============================== -->
+
+  <Style Selector="Border.md-figure">
+    <Setter Property="Margin" Value="0,0,0,18" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).md-figure-caption">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontStyle" Value="Italic" />
+    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+    <Setter Property="TextAlignment" Value="Center" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="Margin" Value="0,6,0,0" />
+  </Style>
+
   <!-- ============================== Callouts ============================== -->
+
 
   <Style Selector="Border.md-callout">
     <Setter Property="BorderThickness" Value="3,0,0,0" />

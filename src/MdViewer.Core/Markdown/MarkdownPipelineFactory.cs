@@ -45,6 +45,9 @@ public static class MarkdownPipelineFactory
             .UseFootnotes()
             .UseMathematics()
 
+            // Figures with captions: ^^^ ... ^^^ caption (5.2)
+            .UseFigures()
+
             // Emoji shortcodes (:smile:) and text smileys (:)), both replaced
             // with the corresponding Unicode characters.
             .UseEmojiAndSmiley(enableSmileys: true)
@@ -77,7 +80,7 @@ public static class MarkdownPipelineFactory
         builder = builder.UseGenericAttributes();
 
         // NOT enabled, deliberately (SPECIFICATION.md 5.1):
-        //   Bootstrap, Figures, JiraLinks, SelfPipeline, Globalization.
+        //   Bootstrap, JiraLinks, SelfPipeline, Globalization.
 
         return builder.Build();
     }
