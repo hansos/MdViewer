@@ -67,6 +67,11 @@ public static class MarkdownPipelineFactory
             builder = builder.UseSmartyPants();
         }
 
+        // Generic attributes: {: .some-class #some-id key=value }. Markdig
+        // requires this to be the last extension registered, because it hooks
+        // the parsers of every extension added before it.
+        builder = builder.UseGenericAttributes();
+
         // NOT enabled, deliberately (SPECIFICATION.md 5.1):
         //   Bootstrap, Figures, JiraLinks, SelfPipeline, Globalization.
 

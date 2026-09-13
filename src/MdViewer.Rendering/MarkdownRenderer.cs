@@ -65,7 +65,13 @@ public sealed class MarkdownRenderer
                 return BuildUnsupportedCard(block, context);
             }
 
-            return renderer.Render(block, context);
+            var control = renderer.Render(block, context);
+
+            // Author-supplied {: .class #id } wins over nothing and loses to
+            // nothing: it is added on top of whatever classes the renderer set.
+            MarkdownAttributes.Apply(block, control);
+
+            return control;
         }
         catch (Exception ex)
         {
