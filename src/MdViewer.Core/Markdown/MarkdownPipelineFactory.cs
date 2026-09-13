@@ -45,6 +45,10 @@ public static class MarkdownPipelineFactory
             .UseFootnotes()
             .UseMathematics()
 
+            // Emoji shortcodes (:smile:) and text smileys (:)), both replaced
+            // with the corresponding Unicode characters.
+            .UseEmojiAndSmiley(enableSmileys: true)
+
             // Containers and GitHub alerts rendered as callouts
             .UseCustomContainers()
             .UseAlertBlocks()
