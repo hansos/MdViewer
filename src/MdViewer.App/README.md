@@ -36,15 +36,9 @@ What is still deliberately absent, by milestone:
 
 | Missing                                                  | Arrives in         |
 | -------------------------------------------------------- | ------------------ |
-| Syntax highlighting in code blocks (they render plain)   | M3 — TextMateSharp |
-| GitHub alerts and `:::` containers as callouts           | M3                 |
-| Full table column algorithm and sticky headers           | M3                 |
-| Find actually searching (the bar is still a placeholder) | M5                 |
 | Cross-block selection, copy-as-source                    | M5                 |
 | File watching, session restore, persisted recent list    | M6                 |
 | Virtualization — every block is realised eagerly         | M7                 |
-| Images, diagrams                                         | M6 / M8            |
-| Live zoom (the control updates the indicator only)       | M7                 |
 
 Raw HTML is escaped and shown dimmed rather than rendered, and remote images are
 not fetched. Both are deliberate — see SPECIFICATION.md 5.6 and 6.5.

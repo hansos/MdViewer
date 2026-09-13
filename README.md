@@ -104,8 +104,15 @@ That is what makes the v2 split-pane editor an addition rather than a rewrite.
 has no class support: those bind to theme tokens dynamically via `Themed`, so a
 theme switch still repaints without re-parsing.
 
+## License
+
+KT MD Viewer is released under the MIT License — see [LICENSE](LICENSE).
+
+Third-party components shipped with or used by the application are listed with
+their licenses in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
 ## How this is built
 
-AI assistance is used intensively throughout this project — design, implementation,
+AI assistance is used intensively throughout this project
 tests and documentation. All of it is reviewed by me before it lands, and the
 specification and architecture decisions are mine.

@@ -75,7 +75,19 @@
       <TextBlock Classes="md-caption" Text="Avalonia UI — MIT License" />
       <TextBlock Classes="md-caption" Text="CommunityToolkit.Mvvm — MIT License" />
       <TextBlock Classes="md-caption" Text="Markdig — BSD 2-Clause License" />
+      <TextBlock Classes="md-caption" Text="TextMateSharp and TextMateSharp.Grammars — MIT License" />
+      <TextBlock Classes="md-caption" Text="Mermaider and Sugiyama — MIT License" />
+      <TextBlock Classes="md-caption" Text="Svg.Controls.Skia.Avalonia (Svg.Skia) — MIT License" />
+      <TextBlock Classes="md-caption" Text="Sylinko.CSharpMath.Avalonia (CSharpMath) — MIT License" />
+      <TextBlock Classes="md-caption" Text="SkiaSharp and HarfBuzzSharp — MIT License" />
       <TextBlock Classes="md-caption" Text="Inter font — SIL Open Font License 1.1" />
+
+      <Button Classes="link"
+              HorizontalAlignment="Left"
+              Command="{Binding OpenThirdPartyNoticesCommand}"
+              ToolTip.Tip="{Binding ThirdPartyNoticesUrl}">
+        <TextBlock Text="Click here for the full third-party notices on GitHub" TextDecorations="Underline" />
+      </Button>
 
       <TextBlock Classes="md-body" Margin="0,12,0,0" Text="Development" />
       <TextBlock Classes="md-caption"

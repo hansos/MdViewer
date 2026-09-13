@@ -223,6 +223,9 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>The public source repository.</summary>
     public string RepositoryUrl => "https://github.com/hansos/MdViewer";
 
+    /// <summary>The third-party component notices as published with the source on GitHub.</summary>
+    public string ThirdPartyNoticesUrl => "https://github.com/hansos/MdViewer/blob/master/THIRD-PARTY-NOTICES.md";
+
     private static Assembly AboutAssembly => typeof(MainWindowViewModel).Assembly;
 
     /// <summary>
@@ -1398,6 +1401,10 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <summary>Opens the GitHub repository from the about page.</summary>
     [RelayCommand]
     private void OpenRepository() => OpenExternal(RepositoryUrl);
+
+    /// <summary>Opens the third-party notices on GitHub from the about page.</summary>
+    [RelayCommand]
+    private void OpenThirdPartyNotices() => OpenExternal(ThirdPartyNoticesUrl);
 
     [RelayCommand]
     private void DismissOverlays()
