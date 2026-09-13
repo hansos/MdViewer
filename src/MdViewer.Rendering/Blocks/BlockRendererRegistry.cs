@@ -23,6 +23,7 @@ public sealed class BlockRendererRegistry
         .Add(new CodeBlockRenderer())
         .Add(new TableBlockRenderer())
         .Add(new ListBlockRenderer())
+        .Add(new DefinitionListBlockRenderer())
         .Add(new FootnoteGroupRenderer())
         .Add(new FigureBlockRenderer())
         .Add(new CalloutBlockRenderer())
@@ -58,13 +59,14 @@ public sealed class BlockRendererRegistry
 }
 
 /// <summary>
-/// Blocks that produce no output: link reference definitions and YAML front
-/// matter, which is surfaced separately as document metadata (5.12).
+/// Blocks that produce no output: link reference definitions, YAML front
+/// matter, which is surfaced separately as document metadata (5.12), and the
+/// blank-line markers Markdig keeps in the tree to record source positions.
 /// </summary>
 public sealed class IgnoredBlockRenderer : IBlockRenderer
 {
     public bool CanRender(Block block) =>
-        block is LinkReferenceDefinitionGroup or LinkReferenceDefinition
+        block is LinkReferenceDefinitionGroup or LinkReferenceDefinition or BlankLineBlock
         || block.GetType().Name is "YamlFrontMatterBlock";
 
     public Control Render(Block block, RenderContext context) => new Panel { IsVisible = false };

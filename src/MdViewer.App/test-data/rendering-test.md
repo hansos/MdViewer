@@ -21,6 +21,7 @@ document being deliberately awkward — those places say so.
 
 Sections marked **NOT ENABLED** describe syntax the pipeline deliberately does
 not turn on. Those must render as literal text, not silently disappear.
+Sections marked **SETTING** are only active when the matching setting is on.
 
 ---
 
@@ -410,10 +411,10 @@ A loose list:
 > > > 
 > > > > Level four
 
-### 7.2 GitHub alerts — NOT ENABLED
+### 7.2 GitHub alerts
 
-The alert extension is not switched on, so these must render as ordinary block
-quotes with the marker visible as literal text, not vanish.
+The alert extension is enabled, so each of these must render as a callout with
+its own kind — the `[!KIND]` marker itself must not appear as literal text.
 
 > [!NOTE]
 > Useful information the user should know.
@@ -429,6 +430,13 @@ quotes with the marker visible as literal text, not vanish.
 
 > [!CAUTION]
 > Advises about risks.
+
+> [!note]
+> A lower-case marker, which is also a valid alert.
+
+> [!NOTSUCHAKIND]
+> An unknown kind, which must fall back to an ordinary block quote with the
+> marker visible.
 
 ### 7.3 Custom containers
 
@@ -717,6 +725,75 @@ Term with a complex definition
     - One
     - Two
 
+First of two terms
+Second of two terms
+:   One definition shared by both terms above.
+
+`InlineCode` and a [link](https://example.com) in the term
+:   A definition whose term contains inline markup.
+
+Term with a multi-paragraph definition
+:   The first paragraph of the definition.
+
+    The second paragraph of the same definition.
+
+Term followed by a definition on the same visual line
+:   Definition text, then a definition holding a code block:
+
+    ```text
+    A code block inside a definition.
+    ```
+
+Term with no definition
+
+:   A definition with no term above it.
+
+Term with a long definition
+:   A definition long enough to wrap across more than one line in any reasonable
+    window width, so that the hanging indent of the continuation lines can be
+    judged against the term above it.
+
+Term with a quoted definition
+:   > A block quote inside a definition.
+
+Term with a nested definition list
+:   An outer definition that contains its own list:
+
+    Nested term
+    :   The nested definition.
+
+Term with a table in the definition
+:   | Key | Value |
+    | --- | ----- |
+    | a   | 1     |
+    | b   | 2     |
+
+Term with an image in the definition
+:   ![Sample image](assets/sample.png)
+
+Term with an ordered list
+:   1. First
+    2. Second
+    3. Third
+
+**Bold term** with ~~strikethrough~~ and an emoji 🚀
+:   A definition whose term uses emphasis extras.
+
+Term: with a colon in it
+:   A definition for a term that itself contains a colon.
+
+Tight definitions
+:   First definition, no blank line before the next term.
+Second tight term
+:   Second definition.
+
+Term whose definition uses a dash marker
+-   Some dialects allow `-` as a definition marker; here this must render as a
+    list item, not a definition.
+
+Not a definition list
+: Missing indentation after the marker is still a valid definition in Markdig.
+
 ### 10.3 Abbreviations
 
 The HTML specification is maintained by the W3C. MVVM is the pattern used here.
@@ -800,7 +877,7 @@ Backslash escapes: \* \_ \# \[ \] \( \) \` \\ \| \{ \} \! \+ \- \. \<
 
 Text that looks like markup but is not:
 
-- A snowman :snowman: — emoji shortcodes are not enabled
+- An asterisk in a filename: report\*.txt
 - An asterisk in maths: 3 * 4 * 5 = 60
 - An underscore in an identifier: some_variable_name
 - A hash in a colour: #FF8800
@@ -862,11 +939,9 @@ A long path:
 
 ---
 
-## 14. Extensions not enabled
+## 14. Further extensions
 
-Everything in this section must render as literal text.
-
-### 14.1 Mathematics — NOT ENABLED
+### 14.1 Mathematics
 
 Inline: $E = mc^2$ and $\frac{a}{b}$
 
@@ -876,18 +951,32 @@ $$
 \int_{0}^{\infty} e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}
 $$
 
-### 14.2 Smart punctuation — NOT ENABLED by default
+A lone dollar amount must not start maths: it costs $5 to enter.
+
+### 14.2 Smart punctuation — SETTING
+
+Only active when smart punctuation is switched on; otherwise these stay as typed.
 
 Three dots... two hyphens -- three hyphens --- "straight quotes" 'single quotes'
 
-### 14.3 Generic attributes — NOT ENABLED
+### 14.3 Generic attributes
 
 A paragraph with an attribute block.
 {: .some-class #some-id }
 
-### 14.4 Emoji shortcodes — NOT ENABLED
+### Heading with an explicit id {#custom-heading-id}
 
-:smile: :rocket: :+1:
+A [link to the explicit id](#custom-heading-id).
+
+### 14.4 Emoji shortcodes and smileys
+
+:smile: :rocket: :+1: :snowman:
+
+Text smileys are replaced too: :) :( ;)
+
+A shortcode that does not exist must stay literal: :notarealemojiname:
+
+Inside code it must stay literal: `:smile:`
 
 ### 14.5 Figures
 

@@ -283,6 +283,26 @@
     <Setter Property="TextWrapping" Value="Wrap" />
   </Style>
 
+  <!-- ============================ Definition lists ========================= -->
+
+  <Style Selector=":is(TextBlock).md-def-term">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource BodyFontSize}" />
+    <Setter Property="LineHeight" Value="{DynamicResource BodyLineHeight}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource HeadingBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="Margin" Value="0,8,0,2" />
+  </Style>
+
+  <Style Selector=":is(TextBlock).md-def-definition">
+    <Setter Property="FontFamily" Value="{DynamicResource BodyFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource BodyFontSize}" />
+    <Setter Property="LineHeight" Value="{DynamicResource BodyLineHeight}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+
   <!-- Checked task-list marker -->
   <Style Selector=":is(TextBlock).md-list-marker.checked">
     <Setter Property="Foreground" Value="{DynamicResource CalloutTipAccentBrush}" />
