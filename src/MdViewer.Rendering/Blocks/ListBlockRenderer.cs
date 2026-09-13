@@ -47,10 +47,7 @@ public sealed class ListBlockRenderer : IBlockRenderer
         RenderContext context,
         ref int ordinal)
     {
-        var grid = new Grid
-        {
-            ColumnDefinitions = new ColumnDefinitions($"{MarkerColumnWidth},*")
-        };
+        var grid = new Grid();
 
         var content = new StackPanel();
         foreach (var child in context.Renderer.RenderChildren(item, context.Nested()))
@@ -61,8 +58,18 @@ public sealed class ListBlockRenderer : IBlockRenderer
 
         var marker = BuildMarker(list, item, context, ref ordinal);
 
+        // An interactive checkbox brings its own size from the theme, so give it
+        // an auto column instead of clipping it to the glyph column width.
+        grid.ColumnDefinitions = marker is CheckBox
+            ? new ColumnDefinitions("Auto,*")
+            : new ColumnDefinitions($"{MarkerColumnWidth},*");
+
         Grid.SetColumn(marker, 0);
         Grid.SetColumn(content, 1);
+
+        // The marker is added first, so without this the item text would paint
+        // over an interactive checkbox wherever the two overlap.
+        marker.ZIndex = 1;
         grid.Children.Add(marker);
         grid.Children.Add(content);
 
@@ -138,10 +145,13 @@ public sealed class ListBlockRenderer : IBlockRenderer
         var box = new CheckBox
         {
             IsChecked = task.Checked,
+            // The default template reserves room for content this checkbox never
+            // has; zero the minimums so it measures down to the glyph itself.
             MinWidth = 0,
             MinHeight = 0,
             Padding = new Thickness(0),
             Margin = new Thickness(0, 0, 8, 0),
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left,
             VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
         };
 

@@ -343,16 +343,16 @@ A loose list:
 
 - [x] Completed task
 
-- [ ] Incomplete task
+- [x] Incomplete task
 
 - [x] Completed with a capital X
 
-- [ ] Task with **bold** and `code` and a [link](https://example.com)
+- [x] Task with **bold** and `code` and a [link](https://example.com)
 
 - [ ] Parent task
   
   - [x] Nested completed
-  - [ ] Nested incomplete
+  - [x] Nested incomplete
 
 - Ordinary item in the same list as tasks
 
