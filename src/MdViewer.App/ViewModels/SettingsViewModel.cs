@@ -91,6 +91,11 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private bool _showFrontMatter;
 
+    // ================================================================ editor
+
+    [ObservableProperty]
+    private string _defaultEditorPath = string.Empty;
+
     // ======================================================== file watching
 
     private bool _enableFileWatching = true;
@@ -153,6 +158,7 @@ public partial class SettingsViewModel : ViewModelBase
 
         ShowLineNumbersInRawView = settings.ShowLineNumbersInRawView;
         ShowFrontMatter = settings.ShowFrontMatter;
+        DefaultEditorPath = settings.DefaultEditorPath;
         EnableFileWatching = settings.EnableFileWatching;
 
         ReopenPreviousFolder = settings.ReopenPreviousFolder;
@@ -186,6 +192,7 @@ public partial class SettingsViewModel : ViewModelBase
 
         settings.ShowLineNumbersInRawView = ShowLineNumbersInRawView;
         settings.ShowFrontMatter = ShowFrontMatter;
+        settings.DefaultEditorPath = DefaultEditorPath;
         settings.EnableFileWatching = EnableFileWatching;
 
         settings.ReopenPreviousFolder = ReopenPreviousFolder;

@@ -56,4 +56,25 @@ public sealed class StorageService : IStorageService
 
         return folders.Count == 0 ? null : folders[0].TryGetLocalPath();
     }
+
+    public async Task<string?> PickEditorExecutableAsync()
+    {
+        var files = await _topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Velg editor",
+            AllowMultiple = false,
+            FileTypeFilter = new[]
+            {
+                new FilePickerFileType("Program")
+                {
+                    Patterns = OperatingSystem.IsWindows()
+                        ? new[] { "*.exe" }
+                        : new[] { "*" }
+                },
+                FilePickerFileTypes.All
+            }
+        });
+
+        return files.Count == 0 ? null : files[0].TryGetLocalPath();
+    }
 }

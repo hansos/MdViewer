@@ -136,6 +136,22 @@
       <CheckBox Content="Show front matter"
                 IsChecked="{Binding Settings.ShowFrontMatter, Mode=TwoWay}" />
 
+      <!-- ========================= Files ======================== -->
+      <TextBlock Classes="md-h4" Text="Filer" Margin="0,16,0,0" />
+      <Border Classes="md-heading-rule" Margin="0,0,0,8" />
+
+      <Grid ColumnDefinitions="220,*,Auto" Margin="0,0,0,10">
+        <TextBlock Grid.Column="0" Classes="md-body" VerticalAlignment="Center" Text="Standard editor" />
+        <TextBox Grid.Column="1"
+                 Margin="0,0,8,0"
+                 PlaceholderText="Sti til editor (.exe)"
+                 Text="{Binding Settings.DefaultEditorPath, Mode=TwoWay}" />
+        <Button Grid.Column="2"
+                Classes="start-action"
+                Content="Bla gjennom…"
+                Command="{Binding PickDefaultEditorCommand}" />
+      </Grid>
+
       <!-- ==================== File watching ==================== -->
       <TextBlock Classes="md-h4" Text="File watching" Margin="0,16,0,0" />
       <Border Classes="md-heading-rule" Margin="0,0,0,8" />

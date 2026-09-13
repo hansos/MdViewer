@@ -257,6 +257,12 @@
                     </StackPanel>
                   </TreeDataTemplate>
                 </TreeView.ItemTemplate>
+                <TreeView.ContextMenu>
+                  <ContextMenu>
+                    <MenuItem Header="Åpne i valgt editor"
+                              Click="OnOpenTreeItemInEditorClick" />
+                  </ContextMenu>
+                </TreeView.ContextMenu>
               </TreeView>
 
               <StackPanel Margin="16,10" Spacing="8"
@@ -317,6 +323,12 @@
 
       <!-- ====================== Document pane ====================== -->
       <Panel x:Name="DocumentPane" Grid.Column="2" Background="{DynamicResource ContentBackgroundBrush}">
+        <Panel.ContextMenu>
+          <ContextMenu>
+            <MenuItem Header="Åpne dokument i valgt editor"
+                      Click="OnOpenSelectedDocumentInEditorClick" />
+          </ContextMenu>
+        </Panel.ContextMenu>
 
         <!-- The rendered document -->
         <ScrollViewer x:Name="DocumentScroller"

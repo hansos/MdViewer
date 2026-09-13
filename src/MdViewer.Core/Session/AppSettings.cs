@@ -68,6 +68,14 @@ public sealed class AppSettings
 
     public bool ShowFrontMatter { get; set; }
 
+    // ================================================================ editor
+
+    /// <summary>
+    /// Absolute path to the external editor executable used by context-menu
+    /// actions in Explorer and the document pane.
+    /// </summary>
+    public string DefaultEditorPath { get; set; } = string.Empty;
+
     // ======================================================== file watching
 
     public bool EnableFileWatching { get; set; } = true;

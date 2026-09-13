@@ -746,6 +746,91 @@ public partial class MainWindowViewModel : ViewModelBase
         if (!string.IsNullOrEmpty(folder)) SetWorkspace(folder);
     }
 
+    [RelayCommand]
+    private async Task PickDefaultEditorAsync()
+    {
+        if (Storage is null) return;
+
+        var path = await Storage.PickEditorExecutableAsync().ConfigureAwait(true);
+        if (string.IsNullOrWhiteSpace(path)) return;
+
+        Settings.DefaultEditorPath = Path.GetFullPath(path);
+        StatusMessage = $"Default editor set to {Path.GetFileName(Settings.DefaultEditorPath)}";
+    }
+
+    [RelayCommand]
+    private void OpenSelectedDocumentInEditor()
+    {
+        var path = SelectedTab?.FullPath;
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            StatusMessage = "No document is selected.";
+            return;
+        }
+
+        OpenDocumentInConfiguredEditor(path);
+    }
+
+    [RelayCommand]
+    private void OpenTreeItemInEditor(FileTreeItemViewModel? item)
+    {
+        if (item is null || item.IsDirectory || string.IsNullOrWhiteSpace(item.FullPath))
+        {
+            StatusMessage = "Select a document file in Explorer first.";
+            return;
+        }
+
+        OpenDocumentInConfiguredEditor(item.FullPath);
+    }
+
+    private void OpenDocumentInConfiguredEditor(string documentPath)
+    {
+        if (!TryGetConfiguredEditorPath(out var editorPath)) return;
+
+        var fullDocumentPath = Path.GetFullPath(documentPath);
+        if (!File.Exists(fullDocumentPath))
+        {
+            StatusMessage = $"File not found: {fullDocumentPath}";
+            return;
+        }
+
+        try
+        {
+            var start = new ProcessStartInfo
+            {
+                FileName = editorPath,
+                UseShellExecute = false
+            };
+
+            start.ArgumentList.Add(fullDocumentPath);
+            Process.Start(start);
+            StatusMessage = null;
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Could not open the document in the configured editor: {ex.Message}";
+        }
+    }
+
+    private bool TryGetConfiguredEditorPath(out string editorPath)
+    {
+        editorPath = Settings.DefaultEditorPath.Trim();
+        if (string.IsNullOrWhiteSpace(editorPath))
+        {
+            StatusMessage = "Set a default editor in Settings first.";
+            return false;
+        }
+
+        editorPath = Path.GetFullPath(editorPath);
+        if (!File.Exists(editorPath))
+        {
+            StatusMessage = $"The configured editor was not found: {editorPath}";
+            return false;
+        }
+
+        return true;
+    }
+
     // ============================================================ workspace
 
     public void SetWorkspace(string folder)
